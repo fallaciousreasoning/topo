@@ -45,4 +45,23 @@ export class TileDownloader {
         if (zoom < this.maxZoom)
           yield* this.tiles(zoom + 1);
     }
+
+    async downloadTiles(tileUrl, onProgress) {
+        onProgress = onProgress || (() => {});
+        
+        const servers = "abc";
+        const totalTiles = this.numTiles();
+        let downloadedTiles = 0;
+
+        for (const tile of this.tiles()) {
+            const url = tileUrl
+                .replace("{s}", servers[nextServer++])
+                .replace("{x}", tile.x)
+                .replace("{y}", tile.y)
+                .replace("{z}", tile.z);
+            await fetch(url);
+
+            onProgress(downloadedTiles/totalTiles);
+        }
+    }
 }
