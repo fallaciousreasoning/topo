@@ -1,10 +1,17 @@
 <script>
   import L from "leaflet";
   import "leaflet/dist/leaflet.css";
+  import "leaflet.locatecontrol";
+  import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+  import GeoSearch from "leaflet-geosearch";
+  import "leaflet-geosearch/dist/style.css";
+  import "leaflet-geosearch/assets/css/leaflet.css";
+
   import "./leaflet/FallbackLayer.js";
+  import "./leaflet/SmoothWheelZoom.js";
   import { onMount } from "svelte";
 
-  import MapPositioner from './MapPositioner.svelte';
+  import MapPositioner from "./MapPositioner.svelte";
 
   let mapElement = undefined;
   let map = undefined;
@@ -64,7 +71,22 @@
     };
     L.control.layers(baseMaps).addTo(map);
 
-    map.invalidateSize();
+    // Scale control.
+    L.control.scale().addTo(map);
+
+    // GeoSearch control.
+    const provider = new GeoSearch.OpenStreetMapProvider();
+    new GeoSearch.GeoSearchControl({
+      provider: provider,
+      autoClose: true,
+      style: "button"
+    }).addTo(map);
+
+    // Locate control.
+    L.control.locate().addTo(map);
+
+    // Make sure the map size is accurate.
+    setTimeout(() => map.invalidateSize());
   });
 </script>
 
@@ -84,4 +106,4 @@
 </style>
 
 <div class="map" bind:this={mapElement} />
-<MapPositioner map={map}/>
+<MapPositioner {map} />
