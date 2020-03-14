@@ -20,6 +20,7 @@
     "leaflet": "^1.6.0",
     "leaflet-geosearch": "^2.7.0",
     "leaflet.locatecontrol": "^0.70.0",
+    "proj4": "^2.6.0",
     "sirv-cli": "^0.4.4"
   }
 }

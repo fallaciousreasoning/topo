@@ -9,6 +9,8 @@
 
   import "./leaflet/FallbackLayer.js";
   import "./leaflet/SmoothWheelZoom.js";
+  import "./leaflet/MetricGrid.js";
+
   import { onMount } from "svelte";
 
   import MapPositioner from "./MapPositioner.svelte";
@@ -84,6 +86,22 @@
 
     // Locate control.
     L.control.locate().addTo(map);
+
+    for (let i = 50; i <= 60; i += 1) {
+      const east = i * 6 - 180;
+      const west = east - 6;
+
+      // South
+      L.utmGrid(i, true, {
+        color: "#000",
+        latLonClipBounds: [[-89, west], [0, east]],
+        drawClip: false,
+        showAxisLabels: [],
+        minZoom: 13,
+        minInterval: 1000,
+        maxInterval: 1000000
+      }).addTo(map);
+    }
 
     // Make sure the map size is accurate.
     setTimeout(() => map.invalidateSize());
