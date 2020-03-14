@@ -24,7 +24,7 @@
         scrollWheelZoom: false, // disable original zoom function
         smoothWheelZoom: true, // enable smooth zoom
         smoothSensitivity: 1 // zoom speed. default is 1
-      }).setView([51.505, -0.09], 13);
+      }).setView([-43.533, 172.633], 11);
     window.map = map;
 
     const openStreetMapsUrl =
