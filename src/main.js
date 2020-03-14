@@ -5,3 +5,6 @@ const app = new App({
 });
 
 export default app;
+
+if (navigator.serviceWorker)
+	navigator.serviceWorker.register('/serviceWorker.js');
