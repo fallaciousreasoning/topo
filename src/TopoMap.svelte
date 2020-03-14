@@ -1,15 +1,16 @@
 <script>
   import L from "leaflet";
   import "leaflet/dist/leaflet.css";
-
   import "./leaflet/FallbackLayer.js";
-
   import { onMount } from "svelte";
 
+  import MapPositioner from './MapPositioner.svelte';
+
   let mapElement = undefined;
+  let map = undefined;
 
   onMount(() => {
-    const map =
+    map =
       mapElement &&
       L.map(mapElement, {
         zoomSnap: 0.1,
@@ -74,12 +75,13 @@
   }
 
   :global(.leaflet-retina a.leaflet-control-layers-toggle) {
-      background-image: url('/images/layers-2x.png');
+    background-image: url("/images/layers-2x.png");
   }
 
   :global(.a.leaflet-control-layers-toggle) {
-      background-image: url('/images/layers.png');
+    background-image: url("/images/layers.png");
   }
 </style>
 
 <div class="map" bind:this={mapElement} />
+<MapPositioner map={map}/>
