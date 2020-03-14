@@ -2,7 +2,7 @@
   import L from "leaflet";
   import "leaflet/dist/leaflet.css";
   import "leaflet.locatecontrol";
-  import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+  import "leaflet.locatecontrol/dist/L.Control.Locate.css";
   import GeoSearch from "leaflet-geosearch";
   import "leaflet-geosearch/dist/style.css";
   import "leaflet-geosearch/assets/css/leaflet.css";
