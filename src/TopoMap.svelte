@@ -10,6 +10,7 @@
   import "./leaflet/FallbackLayer.js";
   import "./leaflet/SmoothWheelZoom.js";
   import "./leaflet/MetricGrid.js";
+  import "./leaflet/DownloadControl.js";
 
   import { onMount } from "svelte";
 
@@ -86,6 +87,9 @@
 
     // Locate control.
     L.control.locate().addTo(map);
+
+    // Download control.
+    L.control.download().addTo(map);
 
     for (let i = 50; i <= 60; i += 1) {
       const east = i * 6 - 180;

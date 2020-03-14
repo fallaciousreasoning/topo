@@ -55,7 +55,7 @@ export class TileDownloader {
 
         for (const tile of this.tiles()) {
             const url = tileUrl
-                .replace("{s}", servers[nextServer++])
+                .replace("{s}", servers[downloadedTiles++ % servers.length])
                 .replace("{x}", tile.x)
                 .replace("{y}", tile.y)
                 .replace("{z}", tile.z);
