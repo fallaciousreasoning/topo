@@ -67,7 +67,7 @@ export class TileDownloader {
                     .replace("{z}", tile.z);
 
                 // Only download tiles we haven't seen.
-                if (!caches.match(url))
+                if (!await caches.match(url))
                     await fetch(url);
 
                 onProgress(downloadedTiles / totalTiles);

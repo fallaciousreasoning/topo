@@ -49,7 +49,6 @@ const DownloadControl = L.Control.extend({
         * This method is called when the user clicks on the control.
         */
     _onClick: function () {
-        console.log(this);
         const zoom = map.getZoom();
 
         if (zoom < 11)
