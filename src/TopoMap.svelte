@@ -35,7 +35,7 @@
       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
     const openTopoMapsUrl = "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png";
     const linzTopo50Url =
-      "http://tiles-{s}.data-cdn.linz.govt.nz/services;key=9224b332ecc44096aee14e396574aa50/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png";
+      "https://tiles-{s}.data-cdn.linz.govt.nz/services;key=9224b332ecc44096aee14e396574aa50/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png";
 
     const openStreetMapsLayer = L.tileLayer.fallback(openStreetMapsUrl, {
       attribution:
