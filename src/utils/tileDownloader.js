@@ -65,7 +65,10 @@ export class TileDownloader {
                     .replace("{x}", tile.x)
                     .replace("{y}", tile.y)
                     .replace("{z}", tile.z);
-                await fetch(url);
+
+                // Only download tiles we haven't seen.
+                if (!caches.match(url))
+                    await fetch(url);
 
                 onProgress(downloadedTiles / totalTiles);
                 result = queue.next();
