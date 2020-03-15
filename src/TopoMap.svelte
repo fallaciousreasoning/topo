@@ -15,6 +15,7 @@
   import { onMount } from "svelte";
 
   import MapPositioner from "./MapPositioner.svelte";
+  import { progress } from './stores';
 
   let mapElement = undefined;
   let map = undefined;
@@ -89,7 +90,9 @@
     L.control.locate().addTo(map);
 
     // Download control.
-    L.control.download().addTo(map);
+    L.control.download({
+        onProgress: progress.set
+    }).addTo(map);
 
     for (let i = 50; i <= 60; i += 1) {
       const east = i * 6 - 180;

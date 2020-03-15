@@ -6,6 +6,7 @@ const DownloadControl = L.Control.extend({
         position: 'topleft',
         layer: undefined,
         icon: 'fa fa-download',
+        onProgress: progress => { },
         /**
         * This callback can be used in case you would like to override button creation behavior.
         * This is useful for DOM manipulation frameworks such as angular etc.
@@ -52,24 +53,24 @@ const DownloadControl = L.Control.extend({
         const zoom = map.getZoom();
 
         if (zoom < 11)
-          return;
+            return;
 
 
         const downloader = new TileDownloader(map.getBounds(), zoom);
         const shouldDownload = confirm(`Download tiles? This will use about ${Math.ceil(downloader.estimatedSize() / 1024 / 1024)}MB of storage`);
 
         if (!shouldDownload)
-          return;
+            return;
 
         const layers = []
         map.eachLayer(l => {
             if (!(l instanceof L.TileLayer))
-              return;
+                return;
 
             layers.push(l);
         });
 
-        downloader.downloadTiles(layers[0]._url).then(() => alert("Done!"));
+        downloader.downloadTiles(layers[0]._url, this.options.onProgress).then(() => alert("Done!"));
     }
 });
 
