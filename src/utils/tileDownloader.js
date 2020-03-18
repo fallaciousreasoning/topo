@@ -3,7 +3,7 @@ import { latLngToTile } from './slippyCoords';
 const ESTIMATED_TILE_SIZE = 40 * 1024; // Estimate each tile at 40kb.
 
 export class TileDownloader {
-    constructor(bounds, startZoom, maxZoom = 17, numWorkers = 50) {
+    constructor(bounds, startZoom, maxZoom = 17, numWorkers = 40) {
         this.min = bounds.getNorthWest();
         this.max = bounds.getSouthEast();
         this.startZoom = Math.floor(startZoom);
@@ -68,7 +68,7 @@ export class TileDownloader {
 
                 // Only download tiles we haven't seen.
                 if (!await caches.match(url))
-                    await fetch(url);
+                    await fetch(url).catch(console.error);
 
                 onProgress(downloadedTiles / totalTiles);
                 result = queue.next();
