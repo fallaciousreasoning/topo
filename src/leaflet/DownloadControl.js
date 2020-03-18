@@ -6,6 +6,7 @@ const DownloadControl = L.Control.extend({
         position: 'topleft',
         layer: undefined,
         icon: 'fa fa-download',
+        minZoom: 11,
         onProgress: progress => { },
         /**
         * This callback can be used in case you would like to override button creation behavior.
@@ -29,7 +30,6 @@ const DownloadControl = L.Control.extend({
     onAdd: function (map) {
         var container = L.DomUtil.create('div',
             'leaflet-control-download leaflet-bar leaflet-control');
-
         this._layer = this.options.layer || new L.LayerGroup();
         this._layer.addTo(map);
 
@@ -42,6 +42,17 @@ const DownloadControl = L.Control.extend({
             .on(this._link, 'click', L.DomEvent.preventDefault)
             .on(this._link, 'click', this._onClick, this)
             .on(this._link, 'dblclick', L.DomEvent.stopPropagation);
+
+        // Hide the control, depending on the zoom level.
+        const maybeHide = () => {
+            const zoom = map.getZoom();
+            container.style = zoom < this.options.minZoom
+                ? 'display: none'
+                : '';
+        };
+
+        map.on('zoom', maybeHide, this);
+        maybeHide();
 
         return container;
     },
