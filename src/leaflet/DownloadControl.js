@@ -52,6 +52,7 @@ const DownloadControl = L.Control.extend({
         };
 
         map.on('zoom', maybeHide, this);
+        map.on('viewreset', maybeHide, this);
         maybeHide();
 
         return container;
