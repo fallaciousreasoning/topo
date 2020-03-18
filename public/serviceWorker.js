@@ -13,9 +13,24 @@ const shouldConserveData = () => {
   return connection.type === "cellular";
 };
 
+// Download assets necessary to work offline.
+const downloadFirstRunAssets = async () => {
+  const cache = await caches.open(CACHE_NAME);
+  cache.addAll([
+    '/index.html',
+    '/favicon.png',
+    '/global.css',
+    '/build/bundle.css',
+    '/build/external.css',
+    '/build//bundle.js',
+    'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'
+  ]);
+};
+
 self.addEventListener('install', function(e) {
   console.log('[ServiceWorker] Install');
-  self.skipWaiting();
+  e.waitUntil(downloadFirstRunAssets()
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', function(e) {
@@ -94,7 +109,10 @@ const rules = {
   "https://unpkg.com/(.*)": cacheThenNetwork,
   
   // First party scripts should be fetched from the network, if possible. 
-  [self.registration.scope]: networkThenCache
+  [self.registration.scope]: networkThenCache,
+
+  // Font Awesome CSS
+  "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css": cacheThenNetwork
 }
 
 self.addEventListener('fetch', function(e) {
