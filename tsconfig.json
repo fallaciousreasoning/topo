@@ -3,4 +3,9 @@
 
   "include": ["src/**/*"],
   "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
+  "compilerOptions": {
+      "sourceMap": true,
+      "noImplicitAny": false,
+      "target": "es2016"
+  }
 }

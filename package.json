@@ -23,6 +23,8 @@
     "@tsconfig/svelte": "^1.0.0"
   },
   "dependencies": {
+    "@types/ol": "^6.3.1",
+    "ol": "^6.4.2",
     "sirv-cli": "^1.0.0"
   }
 }
