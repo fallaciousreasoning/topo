@@ -57,25 +57,36 @@ If you're building a single-page app (SPA) with multiple routes, sirv needs to b
 "start": "sirv public --single"
 ```
 
+## Using TypeScript
+
+This template comes with a script to set up a TypeScript development environment, you can run it immediately after cloning the template with:
+
+```bash
+node scripts/setupTypeScript.js
+```
+
+Or remove the script via:
+
+```bash
+rm scripts/setupTypeScript.js
+```
 
 ## Deploying to the web
 
-### With [now](https://zeit.co/now)
+### With [Vercel](https://vercel.com)
 
-Install `now` if you haven't already:
+Install `vercel` if you haven't already:
 
 ```bash
-npm install -g now
+npm install -g vercel
 ```
 
 Then, from within your project folder:
 
 ```bash
 cd public
-now deploy --name my-project
+vercel deploy --name my-project
 ```
-
-As an alternative, use the [Now desktop client](https://zeit.co/download) and simply drag the unzipped project folder to the taskbar icon.
 
 ### With [surge](https://surge.sh/)
 
