@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "ol/ol.css"
   import Map from "ol/Map";
   import View from "ol/View";
   import TileLayer from "ol/Layer/Tile";
@@ -20,7 +21,7 @@
       ],
       view: new View({
         center: fromLonLat([172.633, -43.533]),
-        zoom: 11,
+        zoom: 11
       }),
     });
   });
