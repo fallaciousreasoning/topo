@@ -56,8 +56,7 @@
         edgeBufferTiles: 1,
         crossOrigin: "anonymous",
         updateWhenIdle: false
-      })
-      .addTo(map);
+      });
 
     const linzTopo50Layer = L.tileLayer.fallback(linzTopo50Url, {
       attribution: "",
@@ -66,7 +65,7 @@
       bounds: [[-34.4, 166], [-47.4, 178.6]],
       edgeBufferTiles: 1,
       updateWhenIdle: false
-    });
+    }).addTo(map);
 
     const baseMaps = {
       "NZ Topo 50": linzTopo50Layer,
