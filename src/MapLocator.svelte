@@ -29,7 +29,7 @@ import Icon from "ol/style/Icon";
 
         const iconStyle = new Style({
             image: new Icon({
-                anchor: [50, 50],
+                anchor: [0.5, 0.5],
                 opacity: 0.5,
                 imgSize: [100, 100],
                 src: 'location-indicator.svg'
