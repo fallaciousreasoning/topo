@@ -11,12 +11,14 @@
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
   import MapLocator from "./MapLocator.svelte";
-  import { FullScreen, ScaleLine } from "ol/control";
-
+  import { FullScreen, ScaleLine, defaults as defaultControls, Rotate } from "ol/control";
+  import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
   let map = undefined;
   onMount(() => {
     map = new Map({
       target: "topo-map",
+      controls: defaultControls().extend([new FullScreen(), new ScaleLine()]),
+      interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
       layers: [
         new TileLayer({
           source: new XYZ({
@@ -30,9 +32,6 @@
         zoom: 11,
       }),
     });
-
-    map.addControl(new FullScreen());
-    map.addControl(new ScaleLine())
   });
 </script>
 
@@ -40,6 +39,10 @@
   .map {
     width: 100vw;
     height: 100vh;
+  }
+
+  :global(.ol-rotate) {
+    top: 3em;
   }
 </style>
 

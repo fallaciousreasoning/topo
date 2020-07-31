@@ -3,6 +3,8 @@
   import { CLASS_CONTROL, CLASS_UNSELECTABLE } from "ol/css";
   import type { Map } from "ol";
 
+  export let top: string = `0.5em`;
+
   class Button extends Control {
     labelNode: Text;
     button: HTMLButtonElement;
@@ -17,6 +19,7 @@
 
       this.button.appendChild(this.labelNode);
       this.element.appendChild(this.button);
+      this.element.setAttribute('style', `top: ${top}; left: 0.5em`)
       this.element.classList.add(CLASS_CONTROL, CLASS_UNSELECTABLE);
     }
   }
@@ -29,5 +32,3 @@
 
   $: if (map) map.addControl(button);
 </script>
-
-<div id="foobar" bind:this={content} />
