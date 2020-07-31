@@ -38,6 +38,7 @@ export default {
 		name: 'app',
 		file: 'public/build/bundle.js'
 	},
+	context: 'window',
 	plugins: [
 		css({ output: "public/build/extra.css" }),
 		svelte({
