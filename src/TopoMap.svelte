@@ -10,6 +10,7 @@
   import XYZ from "ol/source/XYZ";
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
+  import MapLocator from "./MapLocator.svelte";
 
   let map = undefined;
   onMount(() => {
@@ -40,4 +41,5 @@
 
 <div id="topo-map" class="map" />
 <MapPositioner {map} />
-<MapSearch  />
+<MapSearch />
+<MapLocator {map} />
