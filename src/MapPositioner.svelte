@@ -1,14 +1,29 @@
-<script>
+<script lang="ts">
   import { debounce } from "./utils/debounce";
+  import { Map, View } from "ol";
+  import { fromLonLat, toLonLat } from "ol/proj";
+  import round from './utils/round';
 
-  export let map;
+  export let map: Map;
 
   const localStorageKey = "mapPosition";
 
+  const positionToView = (position: { lat: number, lng: number, zoom: number, rotation: number}) => {
+    return new View({
+      center: fromLonLat([position.lng, position.lat]),
+      zoom: isNaN(position.zoom) ? 11 : position.zoom,
+      rotation: isNaN(position.rotation) ? 0 : position.rotation
+    })
+  }
+
   const savePosition = () => {
+    const view = map.getView();
+    const centre = toLonLat(view.getCenter());
     const position = {
-      ...map.getCenter(),
-      zoom: map.getZoom()
+      lat: round(centre[1], 5),
+      lng: round(centre[0], 5),
+      zoom: view.getZoom(),
+      rotation: view.getRotation(),
     };
 
     localStorage.setItem(localStorageKey, JSON.stringify(position));
@@ -50,7 +65,7 @@
       return;
     }
 
-    map.setView(position, position.zoom);
+    map.setView(positionToView(position));
   };
 
   const debounced = debounce(savePosition, 500);
@@ -58,7 +73,15 @@
   window.addEventListener("hashchange", () => {
     if (!map) return;
 
-    const oldPosition = { ...map.getCenter(), zoom: map.getZoom() };
+    const view = map.getView();
+    const center = toLonLat(view.getCenter());
+    const oldPosition = {
+      lat: round(center[1], 5),
+      lng: round(center[0], 5),
+      zoom: view.getZoom(),
+      rotation: view.getRotation(),
+    };
+
     const newPosition = { ...oldPosition, ...positionFromFragment() };
 
     if (
@@ -69,7 +92,7 @@
       return;
     }
 
-    map.setView(newPosition, newPosition.zoom);
+    map.setView(positionToView(newPosition));
   });
 
   $: {

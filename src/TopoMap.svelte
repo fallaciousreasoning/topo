@@ -1,4 +1,6 @@
 <script lang="ts">
+  import MapPositioner from './MapPositioner.svelte';
+
   import "ol/ol.css"
   import Map from "ol/Map";
   import View from "ol/View";
@@ -8,8 +10,9 @@
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
 
+  let map  = undefined;
   onMount(() => {
-    const map = new Map({
+    map = new Map({
       target: "topo-map",
       layers: [
         new TileLayer({
@@ -35,3 +38,4 @@
 </style>
 
 <div id="topo-map" class="map" />
+<MapPositioner {map}/>
