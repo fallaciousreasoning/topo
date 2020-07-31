@@ -11,6 +11,7 @@
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
   import MapLocator from "./MapLocator.svelte";
+  import { FullScreen, ScaleLine } from "ol/control";
 
   let map = undefined;
   onMount(() => {
@@ -29,6 +30,9 @@
         zoom: 11,
       }),
     });
+
+    map.addControl(new FullScreen());
+    map.addControl(new ScaleLine())
   });
 </script>
 
