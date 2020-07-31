@@ -1,16 +1,17 @@
 <script lang="ts">
-  import MapPositioner from './MapPositioner.svelte';
+  import MapPositioner from "./MapPositioner.svelte";
+  import MapSearch from "./MapSearch.svelte";
 
-  import "ol/ol.css"
+  import "ol/ol.css";
   import Map from "ol/Map";
   import View from "ol/View";
   import TileLayer from "ol/Layer/Tile";
-  import OSM from "ol/source/OSM"
+  import OSM from "ol/source/OSM";
   import XYZ from "ol/source/XYZ";
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
 
-  let map  = undefined;
+  let map = undefined;
   onMount(() => {
     map = new Map({
       target: "topo-map",
@@ -24,7 +25,7 @@
       ],
       view: new View({
         center: fromLonLat([172.633, -43.533]),
-        zoom: 11
+        zoom: 11,
       }),
     });
   });
@@ -38,4 +39,5 @@
 </style>
 
 <div id="topo-map" class="map" />
-<MapPositioner {map}/>
+<MapPositioner {map} />
+<MapSearch  />
