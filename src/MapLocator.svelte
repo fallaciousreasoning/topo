@@ -12,6 +12,19 @@ import Icon from "ol/style/Icon";
 
   let tracking = true;
   let geolocation: Geolocation;
+  let vectorSource = new VectorSource({
+      features: []
+  });
+  let vectorLayer = new VectorLayer({
+    source: vectorSource
+  });
+
+  $: {
+      if (map){
+        map.addLayer(vectorLayer);
+      }
+  }
+
   $: {
     if (map) {
       geolocation = new Geolocation({
@@ -19,10 +32,14 @@ import Icon from "ol/style/Icon";
         projection: map.getView().getProjection(),
       });
 
-      geolocation.on("change", (e) => {
+      // When we first get the location, show it.
+      geolocation.once('change', e => {
         const position = geolocation.getPosition();
         map.getView().setCenter(position);
-        
+      })
+
+      geolocation.on("change", (e) => {
+        const position = geolocation.getPosition();
         const iconFeature = new Feature({
             geometry: new Point(position),       
         });
@@ -39,17 +56,13 @@ import Icon from "ol/style/Icon";
         });
         iconFeature.setStyle(iconStyle);
 
-        const vectorSource = new VectorSource({
-            features: [iconFeature]
-        });
-
-        const vectorLayer = new VectorLayer({
-            source: vectorSource
-        });
-
-        map.addLayer(vectorLayer);
-        console.log("Foo?")
+        vectorSource.clear();
+        vectorSource.addFeature(iconFeature);
       });
+
+      // If we aren't tracking the location, don't show it.
+      if (!tracking)
+        vectorSource.clear();
     }
   }
 </script>
