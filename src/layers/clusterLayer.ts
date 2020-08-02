@@ -11,21 +11,6 @@ export const makeClusterLayer = async (from: { getFeatures: () => Promise<Featur
     const source = new VectorSource({
         features: features
     });
-    return new VectorLayer({
-        source,
-        declutter: false,
-        style: new Style({
-            image: new Circle({
-                radius: 10,
-                stroke: new Stroke({ color: 'white' }),
-                fill: new Fill({ color: '#73afa4' })
-            }),
-            text: new Text({
-                text: "Foo",
-                fill: new Fill({ color: 'white' })
-            })
-        }),
-    })
 
     const clusterSource = new Cluster({
         distance: from.clusterDistance,
@@ -46,7 +31,7 @@ export const makeClusterLayer = async (from: { getFeatures: () => Promise<Featur
                         fill: new Fill({ color: '#73afa4' })
                     }),
                     text: new Text({
-                        text: size,
+                        text: "Foo",
                         fill: new Fill({ color: 'white' })
                     })
                 })
