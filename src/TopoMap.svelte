@@ -24,10 +24,11 @@
   import LayerSwitcher from "ol-layerswitcher";
   import "ol-layerswitcher/src/ol-layerswitcher.css";
   import LayerGroup from "ol/layer/Group";
+  import { getLayers } from "./layers";
 
   let map = undefined;
 
-  onMount(() => {
+  onMount(async () => {
     map = new Map({
       target: "topo-map",
       controls: defaultControls().extend([
@@ -55,6 +56,10 @@
               source: new OSM(),
             } as any),
           ],
+        } as any),
+        new LayerGroup({
+          title: "Huts & Campsites",
+          layers: await getLayers(),
         } as any),
       ],
       view: new View({
