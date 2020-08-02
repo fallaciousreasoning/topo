@@ -31,7 +31,7 @@ export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Prom
                         fill: new Fill({ color: '#73afa4' })
                     }),
                     text: new Text({
-                        text: `${size} 🏠`,
+                        text: size === 1 ? `🏠` : `${size} 🏠`,
                         fill: new Fill({ color: 'white' })
                     })
                 })
