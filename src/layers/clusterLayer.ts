@@ -5,9 +5,7 @@ import VectorLayer from "ol/layer/Vector";
 import { Style, Circle, Text, Stroke, Fill } from "ol/style";
 
 export const makeClusterLayer = async (from: { getFeatures: () => Promise<Feature[]>, clusterDistance: number, name: string }) => {
-    console.log("B")
     const features  = await from.getFeatures();
-    console.log(features)
     const source = new VectorSource({
         features: features
     });
@@ -26,12 +24,12 @@ export const makeClusterLayer = async (from: { getFeatures: () => Promise<Featur
             if (!styleCache[size]) {
                 styleCache[size] = new Style({
                     image: new Circle({
-                        radius: 10,
+                        radius: 20,
                         stroke: new Stroke({ color: 'white' }),
                         fill: new Fill({ color: '#73afa4' })
                     }),
                     text: new Text({
-                        text: "Foo",
+                        text: `${size} 🏠`,
                         fill: new Fill({ color: 'white' })
                     })
                 })
