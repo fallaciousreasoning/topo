@@ -1,6 +1,6 @@
 <script lang="ts">
   import { debounce } from "./utils/debounce";
-  import { Map, View } from "ol";
+  import type { Map, View } from "ol";
   import { fromLonLat, toLonLat } from "ol/proj";
   import round from './utils/round';
 
@@ -8,12 +8,10 @@
 
   const localStorageKey = "mapPosition";
 
-  const positionToView = (position: { lat: number, lng: number, zoom: number, rotation: number}) => {
-    return new View({
-      center: fromLonLat([position.lng, position.lat]),
-      zoom: isNaN(position.zoom) ? 11 : position.zoom,
-      rotation: isNaN(position.rotation) ? 0 : position.rotation
-    })
+  const updateView = (view: View, position: { lat: number, lng: number, zoom: number, rotation: number}) => {
+    view.setCenter(fromLonLat([position.lng, position.lat]));
+    view.setZoom(position.zoom);
+    view.setRotation(position.rotation);
   }
 
   const savePosition = () => {
@@ -65,7 +63,7 @@
       return;
     }
 
-    map.setView(positionToView(position));
+    updateView(map.getView(), position);
   };
 
   const debounced = debounce(savePosition, 500);
@@ -92,7 +90,7 @@
       return;
     }
 
-    map.setView(positionToView(newPosition));
+    updateView(map.getView(), newPosition);
   });
 
   $: {
