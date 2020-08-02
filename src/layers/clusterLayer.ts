@@ -3,8 +3,10 @@ import VectorSource from "ol/source/Vector";
 import { Cluster } from "ol/source";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle, Text, Stroke, Fill } from "ol/style";
+import type Map from 'ol/Map';
+import { zoomToFeature } from "../utils/zoomToFeature";
 
-export const makeClusterLayer = async (from: { getFeatures: () => Promise<Feature[]>, clusterDistance: number, name: string }) => {
+export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Promise<Feature[]>, clusterDistance: number, name: string }) => {
     const features  = await from.getFeatures();
     const source = new VectorSource({
         features: features
@@ -36,7 +38,20 @@ export const makeClusterLayer = async (from: { getFeatures: () => Promise<Featur
             }
             return styleCache[size];
         }
-    }as any);
+    } as any);
+
+    map.on('click', e => {
+        const feature = map
+            .forEachFeatureAtPixel(e.pixel, feature => {
+                const subfeatures = feature.get('features');
+                if (!subfeatures)
+                    return;
+                return feature;
+            });
+
+        zoomToFeature(map, feature);
+
+    });
 
     return clusters;
 }

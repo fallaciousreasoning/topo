@@ -26,7 +26,7 @@
   import LayerGroup from "ol/layer/Group";
   import { getLayers } from "./layers";
 
-  let map = undefined;
+  let map: Map = undefined;
 
   onMount(async () => {
     map = new Map({
@@ -57,16 +57,20 @@
             } as any),
           ],
         } as any),
-        new LayerGroup({
-          title: "Huts & Campsites",
-          layers: await getLayers(),
-        } as any),
       ],
       view: new View({
         center: fromLonLat([172.633, -43.533]),
         zoom: 11,
+        maxZoom: 18
       }),
     });
+
+    const hutsAndCampsites = 
+        new LayerGroup({
+          title: "Huts & Campsites",
+          layers: await getLayers(map),
+        } as any);
+    map.addLayer(hutsAndCampsites);
   });
 </script>
 
