@@ -28,7 +28,7 @@ export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Prom
                     image: new Circle({
                         radius: 20,
                         stroke: new Stroke({ color: 'white' }),
-                        fill: new Fill({ color: '#73afa4' })
+                        fill: new Fill({ color: '#194036' })
                     }),
                     text: new Text({
                         text: size === 1 ? `🏠` : `${size} 🏠`,
@@ -39,19 +39,6 @@ export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Prom
             return styleCache[size];
         }
     } as any);
-
-    map.on('click', e => {
-        const feature = map
-            .forEachFeatureAtPixel(e.pixel, feature => {
-                const subfeatures = feature.get('features');
-                if (!subfeatures)
-                    return;
-                return feature;
-            });
-
-        zoomToFeature(map, feature);
-
-    });
 
     return clusters;
 }

@@ -25,6 +25,7 @@
   import "ol-layerswitcher/src/ol-layerswitcher.css";
   import LayerGroup from "ol/layer/Group";
   import { getLayers } from "./layers";
+import { enableZoomToCluster } from "./utils/zoomToFeature";
 
   let map: Map = undefined;
 
@@ -71,6 +72,8 @@
           layers: await getLayers(map),
         } as any);
     map.addLayer(hutsAndCampsites);
+
+    enableZoomToCluster(map);
   });
 </script>
 

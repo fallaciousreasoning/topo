@@ -11,3 +11,16 @@ export const zoomToFeature = (map: Map, feature:FeatureLike) => {
     }
     map.getView().fit(extent);
 }
+
+export const enableZoomToCluster = (map: Map) =>
+    map.on('click', e => {
+        const feature = map
+            .forEachFeatureAtPixel(e.pixel, feature => {
+                const subfeatures = feature.get('features');
+                if (!subfeatures || subfeatures.length <= 1)
+                    return;
+                return feature;
+            });
+
+        zoomToFeature(map, feature);
+    });
