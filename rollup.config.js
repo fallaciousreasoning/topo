@@ -1,6 +1,7 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
@@ -41,6 +42,7 @@ export default {
 	context: 'window',
 	plugins: [
 		css({ output: "public/build/extra.css" }),
+		json(),
 		svelte({
 			// enable run-time checks when not in production
 			dev: !production,
