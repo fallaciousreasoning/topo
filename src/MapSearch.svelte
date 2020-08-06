@@ -1,18 +1,18 @@
 <script lang="ts">
   import type { Map } from "ol";
   import MapButton from "./MapButton.svelte";
-import geocode from "./search/geocode";
+  import geocode from "./search/geocode";
+  import type { GeocodeResult } from "./search/geocode";
 
-  let query = '';
+  let query = "";
   let searching = false;
   let results = [];
 
   const updateResults = async () => {
     try {
       results = await geocode(query);
-      console.log(result)
     } catch {}
-  }
+  };
 </script>
 
 <style>
@@ -32,14 +32,19 @@ import geocode from "./search/geocode";
   {:else}
     <div>
       <div class="search-bar">
-        <input class="search-box" type="search" bind:value={query} on:change={updateResults} />
+        <input
+          class="search-box"
+          type="search"
+          bind:value={query}
+          on:change={updateResults} />
         <button class="clear-button" on:click={() => (searching = false)}>
           X
         </button>
       </div>
-      <div classname="results">
-        <div>Result 1</div>
-        <div>Result 2</div>
+      <div class="results">
+        {#each results as result}
+          <div class="result">{result.displayName}</div>
+        {/each}
       </div>
     </div>
   {/if}
