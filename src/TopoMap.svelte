@@ -1,6 +1,7 @@
 <script lang="ts">
   import MapPositioner from "./MapPositioner.svelte";
   import MapSearch from "./MapSearch.svelte";
+  import Control from "./ol/Control.svelte";
 
   import "ol/ol.css";
   import Map from "./ol/Map.svelte";
@@ -11,13 +12,12 @@
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
   import MapLocator from "./MapLocator.svelte";
-  import Controls from './ol/Controls.svelte'
+  import Controls from "./ol/Controls.svelte";
   import {
     FullScreen,
     ScaleLine,
     defaults as defaultControls,
     Rotate,
-Control,
   } from "ol/control";
   import {
     defaults as defaultInteractions,
@@ -44,7 +44,7 @@ Control,
   //       new LayerSwitcher(),
   //     ]),
   //     interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
-  //     
+  //
 </script>
 
 <style>
@@ -86,16 +86,14 @@ Control,
       <FeatureLayers />
     </LayerGroup>
 
-    <MapLocator/>
-    <MapSearch on:change={e => {
-      zoomToGeocodeResult(e.detail.map, e.detail.result);
-    }}/>
-
-    <Controls defaults={[
-      "zoom",
-      "rotate",
-      "fullscreen",
-      "scaleline"
-    ]}/>
+    <Controls defaults={['zoom', 'fullscreen', 'rotate']}>
+      <div slot="top-left">
+        <MapLocator />
+        <MapSearch
+          on:change={(e) => {
+            zoomToGeocodeResult(e.detail.map, e.detail.result);
+          }} />
+      </div>
+    </Controls>
   </Map>
 </div>
