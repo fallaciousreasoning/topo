@@ -1,0 +1,14 @@
+{
+    "name": "Topo Maps",
+    "short_name": "Topo Maps",
+    "icons": [{
+        "src": "/favicon.png",
+        "sizes": "626x626",
+        "type": "image/png"
+    }],
+    "scope": ".",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#e8eaf6",
+    "theme_color": "#FF0000"
+}
