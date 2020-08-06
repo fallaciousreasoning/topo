@@ -10,10 +10,7 @@ import MapPositioner from "./MapPositioner.svelte";
   export let bottom: string = undefined;
   export let right: string = undefined;
 
-  export let label: string = "";
   export let map: Map;
-
-  export let click
 
   let style = '';
   $: {
@@ -47,5 +44,5 @@ import MapPositioner from "./MapPositioner.svelte";
   style={style}
   class={`${CLASS_CONTROL} ${CLASS_UNSELECTABLE}`}
   use:control={map}>
-  <button>{label}</button>
+  <slot/>
 </div>

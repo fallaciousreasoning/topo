@@ -11,7 +11,7 @@
 
   export let map: Map;
 
-  let tracking = true;
+  let tracking = false;
   let geolocation: Geolocation;
   let vectorSource = new VectorSource({
     features: [],
@@ -69,5 +69,10 @@
 
 <MapButton
   {map}
-  top="4.5em"
-  label="⬊"/>
+  top="4.5em">
+  <button
+    style={`color: ${tracking ? 'blue' : 'white'}`}  
+    on:click={() => tracking = !tracking}>
+    ⬊
+  </button>
+</MapButton>
