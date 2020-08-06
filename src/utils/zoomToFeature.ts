@@ -1,8 +1,8 @@
 import type Map from "ol/Map";
 import type { FeatureLike } from "ol/Feature";
-import { extend } from "ol/extent";
+import { extend, createEmpty } from "ol/extent";
 export const zoomToFeature = (map: Map, feature:FeatureLike) => {
-    let extent = feature.getGeometry().getExtent();
+    let extent = createEmpty();
 
     const subfeatures = feature.get('features');
     if (subfeatures) {
@@ -22,5 +22,6 @@ export const enableZoomToCluster = (map: Map) =>
                 return feature;
             });
 
-        zoomToFeature(map, feature);
+        if (feature)
+            zoomToFeature(map, feature);
     });
