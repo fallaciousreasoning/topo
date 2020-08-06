@@ -85,5 +85,8 @@
     </LayerGroup>
 
     <MapLocator/>
+    <MapSearch on:change={e => {
+      zoomToGeocodeResult(e.detail.map, e.detail.result);
+    }}/>
   </Map>
 </div>

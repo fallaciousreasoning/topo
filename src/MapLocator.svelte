@@ -73,7 +73,7 @@
   }
 </script>
 
-<MapButton {map} top="4.5em">
+<MapButton top="4.5em">
   <button
     style={`color: ${tracking ? 'blue' : 'white'}`}
     on:click={() => (tracking = !tracking)}>

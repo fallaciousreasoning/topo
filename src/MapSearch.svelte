@@ -4,8 +4,10 @@
   import geocode from "./search/geocode";
   import type { GeocodeResult } from "./search/geocode";
 import { createEventDispatcher } from "svelte";
+import { getOlContext } from "./ol/Map.svelte";
 
   const dispatcher = createEventDispatcher();
+  const { getMap } = getOlContext();
 
   let query = "";
   let searching = false;
@@ -18,7 +20,7 @@ import { createEventDispatcher } from "svelte";
   };
 
   const selectResult = (result: GeocodeResult) => {
-    dispatcher('change', result);
+    dispatcher('change', { result, map: getMap() });
     searching = false;
   }
 </script>

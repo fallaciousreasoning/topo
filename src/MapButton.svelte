@@ -3,26 +3,25 @@
   import { CLASS_CONTROL, CLASS_UNSELECTABLE } from "ol/css";
   import type { Map } from "ol";
   import portal from "./utils/portal";
-import MapPositioner from "./MapPositioner.svelte";
+import onMountTick from "./utils/onMountTick";
+import { getOlContext } from "./ol/Map.svelte";
 
   export let top: string = `0.5em`;
   export let left: string = `0.5em`;
   export let bottom: string = undefined;
   export let right: string = undefined;
 
-  export let map: Map;
+  const { getMap } = getOlContext();
+  let map: Map;
+  onMountTick(() => map = getMap());
 
-  let style = '';
+  let style = "";
   $: {
-    style = '';
-    if (top)
-      style += `top: ${top};`;
-    if (bottom)
-      style += `bottom: ${bottom};`;
-    if (left)
-      style += `left: ${left};`;
-    if (right)
-      style += `right: ${right};`;
+    style = "";
+    if (top) style += `top: ${top};`;
+    if (bottom) style += `bottom: ${bottom};`;
+    if (left) style += `left: ${left};`;
+    if (right) style += `right: ${right};`;
   }
 
   const control = (node, map: Map) => {
@@ -30,19 +29,17 @@ import MapPositioner from "./MapPositioner.svelte";
     return {
       destroy: () => map && map.removeControl(control),
       update(newMap) {
-        if (map)
-          map.removeControl(control);
+        if (map) map.removeControl(control);
         map = newMap;
-        if (map)
-          map.addControl(control);
-      }
-    }
-  }
+        if (map) map.addControl(control);
+      },
+    };
+  };
 </script>
 
 <div
-  style={style}
+  {style}
   class={`${CLASS_CONTROL} ${CLASS_UNSELECTABLE}`}
   use:control={map}>
-  <slot/>
+  <slot />
 </div>
