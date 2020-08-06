@@ -65,8 +65,12 @@
         } as any),
       ],
       view: new View({
+        constrainOnlyCenter: true,
+        smoothExtentConstraint: true,
+        extent: nzBounds,
         zoom: 11,
         maxZoom: 18,
+        minZoom: 4
       }),
     });
 
