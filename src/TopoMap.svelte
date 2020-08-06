@@ -11,11 +11,13 @@
   import { fromLonLat } from "ol/proj";
   import { onMount } from "svelte";
   import MapLocator from "./MapLocator.svelte";
+  import Controls from './ol/Controls.svelte'
   import {
     FullScreen,
     ScaleLine,
     defaults as defaultControls,
     Rotate,
+Control,
   } from "ol/control";
   import {
     defaults as defaultInteractions,
@@ -88,5 +90,12 @@
     <MapSearch on:change={e => {
       zoomToGeocodeResult(e.detail.map, e.detail.result);
     }}/>
+
+    <Controls defaults={[
+      "zoom",
+      "rotate",
+      "fullscreen",
+      "scaleline"
+    ]}/>
   </Map>
 </div>

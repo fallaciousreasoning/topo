@@ -39,6 +39,7 @@
       target: mapRef,
       layers: pendingLayers,
       view: new View(),
+      controls: []
     });
   });
 </script>
