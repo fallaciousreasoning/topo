@@ -2,7 +2,8 @@
   import { FullScreen, ScaleLine, Rotate, Zoom } from "ol/control";
   import onMountTick from "../utils/onMountTick";
   import { getOlContext } from "./Map.svelte";
-import portal from "../utils/portal";
+  import portal from "../utils/portal";
+  import Control from "./Control.svelte";
 
   type ControlPosition = "topleft" | "topright" | "bottomleft";
 
@@ -19,10 +20,11 @@ import portal from "../utils/portal";
   let topRight: HTMLElement;
 
   onMountTick(() => {
+    console.log(topRight);
     // Add default controls.
     for (const control of defaults) {
       const info = controls[control];
-      getMap().addControl(new info.control({ }));
+      getMap().addControl(new info.control({ target: topRight }));
     }
   });
 </script>
@@ -32,11 +34,25 @@ import portal from "../utils/portal";
     display: flex;
     flex-direction: column;
     position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 1em;
+  }
+
+  .top-right {
+    align-items: flex-end;
   }
 
   .top-left {
-    top: 1em;
-    left: 1em;
+    align-items: flex-start;
+  }
+
+  :global(.ol-control) {
+    position: initial !important;
+    flex: 0;
   }
 </style>
 
@@ -45,5 +61,5 @@ import portal from "../utils/portal";
 </div>
 
 <div class="container top-right" bind:this={topRight}>
-  <slot name="top-right" />
+  <slot name="top-left" />
 </div>
