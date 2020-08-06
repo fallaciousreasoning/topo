@@ -83,5 +83,7 @@
     <LayerGroup title="Features">
       <FeatureLayers />
     </LayerGroup>
+
+    <MapLocator/>
   </Map>
 </div>

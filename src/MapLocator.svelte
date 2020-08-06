@@ -8,8 +8,14 @@
   import Style from "ol/style/Style";
   import Icon from "ol/style/Icon";
   import MapButton from "./MapButton.svelte";
+  import { getOlContext } from "./ol/Map.svelte";
+  import onMountTick from "./utils/onMountTick";
 
-  export let map: Map;
+  const { getMap } = getOlContext();
+  let map: Map;
+  onMountTick(() => {
+    map = getMap();
+  });
 
   let tracking = false;
   let geolocation: Geolocation;
@@ -67,12 +73,10 @@
   }
 </script>
 
-<MapButton
-  {map}
-  top="4.5em">
+<MapButton {map} top="4.5em">
   <button
-    style={`color: ${tracking ? 'blue' : 'white'}`}  
-    on:click={() => tracking = !tracking}>
+    style={`color: ${tracking ? 'blue' : 'white'}`}
+    on:click={() => (tracking = !tracking)}>
     ⬊
   </button>
 </MapButton>

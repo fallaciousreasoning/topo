@@ -4,11 +4,12 @@
   import { fromLonLat, toLonLat } from "ol/proj";
   import round from "./utils/round";
   import { getOlContext } from "./ol/Map.svelte";
-import { onMount, tick } from "svelte";
+  import { onMount, tick } from "svelte";
+  import onMountTick from "./utils/onMountTick";
 
   const { getMap } = getOlContext();
   let map: Map;
-  onMount(() => tick().then(() => map = getMap()));
+  onMountTick(() => (map = getMap()));
 
   const localStorageKey = "mapPosition";
 
@@ -101,7 +102,6 @@ import { onMount, tick } from "svelte";
   });
 
   $: {
-    console.log(map)
     if (map) {
       map.on("moveend", debounced);
       map.on("zoom", debounced);
