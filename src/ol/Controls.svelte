@@ -36,19 +36,22 @@
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
     z-index: 10;
-    padding: 1em;
+    margin: 1em;
+    gap: 0.5em;
   }
 
   .top-right {
+    top: 0;
+    right: 0;
+    width: 2em;
     align-items: flex-end;
   }
 
   .top-left {
+    top: 0;
+    left: 0;
+    width: 2em;
     align-items: flex-start;
   }
 
@@ -63,5 +66,5 @@
 </div>
 
 <div class="container top-right" bind:this={topRight}>
-  <slot name="top-left" />
+  <slot name="top-right" />
 </div>

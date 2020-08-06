@@ -10,6 +10,7 @@
   import MapButton from "./MapButton.svelte";
   import { getOlContext } from "./ol/Map.svelte";
   import onMountTick from "./utils/onMountTick";
+import Control from "./ol/Control.svelte";
 
   const { getMap } = getOlContext();
   let map: Map;
@@ -73,10 +74,10 @@
   }
 </script>
 
-<MapButton top="4.5em">
+<Control control>
   <button
     style={`color: ${tracking ? 'blue' : 'white'}`}
     on:click={() => (tracking = !tracking)}>
     ⬊
   </button>
-</MapButton>
+</Control>
