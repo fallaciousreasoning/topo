@@ -3,6 +3,9 @@
   import MapButton from "./MapButton.svelte";
   import geocode from "./search/geocode";
   import type { GeocodeResult } from "./search/geocode";
+import { createEventDispatcher } from "svelte";
+
+  const dispatcher = createEventDispatcher();
 
   let query = "";
   let searching = false;
@@ -13,6 +16,10 @@
       results = await geocode(query);
     } catch {}
   };
+
+  const selectResult = (result: GeocodeResult) => {
+    dispatcher('change', result);
+  }
 </script>
 
 <style>
@@ -44,13 +51,16 @@
         <button class="clear-button" on:click={() => {
           searching = false;
           query = '';
+          results = [];
         }}>
           X
         </button>
       </div>
       <div class="results">
         {#each results as result}
-          <div class="result">{result.displayName}</div>
+          <div class="result" on:click={() => selectResult(result)}>
+            {result.displayName}
+          </div>
         {/each}
       </div>
     </div>

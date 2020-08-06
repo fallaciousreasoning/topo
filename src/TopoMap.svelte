@@ -25,7 +25,7 @@
   import "ol-layerswitcher/src/ol-layerswitcher.css";
   import LayerGroup from "ol/layer/Group";
   import { getLayers } from "./layers";
-import { enableZoomToCluster } from "./utils/zoomToFeature";
+import { enableZoomToCluster, zoomToGeocodeResult } from "./utils/zoomToFeature";
 import portal from './utils/portal'
   let map: Map = undefined;
 
@@ -86,5 +86,5 @@ import portal from './utils/portal'
 
 <div id="topo-map" class="map" />
 <MapPositioner {map} />
-<MapSearch />
+<MapSearch on:change={e => zoomToGeocodeResult(map, e.detail)} />
 <MapLocator {map} />
