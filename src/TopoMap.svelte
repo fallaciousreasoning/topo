@@ -25,8 +25,13 @@
   import "ol-layerswitcher/src/ol-layerswitcher.css";
   import LayerGroup from "ol/layer/Group";
   import { getLayers } from "./layers";
-import { enableZoomToCluster, zoomToGeocodeResult } from "./utils/zoomToFeature";
-import portal from './utils/portal'
+  import {
+    enableZoomToCluster,
+    zoomToGeocodeResult,
+  } from "./utils/zoomToFeature";
+  import portal from "./utils/portal";
+  import { nzBounds } from "./utils/bounds";
+
   let map: Map = undefined;
 
   onMount(async () => {
@@ -60,17 +65,17 @@ import portal from './utils/portal'
         } as any),
       ],
       view: new View({
-        center: fromLonLat([172.633, -43.533]),
         zoom: 11,
-        maxZoom: 18
+        maxZoom: 18,
       }),
     });
 
-    const hutsAndCampsites = 
-        new LayerGroup({
-          title: "Huts & Campsites",
-          layers: await getLayers(map),
-        } as any);
+    map.getView().fit(nzBounds);
+
+    const hutsAndCampsites = new LayerGroup({
+      title: "Huts & Campsites",
+      layers: await getLayers(map),
+    } as any);
     map.addLayer(hutsAndCampsites);
 
     enableZoomToCluster(map);
@@ -86,5 +91,5 @@ import portal from './utils/portal'
 
 <div id="topo-map" class="map" />
 <MapPositioner {map} />
-<MapSearch on:change={e => zoomToGeocodeResult(map, e.detail)} />
+<MapSearch on:change={(e) => zoomToGeocodeResult(map, e.detail)} />
 <MapLocator {map} />
