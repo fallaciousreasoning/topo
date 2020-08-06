@@ -26,7 +26,7 @@
   import LayerGroup from "ol/layer/Group";
   import { getLayers } from "./layers";
 import { enableZoomToCluster } from "./utils/zoomToFeature";
-
+import portal from './utils/portal'
   let map: Map = undefined;
 
   onMount(async () => {
