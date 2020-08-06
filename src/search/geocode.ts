@@ -9,6 +9,8 @@ export interface GeocodeResult {
 }
 
 export default async (query: string): Promise<GeocodeResult[]> => {
+    // Hackily include the country because the nominatim API is terrible.
+    query = query + ", NZ";
     const results: GeocodeResult[] = await fetch(`${baseUrl}?q=${encodeURIComponent(query)}&format=jsonv2`)
         .then(r => r.json());
 

@@ -21,8 +21,12 @@
     gap: 0.5em;
   }
 
-  .search-box {
+  .search-bar > input {
     flex: 1;
+  }
+
+  .result:hover {
+    background: rgba(0.8, 0.8, 0.8, 0.5);
   }
 </style>
 
@@ -37,7 +41,10 @@
           type="search"
           bind:value={query}
           on:change={updateResults} />
-        <button class="clear-button" on:click={() => (searching = false)}>
+        <button class="clear-button" on:click={() => {
+          searching = false;
+          query = '';
+        }}>
           X
         </button>
       </div>
