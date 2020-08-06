@@ -19,6 +19,7 @@ import { createEventDispatcher } from "svelte";
 
   const selectResult = (result: GeocodeResult) => {
     dispatcher('change', result);
+    searching = false;
   }
 </script>
 
