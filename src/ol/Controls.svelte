@@ -20,11 +20,13 @@
   let topRight: HTMLElement;
 
   onMountTick(() => {
-    console.log(topRight);
     // Add default controls.
     for (const control of defaults) {
       const info = controls[control];
-      getMap().addControl(new info.control({ target: topRight }));
+      const target = info.position === "topleft"
+        ? topLeft
+        : topRight;
+      getMap().addControl(new info.control({ target }));
     }
   });
 </script>
@@ -56,7 +58,7 @@
   }
 </style>
 
-<div class="container top-left">
+<div class="container top-left" bind:this={topLeft}>
   <slot name="top-left" />
 </div>
 
