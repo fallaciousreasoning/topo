@@ -5,8 +5,25 @@
   import portal from "./utils/portal";
 
   export let top: string = `0.5em`;
+  export let left: string = `0.5em`;
+  export let bottom: string = undefined;
+  export let right: string = undefined;
+
   export let label: string = "";
   export let map: Map;
+
+  let style = '';
+  $: {
+    style = '';
+    if (top)
+      style += 'top: ' + top;
+    if (bottom)
+      style += 'bottom: ' + bottom;
+    if (left)
+      style += 'left: ' + left;
+    if (right)
+      style += 'right: ' + right;
+  }
 
   const control = (node) => {
     if (!map)
@@ -20,7 +37,7 @@
 </script>
 
 <div
-  style={`top: ${top}; left: 0.5em`}
+  style={style}
   class={`${CLASS_CONTROL} ${CLASS_UNSELECTABLE}`}
   use:control>
   <button>{label}</button>
