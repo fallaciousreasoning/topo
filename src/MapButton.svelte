@@ -17,8 +17,6 @@
   }
 </script>
 
-<Control>
-  <div {style} class={`${CLASS_CONTROL} ${CLASS_UNSELECTABLE}`}>
+<Control control {style}>
     <slot />
-  </div>
 </Control>
