@@ -2,33 +2,26 @@
   import { Control } from "ol/control";
   import { CLASS_CONTROL, CLASS_UNSELECTABLE } from "ol/css";
   import type { Map } from "ol";
+  import portal from "./utils/portal";
 
   export let top: string = `0.5em`;
-
-  class Button extends Control {
-    labelNode: Text;
-    button: HTMLButtonElement;
-
-    constructor(props: { label: string }) {
-      super({
-        element: document.createElement("div"),
-      });
-
-      this.labelNode = document.createTextNode(props.label);
-      this.button = document.createElement("button");
-
-      this.button.appendChild(this.labelNode);
-      this.element.appendChild(this.button);
-      this.element.setAttribute('style', `top: ${top}; left: 0.5em`)
-      this.element.classList.add(CLASS_CONTROL, CLASS_UNSELECTABLE);
-    }
-  }
-
+  export let label: string = "";
   export let map: Map;
 
-  let content: HTMLElement;
+  const control = (node) => {
+    if (!map)
+      return;
 
-  const button = new Button({ label: "⬊" });
-
-  $: if (map) map.addControl(button);
+    const control = new Control({ element: node });
+    return {
+      destroy: () => map.removeControl(control)
+    }
+  }
 </script>
+
+<div
+  style={`top: ${top}; left: 0.5em`}
+  class={`${CLASS_CONTROL} ${CLASS_UNSELECTABLE}`}
+  use:control>
+  <button>{label}</button>
+</div>

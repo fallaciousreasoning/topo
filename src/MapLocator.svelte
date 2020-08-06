@@ -67,4 +67,4 @@
   }
 </script>
 
-<MapButton {map} top="4.5em"/>
+<MapButton {map} top="4.5em" label="⬊"/>
