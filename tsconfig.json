@@ -7,6 +7,7 @@
       "sourceMap": true,
       "noImplicitAny": false,
       "target": "es2016",
-      "resolveJsonModule": true
+      "resolveJsonModule": true,
+      "importsNotUsedAsValues": "remove"
   }
 }
