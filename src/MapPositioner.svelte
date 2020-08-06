@@ -2,17 +2,24 @@
   import { debounce } from "./utils/debounce";
   import type { Map, View } from "ol";
   import { fromLonLat, toLonLat } from "ol/proj";
-  import round from './utils/round';
+  import round from "./utils/round";
+  import { getOlContext } from "./ol/Map.svelte";
+import { onMount, tick } from "svelte";
 
-  export let map: Map;
+  const { getMap } = getOlContext();
+  let map: Map;
+  onMount(() => tick().then(() => map = getMap()));
 
   const localStorageKey = "mapPosition";
 
-  const updateView = (view: View, position: { lat: number, lng: number, zoom: number, rotation: number}) => {
+  const updateView = (
+    view: View,
+    position: { lat: number; lng: number; zoom: number; rotation: number }
+  ) => {
     view.setCenter(fromLonLat([position.lng, position.lat]));
     view.setZoom(position.zoom);
     view.setRotation(position.rotation);
-  }
+  };
 
   const savePosition = () => {
     const view = map.getView();
@@ -94,6 +101,7 @@
   });
 
   $: {
+    console.log(map)
     if (map) {
       map.on("moveend", debounced);
       map.on("zoom", debounced);
