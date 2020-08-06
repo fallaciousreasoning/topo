@@ -82,10 +82,6 @@ import portal from './utils/portal'
     width: 100vw;
     height: 100vh;
   }
-
-  :global(.ol-rotate) {
-    top: 3em;
-  }
 </style>
 
 <div id="topo-map" class="map" />
