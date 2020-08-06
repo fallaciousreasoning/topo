@@ -86,6 +86,7 @@
   .map {
     width: 100vw;
     height: 100vh;
+    background: #d0e6f4;
   }
 </style>
 
