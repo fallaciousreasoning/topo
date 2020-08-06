@@ -42,47 +42,7 @@
   //       new LayerSwitcher(),
   //     ]),
   //     interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
-  //     layers: [
-  //       new LayerGroup({
-  //         title: "Base Layers",
-  //         layers: [
-  //           new TileLayer({
-  //             title: "NZ Topo",
-  //             type: "base",
-  //             source: new XYZ({
-  //               url:
-  //                 "https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png",
-  //             }),
-  //           } as any),
-  //           new TileLayer({
-  //             title: "Open Street Maps",
-  //             type: "base",
-  //             visible: false,
-  //             source: new OSM(),
-  //           } as any),
-  //         ],
-  //       } as any),
-  //     ],
-  //     view: new View({
-  //       constrainOnlyCenter: true,
-  //       smoothExtentConstraint: true,
-  //       extent: nzBounds,
-  //       zoom: 11,
-  //       maxZoom: 18,
-  //       minZoom: 4
-  //     }),
-  //   });
-
-  //   map.getView().fit(nzBounds);
-
-  //   const hutsAndCampsites = new LayerGroup({
-  //     title: "Huts & Campsites",
-  //     layers: await getLayers(map),
-  //   } as any);
-  //   map.addLayer(hutsAndCampsites);
-
-  //   enableZoomToCluster(map);
-  // });
+  //     
 </script>
 
 <style>
