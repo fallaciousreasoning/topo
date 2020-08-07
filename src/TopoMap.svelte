@@ -31,6 +31,7 @@
   import { nzBounds } from "./utils/bounds";
   import LayerGroup from "./ol/LayerGroup.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
+import Popup from "./ol/Popup.svelte";
 
 </script>
 
@@ -80,5 +81,9 @@
           zoomToGeocodeResult(e.detail.map, e.detail.result);
         }} />
     </Controls>
+
+    <Popup position={fromLonLat([172.72988,-43.59831])}>
+      Hello World Foo Bar
+    </Popup>
   </Map>
 </div>
