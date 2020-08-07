@@ -16,6 +16,9 @@
   import { zoomToGeocodeResult } from "./utils/zoomToFeature";
   import type { Coordinate } from "ol/coordinate";
   import Marker from "./Marker.svelte";
+  import VectorLayer from "./ol/VectorLayer.svelte";
+  import Feature from "./ol/Feature.svelte";
+  import { Style, Icon, Text } from "ol/style";
 
   interface PopupInfo {
     position: Coordinate;
@@ -60,7 +63,7 @@
         title="Open Topo Maps"
         type="base"
         visible={false}
-        source={"https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"}/>
+        source={'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'} />
       <TileLayer
         title="NZ Topo"
         type="base"

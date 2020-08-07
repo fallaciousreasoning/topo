@@ -1,76 +1,36 @@
 <script lang="ts">
-  import type { Map } from "ol";
+  import type { Coordinate } from "ol/coordinate";
   import Geolocation from "ol/Geolocation";
-  import Feature from "ol/Feature";
-  import VectorSource from "ol/source/Vector";
-  import VectorLayer from "ol/layer/Vector";
-  import Point from "ol/geom/Point";
-  import Style from "ol/style/Style";
   import Icon from "ol/style/Icon";
-  import MapButton from "./MapButton.svelte";
+  import Style from "ol/style/Style";
+  import Control from "./ol/Control.svelte";
+  import Feature from "./ol/Feature.svelte";
   import { getOlContext } from "./ol/Map.svelte";
+  import VectorLayer from "./ol/VectorLayer.svelte";
   import onMountTick from "./utils/onMountTick";
-import Control from "./ol/Control.svelte";
 
   const { getMap } = getOlContext();
-  let map: Map;
-  onMountTick(() => {
-    map = getMap();
-  });
 
   let tracking = false;
-  let geolocation: Geolocation;
-  let vectorSource = new VectorSource({
-    features: [],
+  let position: Coordinate;
+
+  let geolocation = new Geolocation();
+  geolocation.on("change", (e) => {
+    position = geolocation.getPosition();
   });
-  let vectorLayer = new VectorLayer({
-    source: vectorSource,
+
+  onMountTick(() => {
+    geolocation.setProjection(getMap().getView().getProjection());
   });
 
   $: {
-    if (map) {
-      map.addLayer(vectorLayer);
+    if (tracking) {
+      geolocation.once("change", () =>
+        getMap().getView().setCenter(geolocation.getPosition())
+      );
     }
-  }
 
-  $: {
-    if (map) {
-      geolocation = new Geolocation({
-        tracking,
-        projection: map.getView().getProjection(),
-      });
-
-      // When we first get the location, show it.
-      geolocation.once("change", (e) => {
-        const position = geolocation.getPosition();
-        map.getView().setCenter(position);
-      });
-
-      geolocation.on("change", (e) => {
-        const position = geolocation.getPosition();
-        const iconFeature = new Feature({
-          geometry: new Point(position),
-        });
-
-        const iconStyle = new Style({
-          image: new Icon({
-            anchor: [0.5, 0.5],
-            opacity: 0.9,
-            imgSize: [600, 600],
-            scale: 0.08,
-            color: "#578dfF",
-            src: "/icons/location-indicator.svg",
-          }),
-        });
-        iconFeature.setStyle(iconStyle);
-
-        vectorSource.clear();
-        vectorSource.addFeature(iconFeature);
-      });
-
-      // If we aren't tracking the location, don't show it.
-      if (!tracking) vectorSource.clear();
-    }
+    geolocation.setTracking(tracking);
   }
 </script>
 
@@ -81,3 +41,20 @@ import Control from "./ol/Control.svelte";
     ⬊
   </button>
 </Control>
+
+<VectorLayer>
+  {#if tracking && position}
+    <Feature
+      {position}
+      style={new Style({
+        image: new Icon({
+          anchor: [0.5, 0.5],
+          opacity: 0.9,
+          imgSize: [600, 600],
+          scale: 0.08,
+          color: '#578dfF',
+          src: '/icons/location-indicator.svg',
+        }),
+      })} />
+  {/if}
+</VectorLayer>
