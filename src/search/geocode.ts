@@ -1,21 +1,32 @@
-const baseUrl = 'https://nominatim.openstreetmap.org/search'
+const osmUrl = 'https://nominatim.openstreetmap.org/search'
+const nzPlacesUrl = "https://nz-places.now.sh/api/search";
+
 export interface GeocodeResult {
     lat: number;
-    lng: number;
-    boundingbox: [number,number,number,number];
-    displayName: string;
-    category: string;
+    lon: number;
+    name: string;
     type: string;
 }
 
-export default async (query: string): Promise<GeocodeResult[]> => {
+const searchOsm = async (query: string): Promise<GeocodeResult[]> => {
     // Hackily include the country because the nominatim API is terrible.
     query = query + ", NZ";
-    const results: GeocodeResult[] = await fetch(`${baseUrl}?q=${encodeURIComponent(query)}&format=jsonv2`)
+    const results: GeocodeResult[] = await fetch(`${osmUrl}?q=${encodeURIComponent(query)}&format=jsonv2`)
         .then(r => r.json());
 
     for (const result of results) {
-        result['displayName'] = result['display_name'];
+        result['name'] = result['display_name'];
     }
     return results;
+}
+
+const searchNzPlaces = async (query: string): Promise<GeocodeResult[]> => {
+    const url = `${nzPlacesUrl}?query=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+}
+
+export default async (query: string): Promise<GeocodeResult[]> => {
+    return searchNzPlaces(query);
 }

@@ -29,12 +29,9 @@ export const enableZoomToCluster = (map: Map) =>
     });
 
 export const zoomToGeocodeResult = (map: Map, result: GeocodeResult, maxResultZoom=14) => {
-    const points = result.boundingbox.map(b => parseFloat(b as any));
-    const min = fromLonLat([points[2], points[0]]);
-    const max = fromLonLat([points[3], points[1]]);
-    const extent = boundingExtent([min, max]);
-
-    map.getView().fit(extent);
-    if (map.getView().getZoom() > maxResultZoom)
-        map.getView().setZoom(maxResultZoom);
+    map.getView().animate({
+        center: fromLonLat([result.lon, result.lat]),
+        zoom: maxResultZoom,
+        duration: 500
+    });
 }

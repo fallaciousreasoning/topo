@@ -79,7 +79,7 @@
       <MapSearch
         on:change={(e) => {
           const lnglat = [e.detail.result.lon, e.detail.result.lat];
-          popupInfo = { detail: e.detail.result.displayName, title: 'Location', position: fromLonLat(lnglat) };
+          popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
           zoomToGeocodeResult(e.detail.map, e.detail.result);
         }} />
     </Controls>

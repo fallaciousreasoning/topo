@@ -62,7 +62,7 @@ import { getOlContext } from "./ol/Map.svelte";
       <div class="results">
         {#each results as result}
           <div class="result" on:click={() => selectResult(result)}>
-            {result.displayName}
+            {result.name}
           </div>
         {/each}
       </div>
