@@ -19,7 +19,7 @@
   ) => {
     view.setCenter(fromLonLat([position.lng, position.lat]));
     view.setZoom(position.zoom);
-    view.setRotation(position.rotation);
+    view.setRotation(isNaN(position.rotation) ? 0 : position.rotation);
   };
 
   const savePosition = () => {
@@ -67,7 +67,7 @@
     // Prefer position from fragment string.
     const position = { ...localPosition, ...fragmentPosition };
 
-    if (isNaN(position.lat) || isNaN(position.lng) || isNaN(position.zoom)) {
+    if (isNaN(position.lat) || isNaN(position.lng) || isNaN(position.zoom) || isNaN(position.rotation)) {
       return;
     }
 
