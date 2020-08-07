@@ -15,6 +15,7 @@
   import { nzBounds } from "./utils/bounds";
   import { zoomToGeocodeResult } from "./utils/zoomToFeature";
   import type { Coordinate } from "ol/coordinate";
+  import Marker from "./Marker.svelte";
 
   interface PopupInfo {
     position: Coordinate;
@@ -70,11 +71,7 @@
       <MapSearch
         on:change={(e) => {
           const lnglat = [e.detail.result.lon, e.detail.result.lat];
-          popupInfo = {
-            detail: e.detail.result.displayName,
-            title: "Location",
-            position: fromLonLat(lnglat)
-          }
+          popupInfo = { detail: e.detail.result.displayName, title: 'Location', position: fromLonLat(lnglat) };
           zoomToGeocodeResult(e.detail.map, e.detail.result);
         }} />
     </Controls>
