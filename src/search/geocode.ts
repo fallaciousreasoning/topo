@@ -27,6 +27,7 @@ const searchNzPlaces = async (query: string): Promise<GeocodeResult[]> => {
     return data;
 }
 
-export default async (query: string): Promise<GeocodeResult[]> => {
-    return searchNzPlaces(query);
+export default async (query: string, sources=[searchNzPlaces,searchOsm]): Promise<GeocodeResult[]> => {
+    const results = await Promise.all(sources.map(s => s(query)));
+    return results.reduce((prev, next) => [...prev, ...next], [])
 }
