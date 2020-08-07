@@ -83,7 +83,6 @@
 
     {#if !!popupInfo}
       <Popup position={popupInfo.position}>
-        <h2>{popupInfo.title}</h2>
         <p>{popupInfo.detail}</p>
       </Popup>
     {/if}
