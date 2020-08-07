@@ -11,6 +11,8 @@
   
     let overlay: Overlay;
     let element: HTMLElement;
+
+    $: overlay && overlay.setPosition(position);
   
     const olOverlay = (node: HTMLElement, map: Map) => {
       const newOverlay = () =>
