@@ -57,6 +57,11 @@
         visible={false}
         source={new OSM()} />
       <TileLayer
+        title="Open Topo Maps"
+        type="base"
+        visible={false}
+        source={"https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"}/>
+      <TileLayer
         title="NZ Topo"
         type="base"
         source={'https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png'} />
