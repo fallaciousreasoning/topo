@@ -1,45 +1,15 @@
 <script lang="ts">
-  import { Overlay, Map } from "ol";
+  import { Map } from "ol";
   import onMountTick from "../utils/onMountTick";
   import { getOlContext } from "./Map.svelte";
   import type { Coordinate } from "ol/coordinate";
+  import Overlay from "./Overlay.svelte";
 
   export let position: Coordinate;
-  const { getMap } = getOlContext();
-  let map: Map;
-  onMountTick(() => (map = getMap()));
-
-  let overlay: Overlay;
-  let element: HTMLElement;
-
-  const olOverlay = (node: HTMLElement, map: Map) => {
-    const newOverlay = () =>
-      new Overlay({
-        element,
-        autoPan: true,
-        autoPanAnimation: { duration: 250 },
-        position,
-      });
-
-    overlay = newOverlay();
-    overlay.setPosition(position);
-
-    return {
-      destroy: () => map && map.removeOverlay(overlay),
-      update(newMap) {
-        if (map) map.removeOverlay(overlay);
-
-        overlay = newOverlay();
-        map = newMap;
-        map.addOverlay(overlay);
-      },
-    };
-  };
 </script>
 
 <style>
   .ol-popup {
-    position: absolute;
     background-color: white;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     padding: 15px;
@@ -84,15 +54,17 @@
   }
 </style>
 
-<div use:olOverlay={map} class="ol-popup" bind:this={element}>
-  <a href="#close" alt="close" class="ol-popup-closer"
-    on:click={e => {
-        e.preventDefault();
+<Overlay {position} let:overlay>
+    <div class="ol-popup">
+    <a href="#close" alt="close" class="ol-popup-closer"
+        on:click={e => {
+            e.preventDefault();
 
-        if (!overlay)
-            return;
+            if (!overlay)
+                return;
 
-        overlay.setPosition(undefined);
-    }}> </a>
-  <slot />
-</div>
+            overlay.setPosition(undefined);
+        }}> </a>
+    <slot />
+    </div>
+</Overlay>
