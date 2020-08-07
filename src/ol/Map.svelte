@@ -18,6 +18,7 @@
   import type Layer from "ol/layer/Layer";
   import type BaseLayer from "ol/layer/Base";
   import View from "ol/View";
+import { DragRotateAndZoom } from "ol/interaction";
 
   // A place to store all the layers we try and add before mounting.
   const pendingLayers: BaseLayer[] = [];
@@ -41,6 +42,7 @@
       view: new View(),
       controls: []
     });
+    map.addInteraction(new DragRotateAndZoom());
   });
 </script>
 

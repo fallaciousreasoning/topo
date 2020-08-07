@@ -23,14 +23,11 @@
     defaults as defaultInteractions,
     DragRotateAndZoom,
   } from "ol/interaction";
-  import LayerSwitcher from "ol-layerswitcher";
-  import "ol-layerswitcher/src/ol-layerswitcher.css";
   import { getLayers } from "./layers";
   import {
     enableZoomToCluster,
     zoomToGeocodeResult,
   } from "./utils/zoomToFeature";
-  import portal from "./utils/portal";
   import { nzBounds } from "./utils/bounds";
   import LayerGroup from "./ol/LayerGroup.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
@@ -86,7 +83,7 @@
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['zoom', 'fullscreen', 'rotate', 'scaleline']}>
+    <Controls defaults={['zoom', 'fullscreen', 'layerSwitcher', 'rotate', 'scaleline']}>
       <MapLocator/>
       <MapSearch
         on:change={(e) => {
