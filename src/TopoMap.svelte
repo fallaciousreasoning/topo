@@ -1,38 +1,19 @@
 <script lang="ts">
+  import "ol/ol.css";
+  import { fromLonLat } from "ol/proj";
+  import OSM from "ol/source/OSM";
+  import FeatureLayers from "./layers/FeatureLayers.svelte";
+  import MapLocator from "./MapLocator.svelte";
   import MapPositioner from "./MapPositioner.svelte";
   import MapSearch from "./MapSearch.svelte";
-  import Control from "./ol/Control.svelte";
-
-  import "ol/ol.css";
-  import Map from "./ol/Map.svelte";
-  import View from "./ol/View.svelte";
-  import TileLayer from "./ol/TileLayer.svelte";
-  import OSM from "ol/source/OSM";
-  import XYZ from "ol/source/XYZ";
-  import { fromLonLat } from "ol/proj";
-  import { onMount } from "svelte";
-  import MapLocator from "./MapLocator.svelte";
   import Controls from "./ol/Controls.svelte";
-  import {
-    FullScreen,
-    ScaleLine,
-    defaults as defaultControls,
-    Rotate,
-  } from "ol/control";
-  import {
-    defaults as defaultInteractions,
-    DragRotateAndZoom,
-  } from "ol/interaction";
-  import { getLayers } from "./layers";
-  import {
-    enableZoomToCluster,
-    zoomToGeocodeResult,
-  } from "./utils/zoomToFeature";
-  import { nzBounds } from "./utils/bounds";
   import LayerGroup from "./ol/LayerGroup.svelte";
-  import FeatureLayers from "./layers/FeatureLayers.svelte";
-import Popup from "./ol/Popup.svelte";
-
+  import Map from "./ol/Map.svelte";
+  import Popup from "./ol/Popup.svelte";
+  import TileLayer from "./ol/TileLayer.svelte";
+  import View from "./ol/View.svelte";
+  import { nzBounds } from "./utils/bounds";
+  import { zoomToGeocodeResult } from "./utils/zoomToFeature";
 </script>
 
 <style>
@@ -74,15 +55,16 @@ import Popup from "./ol/Popup.svelte";
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['zoom', 'fullscreen', 'layerSwitcher', 'rotate', 'scaleline']}>
-      <MapLocator/>
+    <Controls
+      defaults={['zoom', 'fullscreen', 'layerSwitcher', 'rotate', 'scaleline']}>
+      <MapLocator />
       <MapSearch
         on:change={(e) => {
           zoomToGeocodeResult(e.detail.map, e.detail.result);
         }} />
     </Controls>
 
-    <Popup position={fromLonLat([172.72988,-43.59831])}>
+    <Popup position={fromLonLat([172.72988, -43.59831])}>
       Hello World Foo Bar
     </Popup>
   </Map>
