@@ -14,6 +14,15 @@
   import View from "./ol/View.svelte";
   import { nzBounds } from "./utils/bounds";
   import { zoomToGeocodeResult } from "./utils/zoomToFeature";
+  import type { Coordinate } from "ol/coordinate";
+
+  interface PopupInfo {
+    position: Coordinate;
+    title: string;
+    detail: string;
+  }
+
+  let popupInfo: PopupInfo;
 </script>
 
 <style>
@@ -60,12 +69,21 @@
       <MapLocator />
       <MapSearch
         on:change={(e) => {
+          const lnglat = [e.detail.result.lon, e.detail.result.lat];
+          popupInfo = {
+            detail: e.detail.result.displayName,
+            title: "Location",
+            position: fromLonLat(lnglat)
+          }
           zoomToGeocodeResult(e.detail.map, e.detail.result);
         }} />
     </Controls>
 
-    <Popup position={fromLonLat([172.72988, -43.59831])}>
-      Hello World Foo Bar
-    </Popup>
+    {#if !!popupInfo}
+      <Popup position={popupInfo.position}>
+        <h2>{popupInfo.title}</h2>
+        <p>{popupInfo.detail}</p>
+      </Popup>
+    {/if}
   </Map>
 </div>
