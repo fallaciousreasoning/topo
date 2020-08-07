@@ -3,8 +3,12 @@
     "short_name": "Topo Maps",
     "icons": [{
         "src": "/favicon.png",
-        "sizes": "626x626",
+        "sizes": "512x512",
         "type": "image/png"
+    }, {
+        "src": "/favicon.svg",
+        "sizes": "496x496",
+        "type": "text/xml+svg"
     }],
     "scope": ".",
     "start_url": "/index.html",
