@@ -86,14 +86,12 @@
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['zoom', 'fullscreen', 'rotate']}>
-      <div slot="top-left">
-        <MapLocator />
-        <MapSearch
-          on:change={(e) => {
-            zoomToGeocodeResult(e.detail.map, e.detail.result);
-          }} />
-      </div>
+    <Controls defaults={['zoom', 'fullscreen', 'rotate', 'scaleline']}>
+      <MapLocator/>
+      <MapSearch
+        on:change={(e) => {
+          zoomToGeocodeResult(e.detail.map, e.detail.result);
+        }} />
     </Controls>
   </Map>
 </div>
