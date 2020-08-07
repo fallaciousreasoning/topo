@@ -32,16 +32,6 @@
   import LayerGroup from "./ol/LayerGroup.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
 
-  // onMount(async () => {
-  //   map = new Map({
-  //     target: "topo-map",
-  //     controls: defaultControls().extend([
-  //       new FullScreen(),
-  //       new ScaleLine(),
-  //       new LayerSwitcher(),
-  //     ]),
-  //     interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
-  //
 </script>
 
 <style>
