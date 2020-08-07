@@ -59,7 +59,7 @@ import Control from "./ol/Control.svelte";
             imgSize: [600, 600],
             scale: 0.08,
             color: "#578dfF",
-            src: "location-indicator.svg",
+            src: "/icons/location-indicator.svg",
           }),
         });
         iconFeature.setStyle(iconStyle);
