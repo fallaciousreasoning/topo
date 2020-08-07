@@ -72,8 +72,27 @@
     left: 48px;
     margin-left: -11px;
   }
+
+  .ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+  }
+  .ol-popup-closer:after {
+    content: "✖";
+  }
 </style>
 
 <div use:olOverlay={map} class="ol-popup" bind:this={element}>
+  <a href="#close" alt="close" class="ol-popup-closer"
+    on:click={e => {
+        e.preventDefault();
+
+        if (!overlay)
+            return;
+
+        overlay.setPosition(undefined);
+    }}> </a>
   <slot />
 </div>
