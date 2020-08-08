@@ -19,6 +19,8 @@
   import VectorLayer from "./ol/VectorLayer.svelte";
   import Feature from "./ol/Feature.svelte";
   import { Style, Icon, Text } from "ol/style";
+  import { XYZ } from "ol/source";
+  import { pickRandom } from "./utils/random";
 
   interface PopupInfo {
     position: Coordinate;
@@ -65,9 +67,15 @@
         visible={false}
         source={'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'} />
       <TileLayer
-        title="NZ Topo"
+        title="LINZ Topo"
         type="base"
-        source={'https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png'} />
+        source={new XYZ({ tileUrlFunction: ([z, x, y]) => {
+            const source = pickRandom('abc');
+            const layer = z < 13
+              ? "50798" // Topo250
+              : "50767" // Topo50 --> has more detail at higher zooms zoom.
+            return `http://tiles-${source}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=${layer}/EPSG:3857/${z}/${x}/${y}.png`;
+          } })} />
     </LayerGroup>
     <LayerGroup title="Features">
       <FeatureLayers />
