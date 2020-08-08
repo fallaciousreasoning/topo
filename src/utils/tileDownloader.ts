@@ -91,6 +91,7 @@ export class TileDownloader {
                     await localforage.setItem(url, blob);
                 }
 
+                downloadedTiles += 1;
                 onProgress(downloadedTiles / totalTiles);
                 result = queue.next();
             }
