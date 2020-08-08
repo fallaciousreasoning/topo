@@ -11,7 +11,7 @@ export const zoomToFeature = (map: Map, feature:FeatureLike) => {
         for (const f of subfeatures)
             extent = extend(extent, f.getGeometry().getExtent());
     }
-    map.getView().fit(extent);
+    map.getView().fit(extent, { duration: 500 });
 }
 
 export const enableZoomToCluster = (map: Map) =>
