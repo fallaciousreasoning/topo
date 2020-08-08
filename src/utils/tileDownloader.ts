@@ -2,8 +2,10 @@ import { coordinateToTile } from './slippyCoords';
 import { Extent, getTopLeft, getBottomRight, getTopRight } from 'ol/extent';
 import { toLonLat } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
-
+import { TileCoord } from 'ol/tilecoord';
+import * as localforage from 'localforage'
 const ESTIMATED_TILE_SIZE = 40 * 1024; // Estimate each tile at 40kb.
+type TileUrl = string | ((tile: TileCoord) => string)
 
 export class TileDownloader {
     min: Coordinate;
@@ -41,7 +43,7 @@ export class TileDownloader {
         return this.numTiles() * ESTIMATED_TILE_SIZE;
     }
 
-    *tiles(zoom?:number) {
+    *tiles(zoom?: number) {
         if (zoom === undefined)
             zoom = this.startZoom;
 
@@ -56,7 +58,18 @@ export class TileDownloader {
             yield* this.tiles(zoom + 1);
     }
 
-    async downloadTiles(tileUrl: string, onProgress: (progress: number) => void) {
+    async downloadTiles(tileUrl: TileUrl, onProgress: (progress: number) => void) {
+        let urlFunc: (coord: TileCoord) => string;
+        if (typeof tileUrl === "string") {
+            let url = tileUrl;
+            urlFunc = ([z, x, y]) => url
+                .replace("{s}", servers[downloadedTiles++ % servers.length])
+                .replace("{x}", x.toString())
+                .replace("{y}", y.toString())
+                .replace("{z}", z.toString());
+        } else {
+            urlFunc = tileUrl;
+        }
         onProgress = onProgress || (() => { });
 
         const servers = "abc";
@@ -69,15 +82,14 @@ export class TileDownloader {
             let result = queue.next();
             while (!result.done) {
                 const tile = result.value;
-                const url = tileUrl
-                    .replace("{s}", servers[downloadedTiles++ % servers.length])
-                    .replace("{x}", tile.x)
-                    .replace("{y}", tile.y)
-                    .replace("{z}", tile.z);
+                const url = urlFunc([tile.z, tile.x, tile.y]);
 
                 // Only download tiles we haven't seen.
-                if (!await caches.match(url))
-                    await fetch(url).catch(console.error);
+                if (!await localforage.getItem(url)) {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    await localforage.setItem(url, blob);
+                }
 
                 onProgress(downloadedTiles / totalTiles);
                 result = queue.next();
