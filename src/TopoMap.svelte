@@ -23,7 +23,7 @@
   import { pickRandom } from "./utils/random";
   import cachingSource from "./caching/cachingSource";
   import MapDownloader from "./MapDownloader.svelte";
-  import { tileUrlFunction } from "./layers/linzTopoSource";
+  import { tileUrlFunction, tileCacheId } from "./layers/linzTopoSource";
 
   interface PopupInfo {
     position: Coordinate;
@@ -72,7 +72,10 @@
       <TileLayer
         title="LINZ Topo"
         type="base"
-        source={cachingSource({ tileUrlFunction: tileUrlFunction })} />
+        source={cachingSource({
+          tileUrlFunction: tileUrlFunction,
+          getCacheId: tileCacheId,
+        })} />
     </LayerGroup>
     <LayerGroup title="Features">
       <FeatureLayers />
