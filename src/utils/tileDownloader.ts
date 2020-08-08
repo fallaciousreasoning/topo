@@ -56,7 +56,7 @@ export class TileDownloader {
             yield* this.tiles(zoom + 1);
     }
 
-    async downloadTiles(tileUrl, onProgress) {
+    async downloadTiles(tileUrl: string, onProgress: (progress: number) => void) {
         onProgress = onProgress || (() => { });
 
         const servers = "abc";

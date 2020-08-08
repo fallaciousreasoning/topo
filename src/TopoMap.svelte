@@ -22,6 +22,8 @@
   import { XYZ } from "ol/source";
   import { pickRandom } from "./utils/random";
   import cachingSource from "./caching/cachingSource";
+  import MapDownloader from "./MapDownloader.svelte";
+  import { tileUrlFunction } from "./layers/linzTopoSource";
 
   interface PopupInfo {
     position: Coordinate;
@@ -70,11 +72,7 @@
       <TileLayer
         title="LINZ Topo"
         type="base"
-        source={cachingSource({ tileUrlFunction: ([z, x, y]) => {
-            const source = pickRandom('abc');
-            const layer = z < 13 ? '50798' : '50767';
-            return `http://tiles-${source}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=${layer}/EPSG:3857/${z}/${x}/${y}.png`;
-          } })} />
+        source={cachingSource({ tileUrlFunction: tileUrlFunction })} />
     </LayerGroup>
     <LayerGroup title="Features">
       <FeatureLayers />
@@ -89,6 +87,7 @@
           popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
           zoomToGeocodeResult(e.detail.map, e.detail.result);
         }} />
+      <MapDownloader />
     </Controls>
 
     {#if !!popupInfo}
