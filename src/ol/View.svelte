@@ -5,14 +5,14 @@
   import type { Extent } from "ol/extent";
   import { onMount, tick } from "svelte";
 
-  export let initialView: Extent;
-  export let initialCenter: Coordinate;
-  export let initialZoom: number;
+  export let initialView: Extent = undefined;
+  export let initialCenter: Coordinate = undefined;
+  export let initialZoom: number = undefined;
 
-  export let maxZoom: number;
-  export let minZoom: number;
+  export let maxZoom: number = undefined;
+  export let minZoom: number = undefined;
 
-  export let extent: Extent;
+  export let extent: Extent = undefined;
   export let constrainOnlyCenter: boolean;
   export let smoothExtentConstraint: boolean;
   const { getMap } = getOlContext();
