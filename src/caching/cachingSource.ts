@@ -26,7 +26,6 @@ export default (options: CacheOptions) => {
         ...options,
         tileLoadFunction: async (tile, source) => {
             const url = await cacher(tile.getTileCoord(), source);
-            console.log(url);
             const image: HTMLImageElement = tile['getImage']();
             image.src = url;
         }

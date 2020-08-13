@@ -1,13 +1,13 @@
-export const canvasEncode = async (data: ImageData, type: string, quality: number=1): Promise<Blob> => {
+export const canvasEncode = async (image: ImageBitmap, type: string, quality: number=1): Promise<Blob> => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (!context)
         throw new Error("Canvas was not initialized");
 
-    canvas.width = data.width;
-    canvas.height = data.height;
+    canvas.width = image.width;
+    canvas.height = image.height;
 
-    context.putImageData(data, 0, 0);
+    context.drawImage(image, 0, 0);
 
     let blob: Blob | null;
 
