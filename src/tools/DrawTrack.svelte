@@ -12,6 +12,7 @@
   import CircleStyle from "ol/style/Circle";
   import { getLength } from "ol/sphere";
 import Popup from "../ol/Popup.svelte";
+import { friendlyDistance } from "../utils/friendlyUnits";
 
   const { getMap } = getOlContext();
 
@@ -104,6 +105,6 @@ import Popup from "../ol/Popup.svelte";
 <Popup position={popupPosition} closable={false}>
     {popupMessage}
     <div>
-        Distance: {distance}
+        Distance: {friendlyDistance(distance)}
     </div>
 </Popup>

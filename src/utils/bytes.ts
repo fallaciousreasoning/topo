@@ -1,4 +1,5 @@
 import round from "./round";
+import { friendlyize } from "./friendlyUnits";
 
 const descriptions = [
     'B',
@@ -9,12 +10,5 @@ const descriptions = [
 ];
 
 export const friendlyBytes = (bytes: number, decimalPlaces: number=2) => {
-    let size = 0;
-    while (bytes >= 1024 && size < descriptions.length - 1) {
-        bytes /= 1024;
-        size += 1;
-    }
-
-    bytes = round(bytes, decimalPlaces);
-    return `${bytes}${descriptions[size]}${bytes === 1 ? "" : "s"}`
+    return friendlyize(bytes, descriptions, 1024, true, decimalPlaces);
 }
