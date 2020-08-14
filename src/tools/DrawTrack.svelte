@@ -101,7 +101,7 @@ import Popup from "../ol/Popup.svelte";
   });
 </script>
 
-<Popup position={popupPosition}>
+<Popup position={popupPosition} closable={false}>
     {popupMessage}
     <div>
         Distance: {distance}

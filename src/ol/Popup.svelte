@@ -6,6 +6,7 @@
   import Overlay from "./Overlay.svelte";
 
   export let position: Coordinate;
+  export let closable: boolean = true;
 </script>
 
 <style>
@@ -56,16 +57,18 @@
 </style>
 
 <Overlay {position} let:overlay>
-    <div class="ol-popup">
-    <a href="#close" alt="close" class="ol-popup-closer"
-        on:click={e => {
-            e.preventDefault();
-
-            if (!overlay)
-                return;
-
-            overlay.setPosition(undefined);
-        }}> </a>
+  <div class="ol-popup">
+    {#if closable}
+      <a
+        href="#close"
+        alt="close"
+        class="ol-popup-closer"
+        on:click={(e) => {
+          e.preventDefault();
+          if (!overlay) return;
+          overlay.setPosition(undefined);
+        }} />
+    {/if}
     <slot />
-    </div>
+  </div>
 </Overlay>
