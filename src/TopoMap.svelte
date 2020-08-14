@@ -24,7 +24,8 @@
   import cachingSource from "./caching/cachingSource";
   import MapDownloader from "./MapDownloader.svelte";
   import { tileUrlFunction, tileCacheId } from "./layers/linzTopoSource";
-import DrawTrack from "./tools/DrawTrack.svelte";
+  import DrawTrack from "./tools/DrawTrack.svelte";
+  import Measure from "./components/Measure.svelte";
 
   interface PopupInfo {
     position: Coordinate;
@@ -81,18 +82,18 @@ import DrawTrack from "./tools/DrawTrack.svelte";
     <LayerGroup title="Features">
       <FeatureLayers />
     </LayerGroup>
-    <DrawTrack/>
 
     <Controls
       defaults={['zoom', 'fullscreen', 'layerSwitcher', 'rotate', 'scaleline']}>
       <MapLocator />
       <MapSearch
-        on:change={(e) => {
-          const lnglat = [e.detail.result.lon, e.detail.result.lat];
-          popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
-          zoomToGeocodeResult(e.detail.map, e.detail.result);
-        }} />
+      on:change={(e) => {
+        const lnglat = [e.detail.result.lon, e.detail.result.lat];
+        popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
+        zoomToGeocodeResult(e.detail.map, e.detail.result);
+      }} />
       <MapDownloader />
+      <Measure />
     </Controls>
 
     {#if !!popupInfo}
