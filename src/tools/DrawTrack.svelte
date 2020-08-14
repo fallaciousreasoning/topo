@@ -104,6 +104,10 @@
 <style>
   .popup-content {
     white-space: nowrap;
+    pointer-events: none;
+    cursor: none;
+    user-select: none;
+    -moz-user-select: none;
   }
 </style>
 
@@ -112,7 +116,7 @@
     {#if popupMessage}{popupMessage}{/if}
     <div class="distance">
       <b>Distance:</b>
-      {friendlyDistance(distance)}
+      <span>{friendlyDistance(distance)}</span>
     </div>
   </div>
 </Popup>
