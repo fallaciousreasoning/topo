@@ -11,8 +11,8 @@
   import type { StyleLike } from "ol/style/Style";
   import CircleStyle from "ol/style/Circle";
   import { getLength } from "ol/sphere";
-import Popup from "../ol/Popup.svelte";
-import { friendlyDistance } from "../utils/friendlyUnits";
+  import Popup from "../ol/Popup.svelte";
+  import { friendlyDistance } from "../utils/friendlyUnits";
 
   const { getMap } = getOlContext();
 
@@ -68,22 +68,21 @@ import { friendlyDistance } from "../utils/friendlyUnits";
   let popupMessage: string;
   let distance: number;
 
-  interaction.on('drawstart', ({ feature}) => {
-      const geometry = feature.getGeometry();
-      geometry.on('change', () => {
-          popupPosition = geometry['getLastCoordinate']();
-          popupMessage = `Click last point to finish line`;
-          distance = getLength(geometry);
-      });
-  })
+  interaction.on("drawstart", ({ feature }) => {
+    const geometry = feature.getGeometry();
+    popupMessage = `Click last point to finish line.`;
+
+    geometry.on("change", () => {
+      popupPosition = geometry["getLastCoordinate"]();
+      distance = getLength(geometry);
+    });
+  });
 
   // When the draw finished, start modifying the layerer.
-  interaction.on("drawend", ({ feature }) => {
-    const geometry = feature.getGeometry();
-    console.log(getLength(geometry));
-
+  interaction.on("drawend", () => {
     const map = getMap();
     map.removeInteraction(interaction);
+    popupMessage = null;
 
     interaction = new Modify({
       source,
@@ -102,9 +101,18 @@ import { friendlyDistance } from "../utils/friendlyUnits";
   });
 </script>
 
+<style>
+  .popup-content {
+    white-space: nowrap;
+  }
+</style>
+
 <Popup position={popupPosition} closable={false}>
-    {popupMessage}
-    <div>
-        Distance: {friendlyDistance(distance)}
+  <div class="popup-content">
+    {#if popupMessage}{popupMessage}{/if}
+    <div class="distance">
+      <b>Distance:</b>
+      {friendlyDistance(distance)}
     </div>
+  </div>
 </Popup>

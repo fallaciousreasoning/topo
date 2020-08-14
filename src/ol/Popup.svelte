@@ -19,7 +19,6 @@
     border: 1px solid #cccccc;
     bottom: 12px;
     left: -50px;
-    min-width: 280px;
   }
 
   .ol-popup:after,
