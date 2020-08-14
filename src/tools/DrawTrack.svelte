@@ -9,7 +9,9 @@
   import type { Coordinate } from "ol/coordinate";
   import { Polygon, Point } from "ol/geom";
   import type { StyleLike } from "ol/style/Style";
-import CircleStyle from "ol/style/Circle";
+  import CircleStyle from "ol/style/Circle";
+  import { getLength } from "ol/sphere";
+import Popup from "../ol/Popup.svelte";
 
   const { getMap } = getOlContext();
 
@@ -30,18 +32,20 @@ import CircleStyle from "ol/style/Circle";
     const geometry = feature.getGeometry();
     const coordinates = geometry["getCoordinates"]();
     for (const coordinate of coordinates) {
-      styles.push(new Style({
-        geometry: new Point(coordinate),
-        image: new CircleStyle({
+      styles.push(
+        new Style({
+          geometry: new Point(coordinate),
+          image: new CircleStyle({
             radius: width + 2,
             fill: new Fill({
-                color: fill
+              color: fill,
             }),
             stroke: new Stroke({
-                color: stroke
-            })
+              color: stroke,
+            }),
+          }),
         })
-      }));
+      );
     }
 
     return styles;
@@ -59,8 +63,24 @@ import CircleStyle from "ol/style/Circle";
     style: styleFunction,
   });
 
+  let popupPosition: Coordinate;
+  let popupMessage: string;
+  let distance: number;
+
+  interaction.on('drawstart', ({ feature}) => {
+      const geometry = feature.getGeometry();
+      geometry.on('change', () => {
+          popupPosition = geometry['getLastCoordinate']();
+          popupMessage = `Click last point to finish line`;
+          distance = getLength(geometry);
+      });
+  })
+
   // When the draw finished, start modifying the layerer.
-  interaction.on("drawend", () => {
+  interaction.on("drawend", ({ feature }) => {
+    const geometry = feature.getGeometry();
+    console.log(getLength(geometry));
+
     const map = getMap();
     map.removeInteraction(interaction);
 
@@ -80,3 +100,10 @@ import CircleStyle from "ol/style/Circle";
     };
   });
 </script>
+
+<Popup position={popupPosition}>
+    {popupMessage}
+    <div>
+        Distance: {distance}
+    </div>
+</Popup>
