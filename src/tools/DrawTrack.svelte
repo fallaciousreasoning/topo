@@ -56,6 +56,8 @@
   const layer = new VectorLayer({
     source,
     style: styleFunction,
+    updateWhileInteracting: true,
+    updateWhileAnimating: true
   });
 
   let interaction: Draw | Modify = new Draw({

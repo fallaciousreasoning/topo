@@ -8,7 +8,11 @@
   export let source = new VectorSource({ features: [] });
   const { addLayer, removeLayer } = getOlContext();
 
-  const layer = new VectorLayer({ source });
+  const layer = new VectorLayer({
+    source,
+    updateWhileAnimating: true,
+    updateWhileInteracting: true,
+  });
 
   onMount(() => {
     addLayer(layer);
@@ -21,4 +25,4 @@
   });
 </script>
 
-<slot/>
+<slot />
