@@ -18,8 +18,6 @@
       const newOverlay = () =>
         new Overlay({
           element,
-          autoPan: true,
-          autoPanAnimation: { duration: 250 },
           position,
         });
   
