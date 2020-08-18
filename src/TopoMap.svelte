@@ -84,7 +84,7 @@
     </LayerGroup>
 
     <Controls
-      defaults={['zoom', 'fullscreen', 'layerSwitcher', 'rotate', 'scaleline']}>
+      defaults={['zoom', 'layerSwitcher', 'rotate', 'scaleline']}>
       <MapLocator />
       <MapSearch
       on:change={(e) => {
