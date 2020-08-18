@@ -21,6 +21,7 @@ export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Prom
     const clusters = new VectorLayer({
         title: from.name,
         source: clusterSource,
+        visible: false,
         style: feature => {
             const size = feature.get('features').length;
             if (!styleCache[size]) {
