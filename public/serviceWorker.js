@@ -24,6 +24,7 @@ const downloadFirstRunAssets = async () => {
     '/build/bundle.css',
     '/build/extra.css',
     '/build/bundle.js',
+    '/data/huts.json'
   ]);
 };
 
@@ -102,6 +103,9 @@ const maybeConserve = (normal, conservative) => {
 const rules = {    
   // First party scripts should be fetched from the network, if possible. 
   [self.registration.scope]: networkThenCache,
+
+  // Cache doc huts.
+  "https://api.doc.govt.nz/v2/huts?coordinates=wgs84": cacheThenNetwork
 }
 
 self.addEventListener('fetch', function(e) {
