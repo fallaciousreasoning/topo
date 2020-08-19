@@ -144,9 +144,13 @@
   <div class="chart">
     <Chart
       type="line"
-      axisOptions={{ xIsSeries: true }}
+      axisOptions={{ xIsSeries: true, xAxisMode: 'tick' }}
       lineOptions={{ regionFill: 1, hideDots: true }}
       height={200}
+      tooltipOptions={{
+        formatTooltipX: d => `→ ${friendlyDistance(d)}`,
+        formatTooltipY: d => `↑ ${d}m`
+      }}
       data={{ labels: heights.map((h) =>
           round(h.percent * distance, 0)
         ), datasets: [{ values: heights.map((h) => h.height) }] }} />
