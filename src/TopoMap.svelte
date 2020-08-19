@@ -72,6 +72,11 @@
         visible={false}
         source={'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'} />
       <TileLayer
+        title="LINZ Aerial Imagery"
+        type="base"
+        visible={false}
+        source={'https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=fcac9d10d1c84527bd2a1ca2a35681d8/tiles/v4/set=4702/EPSG:3857/{z}/{x}/{y}.png'} />
+      <TileLayer
         title="LINZ Topo"
         type="base"
         source={cachingSource({
@@ -83,15 +88,14 @@
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls
-      defaults={['zoom', 'layerSwitcher', 'rotate', 'scaleline']}>
+    <Controls defaults={['zoom', 'layerSwitcher', 'rotate', 'scaleline']}>
       <MapLocator />
       <MapSearch
-      on:change={(e) => {
-        const lnglat = [e.detail.result.lon, e.detail.result.lat];
-        popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
-        zoomToGeocodeResult(e.detail.map, e.detail.result);
-      }} />
+        on:change={(e) => {
+          const lnglat = [e.detail.result.lon, e.detail.result.lat];
+          popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
+          zoomToGeocodeResult(e.detail.map, e.detail.result);
+        }} />
       <MapDownloader />
       <Measure />
     </Controls>
