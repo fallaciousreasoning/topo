@@ -14,7 +14,9 @@
   import Popup from "../ol/Popup.svelte";
   import { friendlyDistance } from "../utils/friendlyUnits";
   import { getPathHeight } from "../search/height";
-  
+  import Chart from "svelte-frappe-charts";
+import round from "../utils/round";
+
   const { getMap } = getOlContext();
 
   const styleFunction: StyleLike = (feature) => {
@@ -70,6 +72,7 @@
   let popupPosition: Coordinate;
   let popupMessage: string;
   let distance: number;
+  let heights: { height: number; percent: number }[];
 
   interaction.on("drawstart", ({ feature }) => {
     const geometry = feature.getGeometry();
@@ -88,7 +91,7 @@
     popupMessage = null;
 
     const geometry = feature.getGeometry() as LineString;
-    console.log(await getPathHeight(geometry));
+    heights = await getPathHeight(geometry);
 
     interaction = new Modify({
       source,
@@ -115,6 +118,16 @@
     user-select: none;
     -moz-user-select: none;
   }
+
+  .chart {
+    position: absolute;
+    background: white;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 200px;
+    z-index: 1000;
+  }
 </style>
 
 <Popup position={popupPosition} closable={false}>
@@ -126,3 +139,13 @@
     </div>
   </div>
 </Popup>
+
+{#if heights}
+  <div class="chart">
+    <Chart
+      type="line"
+      data={{ labels: heights.map((h) =>
+          round(h.percent * distance, 0)
+        ), datasets: [{ values: heights.map((h) => h.height) }] }} />
+  </div>
+{/if}
