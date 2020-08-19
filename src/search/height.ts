@@ -1,4 +1,3 @@
-import { Coordinate } from "ol/coordinate";
 import LineString from "ol/geom/LineString";
 import { toLonLat } from "ol/proj";
 

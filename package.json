@@ -26,6 +26,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
+    "@sveltejs/pancake": "0.0.16",
     "localforage": "^1.9.0",
     "ol": "6.0.1",
     "ol-layerswitcher": "^3.6.0",

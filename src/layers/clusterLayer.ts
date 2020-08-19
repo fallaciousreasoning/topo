@@ -4,7 +4,6 @@ import { Cluster } from "ol/source";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle, Text, Stroke, Fill } from "ol/style";
 import type Map from 'ol/Map';
-import { zoomToFeature } from "../utils/zoomToFeature";
 
 export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Promise<Feature[]>, clusterDistance: number, name: string }) => {
     const features  = await from.getFeatures();
