@@ -1,5 +1,6 @@
 import LineString from "ol/geom/LineString";
 import { toLonLat } from "ol/proj";
+import { getLength } from 'ol/sphere';
 
 interface LinzFeature {
     id: string;
@@ -59,7 +60,7 @@ export const heightAtPoint = async (lat: number, lng: number) => {
 }
 
 export const getPathHeight = async (path: LineString, step = 100 /*metres*/) => {
-    const length = path.getLength();
+    const length = getLength(path);
     const percentStep = Math.min(1, step / length);
 
     const heightPromises: Promise<{ height: number, percent: number }>[] = [];
