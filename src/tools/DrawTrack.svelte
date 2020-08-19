@@ -7,13 +7,14 @@
   import Map, { getOlContext } from "../ol/Map.svelte";
   import { Style, Stroke, Fill, Text } from "ol/style";
   import type { Coordinate } from "ol/coordinate";
-  import { Polygon, Point } from "ol/geom";
+  import { Polygon, Point, LineString } from "ol/geom";
   import type { StyleLike } from "ol/style/Style";
   import CircleStyle from "ol/style/Circle";
   import { getLength } from "ol/sphere";
   import Popup from "../ol/Popup.svelte";
   import { friendlyDistance } from "../utils/friendlyUnits";
-
+  import { getPathHeight } from "../search/height";
+  
   const { getMap } = getOlContext();
 
   const styleFunction: StyleLike = (feature) => {
@@ -57,7 +58,7 @@
     source,
     style: styleFunction,
     updateWhileInteracting: true,
-    updateWhileAnimating: true
+    updateWhileAnimating: true,
   });
 
   let interaction: Draw | Modify = new Draw({
@@ -81,10 +82,13 @@
   });
 
   // When the draw finished, start modifying the layerer.
-  interaction.on("drawend", () => {
+  interaction.on("drawend", async ({ feature }) => {
     const map = getMap();
     map.removeInteraction(interaction);
     popupMessage = null;
+
+    const geometry = feature.getGeometry() as LineString;
+    console.log(await getPathHeight(geometry));
 
     interaction = new Modify({
       source,
