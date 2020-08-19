@@ -51,7 +51,6 @@ export const heightAtPoint = async (lat: number, lng: number) => {
     const features = Object.values(data.vectorQuery.layers)
         .reduce((prev, next) => [...prev, ...next.features], [])
         .sort((a, b) => a.distance - b.distance);
-    console.log(features);
     const feature = features[0];
     if (!feature)
         return null;

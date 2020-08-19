@@ -15,7 +15,7 @@
   import { friendlyDistance } from "../utils/friendlyUnits";
   import { getPathHeight } from "../search/height";
   import Chart from "svelte-frappe-charts";
-import round from "../utils/round";
+  import round from "../utils/round";
 
   const { getMap } = getOlContext();
 
@@ -144,6 +144,9 @@ import round from "../utils/round";
   <div class="chart">
     <Chart
       type="line"
+      axisOptions={{ xIsSeries: true }}
+      lineOptions={{ regionFill: 1, hideDots: true }}
+      height={200}
       data={{ labels: heights.map((h) =>
           round(h.percent * distance, 0)
         ), datasets: [{ values: heights.map((h) => h.height) }] }} />
