@@ -1,14 +1,35 @@
-<script>
+<script lang="ts">
   import { debounce } from "./utils/debounce";
+  import type { Map, View } from "ol";
+  import { fromLonLat, toLonLat } from "ol/proj";
+  import round from "./utils/round";
+  import { getOlContext } from "./ol/Map.svelte";
+  import { onMount, tick } from "svelte";
+  import onMountTick from "./utils/onMountTick";
 
-  export let map;
+  const { getMap } = getOlContext();
+  let map: Map;
+  onMountTick(() => (map = getMap()));
 
   const localStorageKey = "mapPosition";
 
+  const updateView = (
+    view: View,
+    position: { lat: number; lng: number; zoom: number; rotation: number }
+  ) => {
+    view.setCenter(fromLonLat([position.lng, position.lat]));
+    view.setZoom(position.zoom);
+    view.setRotation(isNaN(position.rotation) ? 0 : position.rotation);
+  };
+
   const savePosition = () => {
+    const view = map.getView();
+    const centre = toLonLat(view.getCenter());
     const position = {
-      ...map.getCenter(),
-      zoom: map.getZoom()
+      lat: round(centre[1], 5),
+      lng: round(centre[0], 5),
+      zoom: view.getZoom(),
+      rotation: view.getRotation(),
     };
 
     localStorage.setItem(localStorageKey, JSON.stringify(position));
@@ -46,11 +67,11 @@
     // Prefer position from fragment string.
     const position = { ...localPosition, ...fragmentPosition };
 
-    if (isNaN(position.lat) || isNaN(position.lng) || isNaN(position.zoom)) {
+    if (isNaN(position.lat) || isNaN(position.lng) || isNaN(position.zoom) || isNaN(position.rotation)) {
       return;
     }
 
-    map.setView(position, position.zoom);
+    updateView(map.getView(), position);
   };
 
   const debounced = debounce(savePosition, 500);
@@ -58,7 +79,15 @@
   window.addEventListener("hashchange", () => {
     if (!map) return;
 
-    const oldPosition = { ...map.getCenter(), zoom: map.getZoom() };
+    const view = map.getView();
+    const center = toLonLat(view.getCenter());
+    const oldPosition = {
+      lat: round(center[1], 5),
+      lng: round(center[0], 5),
+      zoom: view.getZoom(),
+      rotation: view.getRotation(),
+    };
+
     const newPosition = { ...oldPosition, ...positionFromFragment() };
 
     if (
@@ -69,7 +98,7 @@
       return;
     }
 
-    map.setView(newPosition, newPosition.zoom);
+    updateView(map.getView(), newPosition);
   });
 
   $: {

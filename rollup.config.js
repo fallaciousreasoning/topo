@@ -1,27 +1,57 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
-import css from 'rollup-plugin-css-porter';
-import postcss from 'rollup-plugin-postcss';
+import sveltePreprocess from 'svelte-preprocess';
+import typescript from '@rollup/plugin-typescript';
+import css from "rollup-plugin-css-only";
 
 const production = !process.env.ROLLUP_WATCH;
 
+function serve() {
+	let server;
+	
+	function toExit() {
+		if (server) server.kill(0);
+	}
+
+	return {
+		writeBundle() {
+			if (server) return;
+			server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev', '--host'], {
+				stdio: ['ignore', 'inherit', 'inherit'],
+				shell: true
+			});
+
+			process.on('SIGTERM', toExit);
+			process.on('exit', toExit);
+		}
+	};
+}
+
 export default {
-	input: 'src/main.js',
+	input: 'src/main.ts',
 	output: {
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
 		file: 'public/build/bundle.js'
 	},
+	context: 'window',
 	plugins: [
-		css({ dest: 'public/build/external.css' }),
+		css({ output: "public/build/extra.css" }),
+		json(),
 		svelte({
 			// enable run-time checks when not in production
 			dev: !production,
-			emitCss: true
+			// we'll extract any component CSS out into
+			// a separate file - better for performance
+			css: css => {
+				css.write('public/build/bundle.css');
+			},
+			preprocess: sveltePreprocess(),
 		}),
 
 		// If you have external dependencies installed from
@@ -31,22 +61,10 @@ export default {
 		// https://github.com/rollup/plugins/tree/master/packages/commonjs
 		resolve({
 			browser: true,
-			dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
+			dedupe: ['svelte']
 		}),
 		commonjs(),
-
-		postcss({
-			extract: true,
-			minimize: true,
-			use: [
-				['sass', {
-					includePaths: [
-						'./theme',
-						'./node_modules'
-					]
-				}]
-			]
-		}),
+		typescript({ sourceMap: !production }),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
@@ -64,20 +82,3 @@ export default {
 		clearScreen: false
 	}
 };
-
-function serve() {
-	let started = false;
-
-	return {
-		writeBundle() {
-			if (!started) {
-				started = true;
-
-				require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-					stdio: ['ignore', 'inherit', 'inherit'],
-					shell: true
-				});
-			}
-		}
-	};
-}

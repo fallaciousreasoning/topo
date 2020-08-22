@@ -1,5 +1,5 @@
 const CACHE_VERSION = 1;
-const CACHE_NAME = `topo-maps-cache-v${CACHE_VERSION}`;
+const CACHE_NAME = `nz-topo-cache-v${CACHE_VERSION}`;
 
 // Decide whether we should try and save data.
 const shouldConserveData = () => {
@@ -19,11 +19,12 @@ const downloadFirstRunAssets = async () => {
   cache.addAll([
     '/index.html',
     '/favicon.png',
+    '/favicon.svg',
     '/global.css',
     '/build/bundle.css',
-    '/build/external.css',
-    '/build//bundle.js',
-    'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'
+    '/build/extra.css',
+    '/build/bundle.js',
+    '/data/huts.json'
   ]);
 };
 
@@ -99,20 +100,12 @@ const maybeConserve = (normal, conservative) => {
 };
 
 // Map regexes to a strategy.
-const rules = {
-  // Race all tiles, except when conserving data (cache then network).
-  "https:\/\/([a-c])\.tile\.open(topo|street)map\.org\/([0-9])+\/([0-9])+\/([0-9])+\.png": maybeConserve(
-    raceNetworkAndCache,
-    cacheThenNetwork),
-  
-  // Return third party scripts from the cache.
-  "https://unpkg.com/(.*)": cacheThenNetwork,
-  
+const rules = {    
   // First party scripts should be fetched from the network, if possible. 
   [self.registration.scope]: networkThenCache,
 
-  // Font Awesome CSS
-  "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css": cacheThenNetwork
+  // Cache doc huts.
+  "https://api.doc.govt.nz/v2/huts?coordinates=wgs84": cacheThenNetwork
 }
 
 self.addEventListener('fetch', function(e) {

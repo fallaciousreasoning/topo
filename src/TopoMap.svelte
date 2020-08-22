@@ -1,136 +1,109 @@
-<script>
-  import L from "leaflet";
-  import "leaflet/dist/leaflet.css";
-  import "leaflet.locatecontrol";
-  import "leaflet.locatecontrol/dist/L.Control.Locate.css";
-  import GeoSearch from "leaflet-geosearch";
-  import "leaflet-geosearch/dist/style.css";
-  import "leaflet-geosearch/assets/css/leaflet.css";
-
-  import "./leaflet/FallbackLayer.js";
-  import "./leaflet/SmoothWheelZoom.js";
-  import "./leaflet/MetricGrid.js";
-  import "./leaflet/DownloadControl.js";
-
-  import { onMount } from "svelte";
-
+<script lang="ts">
+  import "ol/ol.css";
+  import { fromLonLat } from "ol/proj";
+  import OSM from "ol/source/OSM";
+  import FeatureLayers from "./layers/FeatureLayers.svelte";
+  import MapLocator from "./MapLocator.svelte";
   import MapPositioner from "./MapPositioner.svelte";
-  import { progress } from './stores';
+  import MapSearch from "./MapSearch.svelte";
+  import Controls from "./ol/Controls.svelte";
+  import LayerGroup from "./ol/LayerGroup.svelte";
+  import Map from "./ol/Map.svelte";
+  import Popup from "./ol/Popup.svelte";
+  import TileLayer from "./ol/TileLayer.svelte";
+  import View from "./ol/View.svelte";
+  import { nzBounds } from "./utils/bounds";
+  import { zoomToGeocodeResult } from "./utils/zoomToFeature";
+  import type { Coordinate } from "ol/coordinate";
+  import Marker from "./Marker.svelte";
+  import VectorLayer from "./ol/VectorLayer.svelte";
+  import Feature from "./ol/Feature.svelte";
+  import { Style, Icon, Text } from "ol/style";
+  import { XYZ } from "ol/source";
+  import { pickRandom } from "./utils/random";
+  import cachingSource from "./caching/cachingSource";
+  import MapDownloader from "./MapDownloader.svelte";
+  import { tileUrlFunction, tileCacheId } from "./layers/linzTopoSource";
+  import DrawTrack from "./tools/DrawTrack.svelte";
+  import Measure from "./components/Measure.svelte";
 
-  let mapElement = undefined;
-  let map = undefined;
+  interface PopupInfo {
+    position: Coordinate;
+    title: string;
+    detail: string;
+  }
 
-  onMount(() => {
-    map =
-      mapElement &&
-      L.map(mapElement, {
-        zoomSnap: 0.1,
-        scrollWheelZoom: false, // disable original zoom function
-        smoothWheelZoom: true, // enable smooth zoom
-        smoothSensitivity: 1 // zoom speed. default is 1
-      }).setView([-43.533, 172.633], 11);
-    window.map = map;
-
-    const openStreetMapsUrl =
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-    const openTopoMapsUrl = "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png";
-    const linzTopo50Url =
-      "https://tiles-{s}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png";
-
-    const openStreetMapsLayer = L.tileLayer.fallback(openStreetMapsUrl, {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 17,
-      minZoom: 1,
-      edgeBufferTiles: 1,
-      crossOrigin: "anonymous",
-      updateWhenIdle: false
-    });
-
-    const openTopoMapsLayer = L.tileLayer
-      .fallback(openTopoMapsUrl, {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 17,
-        minZoom: 1,
-        edgeBufferTiles: 1,
-        crossOrigin: "anonymous",
-        updateWhenIdle: false
-      });
-
-    const linzTopo50Layer = L.tileLayer.fallback(linzTopo50Url, {
-      attribution: "",
-      maxZoom: 21,
-      crossOrigin: "anonymous",
-      bounds: [[-34.4, 166], [-47.4, 178.6]],
-      edgeBufferTiles: 1,
-      updateWhenIdle: false
-    }).addTo(map);
-
-    const baseMaps = {
-      "NZ Topo 50": linzTopo50Layer,
-      "Open Topo Maps": openTopoMapsLayer,
-      "Open Street Maps": openStreetMapsLayer
-    };
-    L.control.layers(baseMaps).addTo(map);
-
-    // Scale control.
-    L.control.scale().addTo(map);
-
-    // GeoSearch control.
-    const provider = new GeoSearch.OpenStreetMapProvider();
-    new GeoSearch.GeoSearchControl({
-      provider: provider,
-      autoClose: true,
-      style: "button"
-    }).addTo(map);
-
-    // Locate control.
-    L.control.locate().addTo(map);
-
-    // Download control.
-    L.control.download({
-        onProgress: progress.set
-    }).addTo(map);
-
-    for (let i = 50; i <= 60; i += 1) {
-      const east = i * 6 - 180;
-      const west = east - 6;
-
-      // South
-      L.utmGrid(i, true, {
-        color: "#000",
-        latLonClipBounds: [[-89, west], [0, east]],
-        drawClip: false,
-        showAxisLabels: [],
-        minZoom: 13,
-        minInterval: 1000,
-        maxInterval: 1000000
-      }).addTo(map);
-    }
-
-    // Make sure the map size is accurate.
-    setTimeout(() => map.invalidateSize());
-  });
+  let popupInfo: PopupInfo;
 </script>
 
 <style>
-  .map {
-    position: absolute !important;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  #topo-map {
+    width: 100vw;
+    height: 100vh;
+    background: #d0e6f4;
   }
 
-  :global(.leaflet-retina a.leaflet-control-layers-toggle) {
-    background-image: url("/images/layers-2x.png");
-  }
-
-  :global(.a.leaflet-control-layers-toggle) {
-    background-image: url("/images/layers.png");
+  :global(#topo-map > div) {
+    width: 100%;
+    height: 100vh;
   }
 </style>
 
-<div class="map" bind:this={mapElement} />
-<MapPositioner {map} />
+<div id="topo-map">
+
+  <Map>
+    <View
+      constrainOnlyCenter
+      smoothExtentConstraint
+      maxZoom={18}
+      minZoom={4}
+      extent={nzBounds}
+      initialView={nzBounds} />
+    <MapPositioner />
+    <LayerGroup title="Base Layers">
+      <TileLayer
+        title="Open Street Maps"
+        type="base"
+        visible={false}
+        source={new OSM()} />
+      <TileLayer
+        title="Open Topo Maps"
+        type="base"
+        visible={false}
+        source={'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'} />
+      <TileLayer
+        title="LINZ Aerial Imagery"
+        type="base"
+        visible={false}
+        source={'https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=fcac9d10d1c84527bd2a1ca2a35681d8/tiles/v4/set=4702/EPSG:3857/{z}/{x}/{y}.png'} />
+      <TileLayer
+        title="LINZ Topo"
+        type="base"
+        source={cachingSource({
+          tileUrlFunction: tileUrlFunction,
+          getCacheId: tileCacheId,
+        })} />
+    </LayerGroup>
+    <LayerGroup title="Features">
+      <FeatureLayers />
+    </LayerGroup>
+
+    <Controls defaults={['zoom', 'layerSwitcher', 'rotate', 'scaleline']}>
+      <MapLocator />
+      <MapSearch
+        on:change={(e) => {
+          const lnglat = [e.detail.result.lon, e.detail.result.lat];
+          popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
+          zoomToGeocodeResult(e.detail.map, e.detail.result);
+        }} />
+      <MapDownloader />
+      <Measure />
+    </Controls>
+
+    {#if !!popupInfo}
+      <Popup position={popupInfo.position}>
+        <p>{popupInfo.detail}</p>
+      </Popup>
+    {/if}
+  </Map>
+</div>

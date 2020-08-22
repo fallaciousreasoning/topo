@@ -1,0 +1,60 @@
+<script lang="ts">
+  import type { Coordinate } from "ol/coordinate";
+  import Geolocation from "ol/Geolocation";
+  import Icon from "ol/style/Icon";
+  import Style from "ol/style/Style";
+  import Control from "./ol/Control.svelte";
+  import Feature from "./ol/Feature.svelte";
+  import { getOlContext } from "./ol/Map.svelte";
+  import VectorLayer from "./ol/VectorLayer.svelte";
+  import onMountTick from "./utils/onMountTick";
+
+  const { getMap } = getOlContext();
+
+  let tracking = false;
+  let position: Coordinate;
+
+  let geolocation = new Geolocation();
+  geolocation.on("change", (e) => {
+    position = geolocation.getPosition();
+  });
+
+  onMountTick(() => {
+    geolocation.setProjection(getMap().getView().getProjection());
+  });
+
+  $: {
+    if (tracking) {
+      geolocation.once("change", () =>
+        getMap().getView().setCenter(geolocation.getPosition())
+      );
+    }
+
+    geolocation.setTracking(tracking);
+  }
+</script>
+
+<Control control>
+  <button
+    style={`color: ${tracking ? 'blue' : 'white'}`}
+    on:click={() => (tracking = !tracking)}>
+    ⬊
+  </button>
+</Control>
+
+<VectorLayer>
+  {#if tracking && position}
+    <Feature
+      {position}
+      style={new Style({
+        image: new Icon({
+          anchor: [0.5, 0.5],
+          opacity: 0.9,
+          imgSize: [600, 600],
+          scale: 0.08,
+          color: '#578dfF',
+          src: '/icons/location-indicator.svg',
+        }),
+      })} />
+  {/if}
+</VectorLayer>
