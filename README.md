@@ -2,6 +2,8 @@
 
 This is an offline topo maps application for use in New Zealand. It features simple trip planning tools, such as measuring distance and generating elevation profiles.
 
+A live version is available at https://nztopo.now.sh/
+
 
 ## Running for Development
 
