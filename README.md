@@ -1,7 +1,3 @@
-*Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
-
----
-
 # NZ Topo
 
 This is an offline topo maps application for use in New Zealand. It features simple trip planning tools, such as measuring distance and generating elevation profiles.
