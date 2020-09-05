@@ -4,10 +4,13 @@
   import { getOlContext } from "./Map.svelte";
   import type { Coordinate } from "ol/coordinate";
   import Overlay from "./Overlay.svelte";
+	import { createEventDispatcher } from 'svelte';
 
   export let position: Coordinate;
   export let closable: boolean = true;
   export let autoPan: boolean = false;
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <style>
@@ -56,6 +59,7 @@
   }
 </style>
 
+<!-- svelte-ignore a11y-missing-content -->
 <Overlay {position} {autoPan} let:overlay>
   <div class="ol-popup">
     {#if closable}
@@ -67,6 +71,7 @@
           e.preventDefault();
           if (!overlay) return;
           overlay.setPosition(undefined);
+          dispatch('close')
         }} />
     {/if}
     <slot />
