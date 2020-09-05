@@ -38,13 +38,23 @@ const parseHash = (): Store => {
     }
 }
 
+const getParams = () => new URLSearchParams(window.location.hash.substr(1));
 const roundedS = (n: number) => round(n, DPS).toString();
 
 export const setLabel = (label: Store['label']) => {
-    const params = new URLSearchParams(window.location.hash.substr(1));
+    const params = getParams();
     params.set('lla', roundedS(label.lat));
     params.set('llo', roundedS(label.lng));
     params.set('lab', label.text);
+    window.location.hash = params.toString();
+}
+
+export const setPosition = (position: Store["position"]) => {
+    const params = getParams();
+    params.set("lat", roundedS(position.lat));
+    params.set("lng", roundedS(position.lng));
+    params.set("zoom", roundedS(position.zoom));
+    params.set("rotation", roundedS(position.rotation));
     window.location.hash = params.toString();
 }
 
