@@ -1,4 +1,5 @@
 import { readable } from 'svelte/store';
+import round from '../utils/round';
 
 interface Store {
     position: {
@@ -14,6 +15,9 @@ interface Store {
         text: string;
     }
 }
+
+// Number of decimal places to keep in the url.
+const DPS = 5;
 
 const parseHash = (): Store => {
     const params = new URLSearchParams(window.location.hash.substr(1));
@@ -34,10 +38,12 @@ const parseHash = (): Store => {
     }
 }
 
+const roundedS = (n: number) => round(n, DPS).toString();
+
 export const setLabel = (label: Store['label']) => {
     const params = new URLSearchParams(window.location.hash.substr(1));
-    params.set('lla', label.lat.toString());
-    params.set('llo', label.lng.toString());
+    params.set('lla', roundedS(label.lat));
+    params.set('llo', roundedS(label.lng));
     params.set('lab', label.text);
     window.location.hash = params.toString();
 }
