@@ -26,14 +26,8 @@
   import { tileUrlFunction, tileCacheId } from "./layers/linzTopoSource";
   import DrawTrack from "./tools/DrawTrack.svelte";
   import Measure from "./components/Measure.svelte";
-
-  interface PopupInfo {
-    position: Coordinate;
-    title: string;
-    detail: string;
-  }
-
-  let popupInfo: PopupInfo;
+  import MapLabel from "./MapLabel.svelte";
+  import { setLabel } from "./stores/fragment";
 </script>
 
 <style>
@@ -93,17 +87,16 @@
       <MapSearch
         on:change={(e) => {
           const lnglat = [e.detail.result.lon, e.detail.result.lat];
-          popupInfo = { detail: e.detail.result.name, title: 'Location', position: fromLonLat(lnglat) };
-          zoomToGeocodeResult(e.detail.map, e.detail.result);
+          setLabel({
+            lat: e.detail.result.lat,
+            lng: e.detail.result.lon,
+            text: e.detail.result.name,
+          });
         }} />
       <MapDownloader />
       <Measure />
     </Controls>
-
-    {#if !!popupInfo}
-      <Popup position={popupInfo.position}>
-        <p>{popupInfo.detail}</p>
-      </Popup>
-    {/if}
+    <MapLabel />
   </Map>
+
 </div>

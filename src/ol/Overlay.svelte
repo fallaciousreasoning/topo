@@ -5,6 +5,8 @@
     import type { Coordinate } from "ol/coordinate";
   
     export let position: Coordinate;
+    export let autoPan: boolean;
+
     const { getMap } = getOlContext();
     let map: Map;
     onMountTick(() => (map = getMap()));
@@ -19,6 +21,7 @@
         new Overlay({
           element,
           position,
+          autoPan
         });
   
       overlay = newOverlay();

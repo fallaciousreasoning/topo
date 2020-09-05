@@ -7,6 +7,7 @@
 
   export let position: Coordinate;
   export let closable: boolean = true;
+  export let autoPan: boolean = false;
 </script>
 
 <style>
@@ -55,7 +56,7 @@
   }
 </style>
 
-<Overlay {position} let:overlay>
+<Overlay {position} {autoPan} let:overlay>
   <div class="ol-popup">
     {#if closable}
       <a
