@@ -14,7 +14,7 @@ export const getLayers = async (map: Map) => {
             const layer = new VectorLayer({
                 ['title' as any]: liveWeather.name,
                 source,
-                visible: true,
+                visible: false,
             });
 
             map.on('click', event => {
