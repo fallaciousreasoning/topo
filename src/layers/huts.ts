@@ -2,7 +2,9 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
+import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
 
+const styleCache = {};
 export default {
     name: "Huts",
     description: "A list of backcountry huts and bivvies in NZ",
@@ -11,6 +13,23 @@ export default {
     type: "geojson",
     view: "cluster",
     clusterDistance: 50,
+    style: feature => {
+        const size = feature.get('features').length;
+        if (!styleCache[size]) {
+            styleCache[size] = new Style({
+                image: new Circle({
+                    radius: 20,
+                    stroke: new Stroke({ color: 'white' }),
+                    fill: new Fill({ color: '#194036' })
+                }),
+                text: new Text({
+                    text: size === 1 ? `🏠` : `${size} 🏠`,
+                    fill: new Fill({ color: 'white' })
+                })
+            })
+        }
+        return styleCache[size];
+    },
     getFeatures: async () => {
         const url = "/data/huts.json"
         const response = await fetch(url);

@@ -4,8 +4,9 @@ import { Cluster } from "ol/source";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Circle, Text, Stroke, Fill } from "ol/style";
 import type Map from 'ol/Map';
+import { StyleLike } from "ol/style/Style";
 
-export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Promise<Feature[]>, clusterDistance: number, name: string }) => {
+export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Promise<Feature[]>, clusterDistance: number, name: string, style: StyleLike }) => {
     const features  = await from.getFeatures();
     const source = new VectorSource({
         features: features
@@ -16,28 +17,11 @@ export const makeClusterLayer = async (map: Map, from: { getFeatures: () => Prom
         source: source
     });
 
-    const styleCache = {};
     const clusters = new VectorLayer({
         title: from.name,
         source: clusterSource,
         visible: false,
-        style: feature => {
-            const size = feature.get('features').length;
-            if (!styleCache[size]) {
-                styleCache[size] = new Style({
-                    image: new Circle({
-                        radius: 20,
-                        stroke: new Stroke({ color: 'white' }),
-                        fill: new Fill({ color: '#194036' })
-                    }),
-                    text: new Text({
-                        text: size === 1 ? `🏠` : `${size} 🏠`,
-                        fill: new Fill({ color: 'white' })
-                    })
-                })
-            }
-            return styleCache[size];
-        }
+        style: from.style
     } as any);
 
     return clusters;
