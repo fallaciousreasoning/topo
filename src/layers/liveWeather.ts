@@ -72,6 +72,25 @@ const getWeatherIcon = (value: SubjectValue): string => {
     return options.sunCloud;
 }
 
+const getWeatherDescription = (value: SubjectValue) => {
+    const lines = [];
+    if (value.temp!==undefined) {
+        lines.push(`🌡️ Temperature: ${value.temp}°C`);
+    }
+    if (value.rainfall !== undefined) {
+        lines.push(`🌧️ Rain: ${value.rainfall}mm`)
+    }
+    if (value.humidity) {
+        lines.push(`💧 Humidity: ${value.humidity}%`)
+    }
+    if (value.wind) {
+        lines.push(`💨 Wind: ${value.wind.strength} ${value.wind.averageSpeed}km/h ${value.wind.direction || ''}`)
+    }
+    if (value.issuedAt)
+        lines.push(`Issued: ${value.issuedAt}`)
+    return lines.join('\n---------------------------------\n');
+}
+
 export default {
     name: "Live Weather",
     description: "Live weather observations from around New Zealand",
@@ -130,8 +149,7 @@ export default {
         setLabel({
             lat: coords[1],
             lng: coords[0],
-            text: "Issued at: " + observation.issuedAt
+            text: getWeatherDescription(observation)
         });
-        console.log(feature.get('subject'));
     }
 }
