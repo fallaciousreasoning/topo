@@ -1,9 +1,10 @@
-import Feature from "ol/Feature";
-import { fromLonLat } from "ol/proj";
+import Feature, { FeatureLike } from "ol/Feature";
+import { fromLonLat, toLonLat } from "ol/proj";
 import Point from "ol/geom/Point";
 import { corsFetch } from "../utils/cors";
 import { Style, Circle, Stroke, Fill, Text } from "ol/style";
 import Collection from "ol/Collection";
+import { setLabel } from "../stores/fragment";
 
 interface SubjectValue {
     humidity: number;
@@ -23,6 +24,7 @@ interface SubjectValue {
 interface MetServiceMapMarkerSubject {
     asAt: string; // ISO-8601 date
     value: SubjectValue;
+    type: 'local' | 'traffic-camera';
 }
 
 interface MetServiceMapMarker {
@@ -54,7 +56,7 @@ const getWeatherIcon = (value: SubjectValue): string => {
     };
 
     const rain = parseFloat(value.rainfall);
-    
+
     if (rain > 0) {
         // I guess it'll be snow/hail if its cold?
         return value.temp < 0
@@ -85,22 +87,51 @@ export default {
         if (!observations)
             return null;
 
-        return observations.map(marker => {
-            const coords = fromLonLat([marker.point[1], marker.point[0]]);
-            const feature = new Feature(new Point(coords));
-            const subject = marker.subject[0]?.value;
-            feature.setStyle(new Style({
-                image: new Circle({
-                    radius: 12,
-                    fill: new Fill({ color: 'blue' }),
-                    stroke: new Stroke({ color: 'white' })
-                }),
-                text: new Text({
-                    fill: new Fill({ color: 'white' }),
-                    text: getWeatherIcon(subject),
-                })
-            }));
-            return feature;
-        })
+        return observations
+            // Filter out traffic cameras and stuff.
+            .filter(marker => {
+                if (!marker.subject.length)
+                    return false;
+
+                if (marker.subject[0].type === 'traffic-camera')
+                    return false;
+
+                return  true;
+            })
+            .map(marker => {
+                const coords = fromLonLat([marker.point[1], marker.point[0]]);
+                const feature = new Feature(new Point(coords));
+                const subject = marker.subject[0];
+                const observation = subject?.value;
+                if (observation && !observation.issuedAt)
+                    observation.issuedAt = subject.asAt;
+
+                feature.setStyle(new Style({
+                    image: new Circle({
+                        radius: 12,
+                        fill: new Fill({ color: 'blue' }),
+                        stroke: new Stroke({ color: 'white' })
+                    }),
+                    text: new Text({
+                        fill: new Fill({ color: 'white' }),
+                        text: getWeatherIcon(observation),
+                    })
+                }));
+                feature.set('observation', observation);
+                feature.set('subject', subject);
+
+                return feature;
+            })
+    },
+    onClick: (feature: FeatureLike) => {
+        const observation = feature.get('observation') as SubjectValue;
+        const geometry = feature.getGeometry() as Point;
+        const coords = toLonLat(geometry.getCoordinates());
+        setLabel({
+            lat: coords[1],
+            lng: coords[0],
+            text: "Issued at: " + observation.issuedAt
+        });
+        console.log(feature.get('subject'));
     }
 }

@@ -10,11 +10,20 @@ export const getLayers = async (map: Map) => {
         await makeClusterLayer(map, huts),
         await liveWeather.getFeatures().then(features => {
             const source = new VectorSource({ features });
-            return new VectorLayer({
+
+            const layer = new VectorLayer({
                 ['title' as any]: liveWeather.name,
                 source,
                 visible: true,
-            })
+            });
+
+            map.on('click', event => {
+                map.forEachFeatureAtPixel(event.pixel, (feature, clickedLayer) => {
+                    if (layer !== clickedLayer) return;
+                    liveWeather.onClick(feature);
+                })
+            });
+            return layer;
         })
     ]
 }
