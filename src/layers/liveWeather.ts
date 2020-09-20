@@ -3,7 +3,6 @@ import { fromLonLat, toLonLat } from "ol/proj";
 import Point from "ol/geom/Point";
 import { corsFetch } from "../utils/cors";
 import { Style, Circle, Stroke, Fill, Text } from "ol/style";
-import Collection from "ol/Collection";
 import { setLabel } from "../stores/fragment";
 
 interface SubjectValue {
