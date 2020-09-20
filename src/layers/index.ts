@@ -4,10 +4,16 @@ import liveWeather from './liveWeather';
 import huts from "./huts";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
+import { Style } from "ol/style";
+
+export interface LayerInfo {
+    title: string;
+    description: string;
+    style?: Style;
+}
 
 export const getLayers = async (map: Map) => {
     return [
-        await makeClusterLayer(map, huts),
         await liveWeather.getFeatures().then(features => {
             const source = new VectorSource({ features });
 
