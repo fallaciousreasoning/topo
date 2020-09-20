@@ -95,8 +95,6 @@ export default {
     name: "Live Weather",
     description: "Live weather observations from around New Zealand",
     source: "https://www.metservice.com/publicData/webdata/maps-radar/weather-stations/nz",
-    view: "cluster",
-    clusterDistance: 0,
     getFeatures: async () => {
         const url = "https://www.metservice.com/publicData/webdata/maps-radar/weather-stations/nz";
         const response = await corsFetch(url);
