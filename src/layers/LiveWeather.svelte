@@ -138,7 +138,7 @@ import RelativeTime from "../components/RelativeTime.svelte";
 {#await getFeatures() then features}
   <VectorLayer
     title="Live Weather"
-    visible
+    visible={false}
     on:featureClick={(event) => {
       const feature = event.detail.feature;
       const geometry = feature.getGeometry();
