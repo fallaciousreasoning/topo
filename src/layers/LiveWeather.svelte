@@ -50,6 +50,7 @@
   import VectorSource from "ol/source/Vector";
   import Popup from "../ol/Popup.svelte";
   import type { Coordinate } from "ol/coordinate";
+import RelativeTime from "../components/RelativeTime.svelte";
 
   const getWeatherIcon = (value: SubjectValue): string => {
     const options = {
@@ -176,7 +177,7 @@
           {currentObservation.wind.averageSpeed}km/h {currentObservation.wind.direction}
         </p>
       {/if}
-      <i>Updated: {currentObservation.issuedAt}</i>
+      <i>Updated: <RelativeTime time={currentObservation.issuedAt}/></i>
     </div>
   </Popup>
 {/if}
