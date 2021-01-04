@@ -1,16 +1,11 @@
 <script lang="ts">
   import { debounce } from "./utils/debounce";
-  import type { Map, View } from "ol";
+  import type { View } from "ol";
   import { fromLonLat, toLonLat } from "ol/proj";
   import round from "./utils/round";
   import { getOlContext } from "./ol/Map.svelte";
-  import { onMount, tick } from "svelte";
-  import onMountTick from "./utils/onMountTick";
 
-  const { getMap } = getOlContext();
-  let map: Map;
-  onMountTick(() => (map = getMap()));
-
+  const { map } = getOlContext();
   const localStorageKey = "mapPosition";
 
   const updateView = (
@@ -77,8 +72,6 @@
   const debounced = debounce(savePosition, 500);
 
   window.addEventListener("hashchange", () => {
-    if (!map) return;
-
     const view = map.getView();
     const center = toLonLat(view.getCenter());
     const oldPosition = {
@@ -101,11 +94,7 @@
     updateView(map.getView(), newPosition);
   });
 
-  $: {
-    if (map) {
-      map.on("moveend", debounced);
-      map.on("zoom", debounced);
-      restorePosition();
-    }
-  }
+  map.on("moveend", debounced);
+  map.on("zoom", debounced);
+  restorePosition();
 </script>

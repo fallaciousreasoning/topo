@@ -14,7 +14,7 @@ import onMountTick from "../utils/onMountTick";
   export let visible: boolean = true;
 
   const dispatch = createEventDispatcher();
-  const { addLayer, removeLayer, getMap } = getOlContext();
+  const { addLayer, removeLayer, map } = getOlContext();
 
   const layer = new VectorLayer({
     source,
@@ -36,8 +36,7 @@ import onMountTick from "../utils/onMountTick";
   };
 
   onMountTick(() => {
-    const map = getMap();
-    const handler = map.on("click", featureClickHandler);
+    map.on("click", featureClickHandler);
 
     addLayer(layer);
     return () => {

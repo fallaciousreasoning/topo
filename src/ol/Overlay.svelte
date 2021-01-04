@@ -1,15 +1,12 @@
 <script lang="ts">
     import { Overlay, Map } from "ol";
-    import onMountTick from "../utils/onMountTick";
     import { getOlContext } from "./Map.svelte";
     import type { Coordinate } from "ol/coordinate";
   
     export let position: Coordinate;
     export let autoPan: boolean;
 
-    const { getMap } = getOlContext();
-    let map: Map;
-    onMountTick(() => (map = getMap()));
+    const { map } = getOlContext();
   
     let overlay: Overlay;
     let element: HTMLElement;

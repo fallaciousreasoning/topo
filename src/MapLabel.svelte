@@ -5,14 +5,13 @@
   import Popup from "./ol/Popup.svelte";
   import fragment, { setLabel } from "./stores/fragment";
 
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
   $: labelInfo = $fragment.label;
   $: position = fromLonLat([labelInfo.lng, labelInfo.lat]);
 
   $: {
-    const map = getMap();
-    if (map && labelInfo.text && position[0] && position[1]) {
+    if (labelInfo.text && position[0] && position[1]) {
       map.getView().animate({ center: position });
     }
   }

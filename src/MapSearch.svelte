@@ -1,13 +1,12 @@
 <script lang="ts">
-  import type { Map } from "ol";
   import Control from './ol/Control.svelte'
   import geocode from "./search/geocode";
   import type { GeocodeResult } from "./search/geocode";
-import { createEventDispatcher } from "svelte";
-import { getOlContext } from "./ol/Map.svelte";
+  import { createEventDispatcher } from "svelte";
+  import { getOlContext } from "./ol/Map.svelte";
 
   const dispatcher = createEventDispatcher();
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
   let query = "";
   let searching = false;
@@ -20,7 +19,7 @@ import { getOlContext } from "./ol/Map.svelte";
   };
 
   const selectResult = (result: GeocodeResult) => {
-    dispatcher('change', { result, map: getMap() });
+    dispatcher('change', { result, map });
     searching = false;
   }
 </script>

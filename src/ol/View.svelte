@@ -15,7 +15,7 @@
   export let extent: Extent = undefined;
   export let constrainOnlyCenter: boolean;
   export let smoothExtentConstraint: boolean;
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
   const view = new View({
     constrainOnlyCenter: constrainOnlyCenter,
@@ -30,12 +30,10 @@
     extent: extent,
   });
 
-  onMount(() => {
-    tick().then(() => {
-      getMap().setView(view);
+  map.setView(view);
 
+  onMount(() => {
       if (initialView)
         view.fit(initialView);
-    });
   });
 </script>

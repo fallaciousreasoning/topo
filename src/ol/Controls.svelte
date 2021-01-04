@@ -4,7 +4,7 @@
   import { getOlContext } from "./Map.svelte";
   import portal from "../utils/portal";
   import Control from "./Control.svelte";
-  import { setContext } from "svelte";
+  import { onMount, setContext } from "svelte";
   import LayerSwitcher from "ol-layerswitcher";
   import "ol-layerswitcher/src/ol-layerswitcher.css";
 
@@ -18,7 +18,7 @@
     layerSwitcher: { control: LayerSwitcher, position: "topright" }
   };
   export let defaults: (keyof typeof controls)[] = ["zoom", "rotate"];
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
   let topLeft: HTMLElement;
   let topRight: HTMLElement;
@@ -29,7 +29,7 @@
     getBottomLeft: () => bottomLeft
   })
 
-  onMountTick(() => {
+  onMount(() => {
     // Add default controls.
     for (const control of defaults) {
       const info = controls[control];
@@ -38,7 +38,7 @@
         target = topRight;
       if (info.position === "bottomleft")
         target = bottomLeft;
-      getMap().addControl(new info.control({ target }));
+      map.addControl(new info.control({ target }));
     }
   });
 </script>

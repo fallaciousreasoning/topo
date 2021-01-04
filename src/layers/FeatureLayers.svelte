@@ -10,10 +10,8 @@
   import onMountTick from "../utils/onMountTick";
 import LiveWeather from "./LiveWeather.svelte";
 
-  const { getMap, addLayer, removeLayer } = getOlContext();
-  onMountTick(async () => {
-    enableZoomToCluster(getMap());
-  });
+  const { map } = getOlContext();
+  enableZoomToCluster(map);
 </script>
 
 {#await huts.getFeatures() then hutFeatures}

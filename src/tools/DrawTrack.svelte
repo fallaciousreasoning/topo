@@ -7,7 +7,7 @@
   import Map, { getOlContext } from "../ol/Map.svelte";
   import { Style, Stroke, Fill, Text } from "ol/style";
   import type { Coordinate } from "ol/coordinate";
-  import { Polygon, Point, LineString } from "ol/geom";
+  import { Point, LineString } from "ol/geom";
   import type { StyleLike } from "ol/style/Style";
   import CircleStyle from "ol/style/Circle";
   import { getLength } from "ol/sphere";
@@ -17,7 +17,7 @@
   import Chart from "svelte-frappe-charts";
   import round from "../utils/round";
 
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
   const styleFunction: StyleLike = (feature) => {
     const stroke = "white";
@@ -86,7 +86,6 @@
 
   // When the draw finished, start modifying the layerer.
   interaction.on("drawend", async ({ feature }) => {
-    const map = getMap();
     map.removeInteraction(interaction);
     popupMessage = null;
 
@@ -100,7 +99,6 @@
   });
 
   onMountTick(() => {
-    const map = getMap();
     map.addInteraction(interaction);
     map.addLayer(layer);
     return () => {

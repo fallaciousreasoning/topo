@@ -11,11 +11,11 @@
     layers: [],
   });
 
-  const { getMap, addLayer, removeLayer } = getOlContext();
+  const { map, addLayer, removeLayer } = getOlContext();
 
   // Make sure we add child layers to this one.
   setContext("ol", {
-    getMap,
+    map,
     addLayer: (layer: BaseLayer) => layerGroup.getLayers().push(layer),
     removeLayer: (layer: BaseLayer) => layerGroup.getLayers().remove(layer),
   });

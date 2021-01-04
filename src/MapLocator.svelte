@@ -9,24 +9,20 @@
   import VectorLayer from "./ol/VectorLayer.svelte";
   import onMountTick from "./utils/onMountTick";
 
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
   let tracking = false;
   let position: Coordinate;
 
-  let geolocation = new Geolocation();
+  let geolocation = new Geolocation({ projection: map.getView().getProjection() });
   geolocation.on("change", (e) => {
     position = geolocation.getPosition();
-  });
-
-  onMountTick(() => {
-    geolocation.setProjection(getMap().getView().getProjection());
   });
 
   $: {
     if (tracking) {
       geolocation.once("change", () =>
-        getMap().getView().setCenter(geolocation.getPosition())
+        map.getView().setCenter(geolocation.getPosition())
       );
     }
 

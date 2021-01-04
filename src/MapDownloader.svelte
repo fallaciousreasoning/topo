@@ -8,19 +8,17 @@
   import onMountTick from "./utils/onMountTick";
   import Spinner from "./components/Spinner.svelte";
 
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
 
-  let zoom = 11;
+  let zoom = map.getView().getZoom();
   let downloading = false;
 
   onMountTick(() => {
-    zoom = getMap().getView().getZoom();
-
     const handler = () => {
-      zoom = getMap().getView().getZoom();
+      zoom = map.getView().getZoom();
     };
-    getMap().on("moveend", handler);
-    return () => getMap().un("moveend", handler);
+    map.on("moveend", handler);
+    return () => map.un("moveend", handler);
   });
 </script>
 
@@ -29,7 +27,7 @@
     {#if !downloading}
       <button
         on:click={async () => {
-          const view = getMap().getView();
+          const view = map.getView();
           const extent = view.calculateExtent();
           const downloader = new TileDownloader(extent, view.getZoom());
           const message = `Would you like to download tiles?\nThis will use approximately ${friendlyBytes(downloader.estimatedSize())} of storage.`;

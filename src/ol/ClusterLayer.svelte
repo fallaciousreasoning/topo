@@ -14,8 +14,6 @@
   export let title: string = undefined;
   export let visible: boolean = true;
 
-  const { getMap } = getOlContext();
-
   const clusters = new Cluster({
     distance,
     source: new VectorSource({

@@ -3,7 +3,7 @@
   import { getContext } from "svelte";
 
   interface OlContext {
-    getMap(): Map;
+    map: Map;
     addLayer(layer: BaseLayer): void;
     removeLayer(layer: BaseLayer): void;
   }
@@ -15,22 +15,19 @@
 
 <script lang="ts">
   import { onMount, setContext } from "svelte";
-  import type Layer from "ol/layer/Layer";
   import type BaseLayer from "ol/layer/Base";
   import View from "ol/View";
-import { DragRotateAndZoom } from "ol/interaction";
+  import { DragRotateAndZoom } from "ol/interaction";
 
   // A place to store all the layers we try and add before mounting.
   const pendingLayers: BaseLayer[] = [];
-
-  setContext("ol", {
-    getMap: () => map,
-    addLayer: (layer: BaseLayer) => {
-      if (!map) pendingLayers.push(layer);
-      else map.addLayer(layer);
-    },
-    removeLayer: (layer: BaseLayer) => map.removeLayer(layer),
-  });
+  
+  const context: OlContext = {
+    map: undefined,
+    addLayer: (layer: BaseLayer) => context.map.addLayer(layer),
+    removeLayer: (layer: BaseLayer) => context.addLayer(layer)
+  }
+  setContext("ol", context);
 
   let map: Map;
   let mapRef: HTMLElement;
@@ -47,5 +44,7 @@ import { DragRotateAndZoom } from "ol/interaction";
 </script>
 
 <div bind:this={mapRef}>
-  <slot />
+  {#if map}
+    <slot />
+  {/if}
 </div>

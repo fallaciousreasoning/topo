@@ -11,12 +11,11 @@
   export let selectable: boolean = false;
   export let style: string = "";
 
-  const { getMap } = getOlContext();
+  const { map } = getOlContext();
   const { getTopLeft, getTopRight, getBottomLeft } = getContext(
     "control-containers"
   );
-  let map: Map;
-  onMountTick(() => (map = getMap()));
+  console.log(map);
 
   const olControl = (node, map: Map) => {
     let targetSelector = getTopLeft;
