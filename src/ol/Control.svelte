@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Control } from "ol/control";
   import type Map from "ol/Map";
-  import onMountTick from "../utils/onMountTick";
   import { getOlContext } from "./Map.svelte";
   import { CLASS_CONTROL, CLASS_SELECTABLE, CLASS_UNSELECTABLE } from "ol/css";
   import { getContext } from "svelte";

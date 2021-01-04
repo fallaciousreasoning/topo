@@ -12,6 +12,8 @@
   let searching = false;
   let results = [];
 
+  console.log("Added search!")
+
   const updateResults = async () => {
     try {
       results = await geocode(query);
@@ -41,7 +43,7 @@
 
 <Control control>
   {#if !searching}
-    <button on:click={() => (searching = true)}>🔎</button>
+    <button class="foo" on:click={() => (searching = true)}>🔎</button>
   {:else}
     <div>
       <div class="search-bar">
