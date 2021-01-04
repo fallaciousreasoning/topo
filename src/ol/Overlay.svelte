@@ -9,30 +9,22 @@
     const { map } = getOlContext();
   
     let overlay: Overlay;
-    let element: HTMLElement;
-
     $: overlay && overlay.setPosition(position);
   
-    const olOverlay = (node: HTMLElement, map: Map) => {
+    const olOverlay = (node: HTMLElement) => {
       const newOverlay = () =>
         new Overlay({
-          element,
+          element: node,
           position,
           autoPan
         });
   
       overlay = newOverlay();
       overlay.setPosition(position);
+      map.addOverlay(overlay);
   
       return {
-        destroy: () => map && map.removeOverlay(overlay),
-        update(newMap) {
-          if (map) map.removeOverlay(overlay);
-  
-          overlay = newOverlay();
-          map = newMap;
-          map.addOverlay(overlay);
-        },
+        destroy: () => map.removeOverlay(overlay),
       };
     };
   </script>
@@ -43,8 +35,8 @@
     }
   </style>
   
-  <div use:olOverlay={map}
-    class="ol-overlay" bind:this={element}>
+  <div use:olOverlay
+    class="ol-overlay">
     <slot overlay={overlay} />
   </div>
   
