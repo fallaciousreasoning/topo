@@ -86,10 +86,10 @@
       <MapLocator />
       <MapSearch
         on:change={(e) => {
-          const lnglat = [e.detail.result.lon, e.detail.result.lat];
+          const [lng, lat] = [e.detail.result.lon, e.detail.result.lat];
           setLabel({
-            lat: e.detail.result.lat,
-            lng: e.detail.result.lon,
+            lat,
+            lng,
             text: e.detail.result.name,
           });
         }} />
