@@ -16,6 +16,7 @@
   export let constrainOnlyCenter: boolean;
   export let smoothExtentConstraint: boolean;
   const { map } = getOlContext();
+  console.log("Made it here: View");
 
   const view = new View({
     constrainOnlyCenter: constrainOnlyCenter,

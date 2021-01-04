@@ -21,7 +21,7 @@
 
   // A place to store all the layers we try and add before mounting.
   const pendingLayers: BaseLayer[] = [];
-  
+  console.log("Here: Map")
   const context: OlContext = {
     map: undefined,
     addLayer: (layer: BaseLayer) => context.map.addLayer(layer),
@@ -29,22 +29,21 @@
   }
   setContext("ol", context);
 
-  let map: Map;
   let mapRef: HTMLElement;
 
   onMount(() => {
-    map = new Map({
+    context.map = new Map({
       target: mapRef,
       layers: pendingLayers,
       view: new View(),
       controls: []
     });
-    map.addInteraction(new DragRotateAndZoom());
+    context.map.addInteraction(new DragRotateAndZoom());
   });
 </script>
 
 <div bind:this={mapRef}>
-  {#if map}
+  {#if mapRef}
     <slot />
   {/if}
 </div>
