@@ -44,7 +44,6 @@
 </style>
 
 <div id="topo-map">
-
   <Map>
     <View
       constrainOnlyCenter
