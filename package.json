@@ -2,8 +2,10 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "watch:tailwind": "cross-env ROLLUP_WATCH=1 postcss src/tailwind.pcss -o public/build/tailwind.css -w",
+    "build:tailwind": "postcss src/tailwind.pcss -o public/build/tailwind.css",
+    "build": "npm run build:tailwind && rollup -c",
+    "dev": "concurrently \"rollup -c -w\" \"npm run watch:tailwind\"",
     "start": "sirv public",
     "validate": "svelte-check"
   },
@@ -16,6 +18,10 @@
     "@types/human-date": "^1.4.0",
     "@types/ol": "^6.4.2",
     "autoprefixer": "^10.1.0",
+    "concurrently": "^5.3.0",
+    "cross-env": "^7.0.3",
+    "postcss": "^8.2.2",
+    "postcss-cli": "^8.3.1",
     "rollup": "^2.35.1",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",

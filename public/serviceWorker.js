@@ -21,7 +21,6 @@ const downloadFirstRunAssets = async () => {
     '/favicon.png',
     '/favicon.svg',
     '/global.css',
-    '/build/bundle.css',
     '/build/extra.css',
     '/build/bundle.js',
     '/data/huts.json'
