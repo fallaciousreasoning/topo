@@ -41,7 +41,7 @@
 
 <Control control>
   {#if !searching}
-    <button class="foo" on:click={() => (searching = true)}>🔎</button>
+    <button on:click={() => (searching = true)}>🔎</button>
   {:else}
     <div>
       <div class="search-bar">
