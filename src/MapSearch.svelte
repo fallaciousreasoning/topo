@@ -12,8 +12,6 @@
   let searching = false;
   let results = [];
 
-  console.log("Added search!")
-
   const updateResults = async () => {
     try {
       results = await geocode(query);
