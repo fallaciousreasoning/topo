@@ -7,6 +7,7 @@ import livereload from 'rollup-plugin-livereload';
 import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
+import tailwindcss from 'tailwindcss';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -47,7 +48,13 @@ export default {
 				// enable run-time checks when not in production
 				dev: !production,
 			},
-			preprocess: sveltePreprocess(),
+			preprocess: sveltePreprocess({
+				postcss: {
+					plugins: [
+						tailwindcss('./tailwind.config.js')
+					]
+				}
+			}),
 		}),
 
 		css({ output: "extra.css" }),
