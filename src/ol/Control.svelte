@@ -15,7 +15,6 @@
   const { getTopLeft, getTopRight, getBottomLeft } = getContext(
     "control-containers"
   );
-  console.log(map);
 
   const olControl = (node, map: Map) => {
     let targetSelector = getTopLeft;

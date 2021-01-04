@@ -21,7 +21,6 @@
 
   // A place to store all the layers we try and add before mounting.
   const pendingLayers: BaseLayer[] = [];
-  console.log("Here: Map")
   const context: OlContext = {
     map: undefined,
     addLayer: (layer: BaseLayer) => context.map.addLayer(layer),
