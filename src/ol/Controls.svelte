@@ -20,6 +20,8 @@
   export let defaults: (keyof typeof controls)[] = ["zoom", "rotate"];
   const { map } = getOlContext();
 
+  let mounted = false;
+
   let topLeft: HTMLElement;
   let topRight: HTMLElement;
   let bottomLeft: HTMLElement;
@@ -38,8 +40,11 @@
         target = topRight;
       if (info.position === "bottomleft")
         target = bottomLeft;
+
       map.addControl(new info.control({ target }));
     }
+
+    mounted = true;
   });
 </script>
 
@@ -83,4 +88,7 @@
 <div class="container top-left" bind:this={topLeft} />
 <div class="container top-right" bind:this={topRight} />
 <div class="container bottom-left" bind:this={bottomLeft} />
-<slot/>
+
+{#if mounted}
+  <slot/>
+{/if}

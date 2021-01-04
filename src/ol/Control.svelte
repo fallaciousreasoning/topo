@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Control } from "ol/control";
-  import type Map from "ol/Map";
   import { getOlContext } from "./Map.svelte";
   import { CLASS_CONTROL, CLASS_SELECTABLE, CLASS_UNSELECTABLE } from "ol/css";
   import { getContext } from "svelte";
@@ -15,28 +14,23 @@
     "control-containers"
   );
 
-  const olControl = (node, map: Map) => {
+  const olControl = (node) => {
     let targetSelector = getTopLeft;
     if (position === "topright") targetSelector = getTopRight;
     if (position === "bottomleft") targetSelector = getBottomLeft;
 
-    let control = new Control({ element: node, target: targetSelector() });
-    return {
-      destroy: () => map && map.removeControl(control),
-      update(newMap) {
-        if (map) map.removeControl(control);
+    const control = new Control({ element: node, target: targetSelector() });
+    map.addControl(control);
 
-        control = new Control({ element: node, target: targetSelector() });
-        map = newMap;
-        if (map) map.addControl(control);
-      },
+    return {
+      destroy: () => map.removeControl(control),
     };
   };
 </script>
 
 <div
   {style}
-  use:olControl={map}
+  use:olControl
   class={`${control ? CLASS_CONTROL : ''} ${selectable ? CLASS_SELECTABLE : CLASS_UNSELECTABLE}`}>
   <slot />
 </div>
