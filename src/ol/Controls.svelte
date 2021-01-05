@@ -49,45 +49,14 @@
 </script>
 
 <style>
-  .container {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    z-index: 10;
-    margin: 1em;
-    gap: 0.5em;
-  }
-
-  .top-right {
-    top: 0;
-    right: 0;
-    width: 2em;
-    align-items: flex-end;
-  }
-
-  .top-left {
-    top: 0;
-    left: 0;
-    width: 2em;
-    align-items: flex-start;
-  }
-
-  .bottom-left {
-    bottom: 0;
-    left: 0;
-    height: 2em;
-    flex-direction: row;
-  }
-
   :global(.ol-control) {
     position: initial !important;
-    flex: 0;
   }
 </style>
 
-<div class="container top-left" bind:this={topLeft} />
-<div class="container top-right" bind:this={topRight} />
-<div class="container bottom-left" bind:this={bottomLeft} />
+<div class="absolute flex flex-col z-10 m-1 space-1 top-0 left-0 w-2 items-start top-left" bind:this={topLeft} />
+<div class="absolute flex flex-col z-10 m-1 space-1 top-0 right-0 w-2 items-end top-right" bind:this={topRight} />
+<div class="absolute flex flex-row z-10 m-1 space-1 bottom-0 left-0 h-2 bottom-left" bind:this={bottomLeft} />
 
 {#if mounted}
   <slot/>

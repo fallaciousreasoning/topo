@@ -31,6 +31,6 @@
 <div
   {style}
   use:olControl
-  class={`${control ? CLASS_CONTROL : ''} ${selectable ? CLASS_SELECTABLE : CLASS_UNSELECTABLE}`}>
+  class={`${control ? CLASS_CONTROL : ''} ${selectable ? CLASS_SELECTABLE : CLASS_UNSELECTABLE} flex-none`}>
   <slot />
 </div>
