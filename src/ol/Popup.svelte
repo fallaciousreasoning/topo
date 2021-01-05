@@ -41,15 +41,6 @@
     left: 48px;
     margin-left: -11px;
   }
-
-  .ol-popup-closer {
-    text-decoration: none;
-    top: 2px;
-    right: 8px;
-  }
-  .ol-popup-closer:after {
-    content: "✖";
-  }
 </style>
 
 <!-- svelte-ignore a11y-missing-content -->
@@ -59,13 +50,13 @@
       <a
         href="#close"
         alt="close"
-        class="ol-popup-closer absolute"
+        class="absolute top-1 right-1"
         on:click={(e) => {
           e.preventDefault();
           if (!overlay) return;
           overlay.setPosition(undefined);
           dispatch('close')
-        }} />
+        }}>✖</a>
     {/if}
     <slot />
   </div>
