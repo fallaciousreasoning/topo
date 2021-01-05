@@ -15,14 +15,8 @@
 
 <style>
   .ol-popup {
-    position: absolute;
-    background-color: white;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid #cccccc;
     bottom: 12px;
-    left: -50px;
+    left: -52px;
   }
 
   .ol-popup:after,
@@ -50,7 +44,6 @@
 
   .ol-popup-closer {
     text-decoration: none;
-    position: absolute;
     top: 2px;
     right: 8px;
   }
@@ -61,12 +54,12 @@
 
 <!-- svelte-ignore a11y-missing-content -->
 <Overlay {position} {autoPan} let:overlay>
-  <div class="ol-popup">
+  <div class="ol-popup absolute bg-white shadow-md rounded-md p-4 pt-6 max-w-5xl w-48 border-gray-300">
     {#if closable}
       <a
         href="#close"
         alt="close"
-        class="ol-popup-closer"
+        class="ol-popup-closer absolute"
         on:click={(e) => {
           e.preventDefault();
           if (!overlay) return;
