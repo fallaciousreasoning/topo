@@ -35,22 +35,16 @@
     left: 48px;
     margin-left: -10px;
   }
-  .ol-popup:before {
-    border-top-color: #cccccc;
-    border-width: 11px;
-    left: 48px;
-    margin-left: -11px;
-  }
 </style>
 
 <!-- svelte-ignore a11y-missing-content -->
 <Overlay {position} {autoPan} let:overlay>
-  <div class="ol-popup absolute bg-white shadow-md rounded-md p-4 pt-6 max-w-5xl w-48 border-gray-300">
+  <div class="ol-popup absolute shadow-lg bg-white rounded-md p-4 pt-6 max-w-5xl w-48 border-gray-500">
     {#if closable}
       <a
         href="#close"
         alt="close"
-        class="absolute top-1 right-1"
+        class="absolute top-1 right-1 select-none"
         on:click={(e) => {
           e.preventDefault();
           if (!overlay) return;
