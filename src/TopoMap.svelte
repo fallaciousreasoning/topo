@@ -11,7 +11,7 @@
   import { tileCacheId, tileUrlFunction } from "./layers/linzTopoSource";
   import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
-  import MapSearch from "./MapSearch.svelte";
+  import MapSearch from "./components/MapSearch.svelte";
   import Control from "./ol/Control.svelte";
   import Controls from "./ol/Controls.svelte";
   import LayerGroup from "./ol/LayerGroup.svelte";

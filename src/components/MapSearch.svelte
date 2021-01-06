@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Control from './ol/Control.svelte'
-  import geocode from "./search/geocode";
-  import type { GeocodeResult } from "./search/geocode";
+  import Control from '../ol/Control.svelte'
+  import geocode from "../search/geocode";
+  import type { GeocodeResult } from "../search/geocode";
   import { createEventDispatcher } from "svelte";
-  import { getOlContext } from "./ol/Map.svelte";
+  import { getOlContext } from "../ol/Map.svelte";
 
   const dispatcher = createEventDispatcher();
   const { map } = getOlContext();
