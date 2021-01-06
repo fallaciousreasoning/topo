@@ -3,6 +3,7 @@
   import Geolocation from "ol/Geolocation";
   import Icon from "ol/style/Icon";
   import Style from "ol/style/Style";
+import MapButton from "./components/MapButton.svelte";
   import Control from "./ol/Control.svelte";
   import Feature from "./ol/Feature.svelte";
   import { getOlContext } from "./ol/Map.svelte";
@@ -30,13 +31,11 @@
   }
 </script>
 
-<Control control>
-  <button
-    style={`color: ${tracking ? 'blue' : 'white'}`}
-    on:click={() => (tracking = !tracking)}>
+<MapButton on:click={() => tracking = !tracking}>
+  <span class={`${tracking ? 'text-primary' : 'text-foreground'}`}>
     ⬊
-  </button>
-</Control>
+  </span>
+</MapButton>
 
 <VectorLayer>
   {#if tracking && position}
