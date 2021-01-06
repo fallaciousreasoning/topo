@@ -2,17 +2,15 @@
   import "ol/ol.css";
   import OSM from "ol/source/OSM";
   import cachingSource from "./caching/cachingSource";
-  import Button from "./components/Button.svelte";
   import MapDownloader from "./components/MapDownloader.svelte";
   import MapLocator from "./components/MapLocator.svelte";
-  import Measure from "./components/MapMeasure.svelte";
-  import ZoomControl from "./components/MapZoom.svelte";
+  import MapMeasure from "./components/MapMeasure.svelte";
+  import MapZoom from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
   import { tileCacheId, tileUrlFunction } from "./layers/linzTopoSource";
   import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
   import MapSearch from "./components/MapSearch.svelte";
-  import Control from "./ol/Control.svelte";
   import Controls from "./ol/Controls.svelte";
   import LayerGroup from "./ol/LayerGroup.svelte";
   import Map from "./ol/Map.svelte";
@@ -74,15 +72,15 @@
     </LayerGroup>
 
     <Controls defaults={['layerSwitcher', 'rotate', 'scaleline']}>
-      <ZoomControl />
+      <MapZoom />
       <MapLocator />
       <MapSearch
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat];
           setLabel({ lat, lng, text: e.detail.result.name });
         }} />
+      <MapMeasure />
       <MapDownloader />
-      <Measure />
     </Controls>
     <MapLabel />
   </Map>
