@@ -26,7 +26,7 @@
   <MapControl>
     {#if !downloading}
       <button
-        class="w-full py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-b border-t button"
+        class="map-button"
         on:click={async () => {
           const view = map.getView();
           const extent = view.calculateExtent();

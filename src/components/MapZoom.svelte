@@ -12,10 +12,10 @@
 <MapControl>
     <div class="flex flex-col">
         <button
-            class="w-full py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-t button"
+            class="map-button rounded-b-none"
             on:click={(e) => adjustZoom(1)}>+</button>
         <button
-            class="w-full py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-b border-t button"
+            class="map-button border-t border-gray-300 rounded-t-none"
             on:click={(e) => adjustZoom(-1)}>-</button>
     </div>
 </MapControl>

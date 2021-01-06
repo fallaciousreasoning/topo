@@ -42,7 +42,7 @@ import MapControl from './MapControl.svelte';
 
 <MapControl>
   {#if !searching}
-    <button on:click={() => (searching = true)}>🔎</button>
+    <button class="map-button" on:click={() => (searching = true)}>🔎</button>
   {:else}
     <div>
       <div class="search-bar">
