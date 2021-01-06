@@ -2,6 +2,7 @@
     import Button from "./Button.svelte";
     import Control from "../ol/Control.svelte";
     import { getOlContext } from "../ol/Map.svelte";
+import MapControl from "./MapControl.svelte";
 
     const { map } = getOlContext();
     const adjustZoom = (delta: number) => {
@@ -10,12 +11,13 @@
     };
 </script>
 
-<Control>
-    <div class="w-11 bg-background text-foreground shadow text-sm font-medium rounded button flex flex-col">
+<MapControl>
+    <div class="flex flex-col">
         <button
             class="py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-t"
             on:click={(e) => adjustZoom(1)}>+</button>
-        <button class="py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-b border-t"
+        <button
+            class="py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-b border-t"
             on:click={e => adjustZoom(-1)}>-</button>
     </div>
-</Control>
+</MapControl>
