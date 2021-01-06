@@ -3,7 +3,7 @@
   import Geolocation from "ol/Geolocation";
   import Icon from "ol/style/Icon";
   import Style from "ol/style/Style";
-import MapButton from "./components/MapButton.svelte";
+import MapControl from "./components/MapControl.svelte";
   import Control from "./ol/Control.svelte";
   import Feature from "./ol/Feature.svelte";
   import { getOlContext } from "./ol/Map.svelte";
@@ -31,11 +31,13 @@ import MapButton from "./components/MapButton.svelte";
   }
 </script>
 
-<MapButton on:click={() => tracking = !tracking}>
-  <span class={`${tracking ? 'text-primary' : 'text-foreground'}`}>
+<MapControl>
+  <button
+    on:click={() => tracking = !tracking}  
+    class={`rounded py-2 px-4 hover:${tracking ? 'bg-primary-hover' : 'bg-background-hover'} focus:outline-none ease-in button ${tracking ? 'text-background bg-primary' : 'text-foreground bg-background'}`}>
     ⬊
-  </span>
-</MapButton>
+  </button>
+</MapControl>
 
 <VectorLayer>
   {#if tracking && position}
