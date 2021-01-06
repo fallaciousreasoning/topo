@@ -54,9 +54,9 @@
   }
 </style>
 
-<div class="absolute flex flex-col z-10 m-1 space-1 top-0 left-0 w-2 items-start top-left" bind:this={topLeft} />
-<div class="absolute flex flex-col z-10 m-1 space-1 top-0 right-0 w-2 items-end top-right" bind:this={topRight} />
-<div class="absolute flex flex-row z-10 m-1 space-1 bottom-0 left-0 h-2 bottom-left" bind:this={bottomLeft} />
+<div class="absolute flex flex-col z-10 m-1 gap-1 top-0 left-0 w-2 items-start top-left" bind:this={topLeft} />
+<div class="absolute flex flex-col z-10 m-1 gap-1 top-0 right-0 w-2 items-end top-right" bind:this={topRight} />
+<div class="absolute flex flex-row z-10 m-1 gap-1 bottom-0 left-0 h-2 bottom-left" bind:this={bottomLeft} />
 
 {#if mounted}
   <slot/>
