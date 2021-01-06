@@ -19,6 +19,7 @@
   import { setLabel } from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
   import { linzAerialLayerUrl } from "./layers/linzAerialSource";
+import MapFeatures from "./components/MapFeatures.svelte";
 </script>
 
 <style>
@@ -82,6 +83,7 @@
         }} />
       <MapMeasure />
       <MapDownloader />
+      <MapFeatures/>
     </Controls>
     <MapLabel />
   </Map>
