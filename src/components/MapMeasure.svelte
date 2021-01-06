@@ -5,12 +5,6 @@
   let measuring = false;
 </script>
 
-<style>
-  .measuring {
-    background: white;
-  }
-</style>
-
 <MapControl>
   <button
     class={`w-full py-2 px-4 focus:outline-none ease-in rounded border button ${measuring ? 'bg-primary hover:bg-primary-hover text-background' : 'bg-background hover:bg-background-hover text-primary'}`}

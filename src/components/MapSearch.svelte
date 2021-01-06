@@ -4,6 +4,7 @@
   import type { GeocodeResult } from "../search/geocode";
   import { createEventDispatcher } from "svelte";
   import { getOlContext } from "../ol/Map.svelte";
+import MapControl from './MapControl.svelte';
 
   const dispatcher = createEventDispatcher();
   const { map } = getOlContext();
@@ -39,7 +40,7 @@
   }
 </style>
 
-<Control control>
+<MapControl>
   {#if !searching}
     <button on:click={() => (searching = true)}>🔎</button>
   {:else}
@@ -67,4 +68,4 @@
       </div>
     </div>
   {/if}
-  </Control>
+</MapControl>
