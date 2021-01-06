@@ -1,36 +1,25 @@
 <script lang="ts">
   import "ol/ol.css";
-  import { fromLonLat } from "ol/proj";
   import OSM from "ol/source/OSM";
-  import FeatureLayers from "./layers/FeatureLayers.svelte";
+  import cachingSource from "./caching/cachingSource";
+  import Button from "./components/Button.svelte";
+  import MapDownloader from "./components/MapDownloader.svelte";
   import MapLocator from "./components/MapLocator.svelte";
+  import Measure from "./components/Measure.svelte";
+  import ZoomControl from "./components/ZoomControl.svelte";
+  import FeatureLayers from "./layers/FeatureLayers.svelte";
+  import { tileCacheId, tileUrlFunction } from "./layers/linzTopoSource";
+  import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
   import MapSearch from "./MapSearch.svelte";
+  import Control from "./ol/Control.svelte";
   import Controls from "./ol/Controls.svelte";
   import LayerGroup from "./ol/LayerGroup.svelte";
   import Map from "./ol/Map.svelte";
-  import Popup from "./ol/Popup.svelte";
   import TileLayer from "./ol/TileLayer.svelte";
   import View from "./ol/View.svelte";
-  import { nzBounds } from "./utils/bounds";
-  import { zoomToGeocodeResult } from "./utils/zoomToFeature";
-  import type { Coordinate } from "ol/coordinate";
-  import Marker from "./Marker.svelte";
-  import VectorLayer from "./ol/VectorLayer.svelte";
-  import Feature from "./ol/Feature.svelte";
-  import { Style, Icon, Text } from "ol/style";
-  import { XYZ } from "ol/source";
-  import { pickRandom } from "./utils/random";
-  import cachingSource from "./caching/cachingSource";
-  import MapDownloader from "./components/MapDownloader.svelte";
-  import { tileUrlFunction, tileCacheId } from "./layers/linzTopoSource";
-  import DrawTrack from "./tools/DrawTrack.svelte";
-  import Measure from "./components/Measure.svelte";
-  import MapLabel from "./MapLabel.svelte";
   import { setLabel } from "./stores/fragment";
-import Button from "./components/Button.svelte";
-import Control from "./ol/Control.svelte";
-import ZoomControl from "./components/ZoomControl.svelte";
+  import { nzBounds } from "./utils/bounds";
 </script>
 
 <style>
@@ -85,16 +74,12 @@ import ZoomControl from "./components/ZoomControl.svelte";
     </LayerGroup>
 
     <Controls defaults={['layerSwitcher', 'rotate', 'scaleline']}>
-      <ZoomControl/>
+      <ZoomControl />
       <MapLocator />
       <MapSearch
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat];
-          setLabel({
-            lat,
-            lng,
-            text: e.detail.result.name,
-          });
+          setLabel({ lat, lng, text: e.detail.result.name });
         }} />
       <MapDownloader />
       <Measure />
@@ -104,5 +89,4 @@ import ZoomControl from "./components/ZoomControl.svelte";
     </Controls>
     <MapLabel />
   </Map>
-
 </div>
