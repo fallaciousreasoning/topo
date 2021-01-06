@@ -18,9 +18,7 @@
   import View from "./ol/View.svelte";
   import { setLabel } from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
-import fallbackSource from "./sources/fallbackSource";
-import { linzAerialLayerUrl, linzAerialTileUrl } from "./layers/linzAerialSource";
-import { mapilliaryTileUrl } from "./layers/mapilliarySource";
+  import { linzAerialLayerUrl } from "./layers/linzAerialSource";
 </script>
 
 <style>
