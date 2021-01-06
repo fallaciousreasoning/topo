@@ -1,12 +1,12 @@
 <script lang="ts">
-  import Control from "./ol/Control.svelte";
-  import { getOlContext } from "./ol/Map.svelte";
-  import { TileDownloader } from "./utils/tileDownloader";
-  import { tileUrlFunction } from "./layers/linzTopoSource";
-  import { friendlyBytes } from "./utils/bytes";
-  import { onMount } from "svelte";
-  import onMountTick from "./utils/onMountTick";
-  import Spinner from "./components/Spinner.svelte";
+  import { tileUrlFunction } from "../layers/linzTopoSource";
+  import { getOlContext } from "../ol/Map.svelte";
+  import { friendlyBytes } from "../utils/bytes";
+  import onMountTick from "../utils/onMountTick";
+  import { TileDownloader } from "../utils/tileDownloader";
+  import MapControl from "./MapControl.svelte";
+  import Spinner from "./Spinner.svelte";
+
 
   const { map } = getOlContext();
 
@@ -23,9 +23,10 @@
 </script>
 
 {#if zoom >= 11 || downloading}
-  <Control control>
+  <MapControl>
     {#if !downloading}
       <button
+        class="w-full py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-b border-t button"
         on:click={async () => {
           const view = map.getView();
           const extent = view.calculateExtent();
@@ -42,5 +43,5 @@
     {:else}
       <Spinner />
     {/if}
-  </Control>
+  </MapControl>
 {/if}

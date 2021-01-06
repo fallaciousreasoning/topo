@@ -34,7 +34,7 @@ import MapControl from "./MapControl.svelte";
 <MapControl>
   <button
     on:click={() => tracking = !tracking}  
-    class={`rounded py-2 px-4 hover:${tracking ? 'bg-primary-hover' : 'bg-background-hover'} focus:outline-none ease-in button ${tracking ? 'text-background bg-primary' : 'text-foreground bg-background'}`}>
+    class={`w-full rounded py-2 px-4 hover:${tracking ? 'bg-primary-hover' : 'bg-background-hover'} focus:outline-none ease-in button ${tracking ? 'text-background bg-primary' : 'text-foreground bg-background'}`}>
     ⬊
   </button>
 </MapControl>

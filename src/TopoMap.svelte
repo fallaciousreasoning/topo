@@ -22,7 +22,7 @@
   import { XYZ } from "ol/source";
   import { pickRandom } from "./utils/random";
   import cachingSource from "./caching/cachingSource";
-  import MapDownloader from "./MapDownloader.svelte";
+  import MapDownloader from "./components/MapDownloader.svelte";
   import { tileUrlFunction, tileCacheId } from "./layers/linzTopoSource";
   import DrawTrack from "./tools/DrawTrack.svelte";
   import Measure from "./components/Measure.svelte";
