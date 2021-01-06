@@ -3,7 +3,7 @@
   import { fromLonLat } from "ol/proj";
   import OSM from "ol/source/OSM";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
-  import MapLocator from "./MapLocator.svelte";
+  import MapLocator from "./components/MapLocator.svelte";
   import MapPositioner from "./MapPositioner.svelte";
   import MapSearch from "./MapSearch.svelte";
   import Controls from "./ol/Controls.svelte";

@@ -3,12 +3,12 @@
   import Geolocation from "ol/Geolocation";
   import Icon from "ol/style/Icon";
   import Style from "ol/style/Style";
-import MapControl from "./components/MapControl.svelte";
-  import Control from "./ol/Control.svelte";
-  import Feature from "./ol/Feature.svelte";
-  import { getOlContext } from "./ol/Map.svelte";
-  import VectorLayer from "./ol/VectorLayer.svelte";
-  import onMountTick from "./utils/onMountTick";
+import MapControl from "./MapControl.svelte";
+  import Control from "../ol/Control.svelte";
+  import Feature from "../ol/Feature.svelte";
+  import { getOlContext } from "../ol/Map.svelte";
+  import VectorLayer from "../ol/VectorLayer.svelte";
+  import onMountTick from "../utils/onMountTick";
 
   const { map } = getOlContext();
 
