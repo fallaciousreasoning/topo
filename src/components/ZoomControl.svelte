@@ -13,9 +13,9 @@
 <Control>
     <div class="bg-background text-foreground shadow text-sm font-medium rounded button flex flex-col">
         <button
-            class="py-2 px-4 hover:bg-background-hover ease-in rounded-t"
+            class="py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-t"
             on:click={(e) => adjustZoom(1)}>+</button>
-        <button class="py-2 px-4 hover:bg-background-hover ease-in rounded-b border-t"
+        <button class="py-2 px-4 hover:bg-background-hover focus:outline-none ease-in rounded-b border-t"
             on:click={e => adjustZoom(-1)}>-</button>
     </div>
 </Control>
