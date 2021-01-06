@@ -11,11 +11,11 @@
 </script>
 
 <Control>
-    <div class="bg-gray-300 shadow text-sm font-medium rounded button flex flex-col">
+    <div class="bg-background text-foreground shadow text-sm font-medium rounded button flex flex-col">
         <button
-            class="py-2 px-4 hover:bg-purple-600 ease-in rounded-t"
+            class="py-2 px-4 hover:bg-background-hover ease-in rounded-t"
             on:click={(e) => adjustZoom(1)}>+</button>
-        <button class="py-2 px-4 hover:bg-purple-600 ease-in rounded-b border-t"
+        <button class="py-2 px-4 hover:bg-background-hover ease-in rounded-b border-t"
             on:click={e => adjustZoom(-1)}>-</button>
     </div>
 </Control>
