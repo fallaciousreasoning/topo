@@ -6,7 +6,7 @@
   import MapDownloader from "./components/MapDownloader.svelte";
   import MapLocator from "./components/MapLocator.svelte";
   import Measure from "./components/MapMeasure.svelte";
-  import ZoomControl from "./components/ZoomControl.svelte";
+  import ZoomControl from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
   import { tileCacheId, tileUrlFunction } from "./layers/linzTopoSource";
   import MapLabel from "./MapLabel.svelte";
@@ -83,9 +83,6 @@
         }} />
       <MapDownloader />
       <Measure />
-      <Control>
-        <Button on:click={console.log}>Foo</Button>
-      </Control>
     </Controls>
     <MapLabel />
   </Map>
