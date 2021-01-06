@@ -19,6 +19,8 @@
   import { setLabel } from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
 import fallbackSource from "./sources/fallbackSource";
+import { linzAerialTileUrl } from "./layers/linzAerialSource";
+import { mapilliaryTileUrl } from "./layers/mapilliarySource";
 </script>
 
 <style>
@@ -60,8 +62,9 @@ import fallbackSource from "./sources/fallbackSource";
         type="base"
         visible={false}
         source={fallbackSource(
-          'https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=fcac9d10d1c84527bd2a1ca2a35681d8/tiles/v4/set=4702/EPSG:3857/{z}/{x}/{y}.png',
-          'http://otile2.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png')} />
+          linzAerialTileUrl,
+          mapilliaryTileUrl
+          )} />
       <TileLayer
         title="LINZ Topo"
         type="base"

@@ -1,17 +1,24 @@
 import XYZ from "ol/source/XYZ";
+import { TileCoord } from "ol/tilecoord";
 import { resolvable } from "../utils/promise";
 
-export default (...sources: string[]) => {
+type TileUrlFunction = (tile: TileCoord) => string;
+
+export default (...sources: [TileUrlFunction, ...TileUrlFunction[]]) => {
     return new XYZ({
-        urls: sources,
-        async tileLoadFunction(tile) {
+        url: 'https://example.com',
+        async tileLoadFunction(tile, source) {
             const image: HTMLImageElement = tile['getImage']();
             
             for (const source of sources) {
-                image.src = source;
+                image.src = source(tile.getTileCoord());
 
                 const { resolve, promise } = resolvable<boolean>();
-                image.addEventListener('error', () => resolve(false), { once: true });
+                image.addEventListener('error', () => {
+                    resolve(false);
+
+                    console.log("Error!")
+                }, { once: true });
                 image.addEventListener('load', () => resolve(true), { once: true });
 
                 const success = await promise;
