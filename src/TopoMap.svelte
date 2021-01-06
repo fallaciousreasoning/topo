@@ -19,7 +19,7 @@
   import { setLabel } from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
 import fallbackSource from "./sources/fallbackSource";
-import { linzAerialTileUrl } from "./layers/linzAerialSource";
+import { linzAerialLayerUrl, linzAerialTileUrl } from "./layers/linzAerialSource";
 import { mapilliaryTileUrl } from "./layers/mapilliarySource";
 </script>
 
@@ -61,10 +61,7 @@ import { mapilliaryTileUrl } from "./layers/mapilliarySource";
         title="LINZ Aerial Imagery"
         type="base"
         visible={false}
-        source={fallbackSource(
-          linzAerialTileUrl,
-          mapilliaryTileUrl
-          )} />
+        source={linzAerialLayerUrl} />
       <TileLayer
         title="LINZ Topo"
         type="base"
