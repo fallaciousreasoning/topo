@@ -28,6 +28,9 @@
   import Measure from "./components/Measure.svelte";
   import MapLabel from "./MapLabel.svelte";
   import { setLabel } from "./stores/fragment";
+import Button from "./components/Button.svelte";
+import Control from "./ol/Control.svelte";
+import ZoomControl from "./components/ZoomControl.svelte";
 </script>
 
 <style>
@@ -81,7 +84,8 @@
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['zoom', 'layerSwitcher', 'rotate', 'scaleline']}>
+    <Controls defaults={['layerSwitcher', 'rotate', 'scaleline']}>
+      <ZoomControl/>
       <MapLocator />
       <MapSearch
         on:change={(e) => {
@@ -94,6 +98,9 @@
         }} />
       <MapDownloader />
       <Measure />
+      <Control>
+        <Button on:click={console.log}>Foo</Button>
+      </Control>
     </Controls>
     <MapLabel />
   </Map>
