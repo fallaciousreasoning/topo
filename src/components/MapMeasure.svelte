@@ -1,23 +1,17 @@
 <script lang="ts">
-  import Control from "../ol/Control.svelte";
   import DrawTrack from "../tools/DrawTrack.svelte";
+  import MapControl from "./MapControl.svelte";
 
   let measuring = false;
 </script>
 
-<style>
-  .measuring {
-    background: white;
-  }
-</style>
-
-<Control control>
+<MapControl>
   <button
-    class={measuring && 'measuring'}
+    class={`map-button ${measuring && 'bg-primary hover:bg-primary-hover text-background'}`}
     on:click={(e) => (measuring = !measuring)}>
-    📏
+    <span class="-m-2">📏</span>
   </button>
-</Control>
+</MapControl>
 
 {#if measuring}
   <DrawTrack />

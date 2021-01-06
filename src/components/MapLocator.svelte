@@ -3,11 +3,12 @@
   import Geolocation from "ol/Geolocation";
   import Icon from "ol/style/Icon";
   import Style from "ol/style/Style";
-  import Control from "./ol/Control.svelte";
-  import Feature from "./ol/Feature.svelte";
-  import { getOlContext } from "./ol/Map.svelte";
-  import VectorLayer from "./ol/VectorLayer.svelte";
-  import onMountTick from "./utils/onMountTick";
+import MapControl from "./MapControl.svelte";
+  import Control from "../ol/Control.svelte";
+  import Feature from "../ol/Feature.svelte";
+  import { getOlContext } from "../ol/Map.svelte";
+  import VectorLayer from "../ol/VectorLayer.svelte";
+  import onMountTick from "../utils/onMountTick";
 
   const { map } = getOlContext();
 
@@ -30,13 +31,13 @@
   }
 </script>
 
-<Control control>
+<MapControl>
   <button
-    style={`color: ${tracking ? 'blue' : 'white'}`}
-    on:click={() => (tracking = !tracking)}>
+    on:click={() => tracking = !tracking}  
+    class={`map-button ${tracking && 'hover:bg-primary-hover hover:text-background'}`}>
     ⬊
   </button>
-</Control>
+</MapControl>
 
 <VectorLayer>
   {#if tracking && position}

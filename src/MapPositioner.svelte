@@ -4,6 +4,8 @@
   import { fromLonLat, toLonLat } from "ol/proj";
   import round from "./utils/round";
   import { getOlContext } from "./ol/Map.svelte";
+import { onMount } from "svelte";
+import onMountTick from "./utils/onMountTick";
 
   const { map } = getOlContext();
   const localStorageKey = "mapPosition";
@@ -96,5 +98,6 @@
 
   map.on("moveend", debounced);
   map.on("zoom", debounced);
-  restorePosition();
+
+  onMount(restorePosition);
 </script>
