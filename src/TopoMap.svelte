@@ -5,7 +5,7 @@
   import Button from "./components/Button.svelte";
   import MapDownloader from "./components/MapDownloader.svelte";
   import MapLocator from "./components/MapLocator.svelte";
-  import Measure from "./components/Measure.svelte";
+  import Measure from "./components/MapMeasure.svelte";
   import ZoomControl from "./components/ZoomControl.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
   import { tileCacheId, tileUrlFunction } from "./layers/linzTopoSource";
