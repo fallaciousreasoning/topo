@@ -21,6 +21,15 @@
   let searching = false;
   let results = [];
 
+  let shouldClose = false;
+  const close = () => {
+    shouldClose = true;
+    setTimeout(() => {
+      if (!shouldClose) return;
+      searching = false;
+    });
+  }
+
   const updateResults = async () => {
     try {
       results = await geocode(query);
@@ -36,13 +45,16 @@
 <MapControl>
   <div
     tabindex=0
-    on:focusin={(e) => searching = true}
-    on:focusout={(e) => searching = false}>
+    on:focusin={(e) => {
+      shouldClose = false;
+      searching = true;
+    }}
+    on:focusout={close}>
     <div
-      class="flex rounded items-start border ${searching && 'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary'}">
+      class="transition-colors divide-purple-200 flex rounded items-start border ${searching && 'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary'}">
       <button
         tabindex=-1
-        class={`transition-colors map-button flex-shrink-0 ${searching && 'bg-primary focus:bg-primary-hover hover:bg-primary-hover'}`}>
+        class={`transition-colors duration-200 map-button flex-shrink-0 ${searching && 'bg-primary focus:bg-primary-hover hover:bg-primary-hover'}`}>
         <span class="-mx-2">🔎</span>
       </button>
 
@@ -61,7 +73,7 @@
         {#each results as result}
           <div
             class="opacity-95 hover:bg-background-hover"
-            on:mouseup={() => selectResult(result)}>
+            on:click={() => selectResult(result)}>
             {result.name}
           </div>
         {/each}
