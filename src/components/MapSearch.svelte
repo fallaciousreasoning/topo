@@ -33,12 +33,6 @@
   };
 </script>
 
-<style>
-  .result:hover {
-    background: rgba(0.8, 0.8, 0.8, 0.5);
-  }
-</style>
-
 <MapControl>
   <div
     tabindex=0
