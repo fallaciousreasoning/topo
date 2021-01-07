@@ -1,18 +1,9 @@
 <script lang="ts">
-    import { all } from "ol/events/condition";
-
-    import { preventDefault } from "ol/events/Event";
-
     import BaseLayer from "ol/layer/Base";
-    import Layer from "ol/layer/Layer";
-    import { get } from "ol/proj";
     import LayerGroup from "ol/layer/Group";
-
-    import { getOlContext } from "../ol/Map.svelte";
-    import Button from "./Button.svelte";
-    import MapControl from "./MapControl.svelte";
-    import { key } from "localforage";
     import { onMount } from "svelte";
+    import { getOlContext } from "../ol/Map.svelte";
+    import MapControl from "./MapControl.svelte";
 
     const { map } = getOlContext();
     let open = true;
@@ -51,6 +42,8 @@
     $: featureLayers = nonGroupLayers.filter((l) => l.get("type") !== "base");
     $: canSelectAllFeatures = featureLayers.find((l) => !l.get("visible"));
     $: canSelectNoFeatures = featureLayers.find((l) => l.get("visible"));
+    const toggleAllFeatures = (visible: boolean) =>
+        featureLayers.forEach((l) => l.set("visible", visible));
 
     onMount(() => {
         selectedBaseLayer = baseLayers.findIndex((l) => l.get("visible"));
@@ -81,18 +74,14 @@
                 {#if canSelectAllFeatures}
                     <button
                         class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
-                        on:click={() => {
-                            for (const layer of featureLayers) layer.set('visible', true);
-                        }}>
+                        on:click={() => toggleAllFeatures(true)}>
                         All
                     </button>
                 {/if}
                 {#if canSelectNoFeatures}
                     <button
                         class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
-                        on:click={() => {
-                            for (const layer of featureLayers) layer.set('visible', false);
-                        }}>
+                        on:click={() => toggleAllFeatures(false)}>
                         None
                     </button>
                 {/if}
