@@ -33,11 +33,13 @@
     $: nonGroupLayers = allLayers.filter((l) => !(l instanceof LayerGroup));
 
     $: baseLayers = nonGroupLayers.filter((l) => l.get("type") === "base");
-    let selectedBaseLayer = 0;
+    let selectedBaseLayer = -1;
     $: {
-        // Handle selecting a different base layer.
-        for (const baseLayer of baseLayers) baseLayer.set("visible", false);
-        baseLayers[selectedBaseLayer].set("visible", true);
+        if (selectedBaseLayer !== -1) {
+            // Handle selecting a different base layer.
+            for (const baseLayer of baseLayers) baseLayer.set("visible", false);
+            baseLayers[selectedBaseLayer].set("visible", true);
+        }
     }
 
     $: featureLayers = nonGroupLayers.filter((l) => l.get("type") !== "base");
@@ -52,10 +54,10 @@
 </script>
 
 <MapControl position="topright">
-    <div on:mouseenter={e => open = true} on:mouseleave={e => open = false}>
-        <button class="map-button">
-            <span class="-ml-1">↔️</span>
-        </button>
+    <div
+        on:mouseenter={(e) => (open = true)}
+        on:mouseleave={(e) => (open = false)}>
+        <button class="map-button"> <span class="-ml-1">↔️</span> </button>
         {#if open}
             <div
                 transition:grow
