@@ -51,54 +51,59 @@
 </script>
 
 <MapControl position="topright">
-    <button class="map-button" on:click={(e) => (open = !open)}>
-        <span class="-ml-1">↔️</span>
-    </button>
-    {#if open}
-        <div class="w-52 bg-background py-2 px-4 rounded-b">
-            <h4 class="text-foreground font-bold">Base Maps</h4>
-            {#each baseLayers as layer, index}
-                <div>
-                    <label>
-                        <input
-                            type="radio"
-                            bind:group={selectedBaseLayer}
-                            value={index} />
-                        {layer.get('title')}
-                    </label>
-                </div>
-            {/each}
-            <div class="w-auto border-t border-foreground my-2" />
-            <h4 class="text-foreground font-bold">
-                Features
-                {#if canSelectAllFeatures}
-                    <button
-                        class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
-                        on:click={() => toggleAllFeatures(true)}>
-                        All
-                    </button>
-                {/if}
-                {#if canSelectNoFeatures}
-                    <button
-                        class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
-                        on:click={() => toggleAllFeatures(false)}>
-                        None
-                    </button>
-                {/if}
-            </h4>
-            {#each featureLayers as layer}
-                <div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={layer.get('visible')}
-                            on:change={(e) => {
-                                layer.set('visible', e.target['checked']);
-                            }} />
-                        {layer.get('title')}
-                    </label>
-                </div>
-            {/each}
-        </div>
-    {/if}
+    <div
+        
+        on:mouseenter={() => open = true}
+        on:mouseleave={() => open = false}>
+        <button class="map-button">
+            <span class="-ml-1">↔️</span>
+        </button>
+        {#if open}
+            <div class="w-52 bg-background py-2 px-4 rounded-b">
+                <h4 class="text-foreground font-bold">Base Maps</h4>
+                {#each baseLayers as layer, index}
+                    <div>
+                        <label>
+                            <input
+                                type="radio"
+                                bind:group={selectedBaseLayer}
+                                value={index} />
+                            {layer.get('title')}
+                        </label>
+                    </div>
+                {/each}
+                <div class="w-auto border-t border-foreground my-2" />
+                <h4 class="text-foreground font-bold">
+                    Features
+                    {#if canSelectAllFeatures}
+                        <button
+                            class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
+                            on:click={() => toggleAllFeatures(true)}>
+                            All
+                        </button>
+                    {/if}
+                    {#if canSelectNoFeatures}
+                        <button
+                            class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
+                            on:click={() => toggleAllFeatures(false)}>
+                            None
+                        </button>
+                    {/if}
+                </h4>
+                {#each featureLayers as layer}
+                    <div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={layer.get('visible')}
+                                on:change={(e) => {
+                                    layer.set('visible', e.target['checked']);
+                                }} />
+                            {layer.get('title')}
+                        </label>
+                    </div>
+                {/each}
+            </div>
+        {/if}
+    </div>
 </MapControl>
