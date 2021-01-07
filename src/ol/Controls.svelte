@@ -5,8 +5,6 @@
   import portal from "../utils/portal";
   import Control from "./Control.svelte";
   import { onMount, setContext } from "svelte";
-  import LayerSwitcher from "ol-layerswitcher";
-  import "ol-layerswitcher/src/ol-layerswitcher.css";
 
   type ControlPosition = "topleft" | "topright" | "bottomleft";
 
@@ -15,7 +13,6 @@
     scaleline: { control: ScaleLine, position: "bottomleft" },
     rotate: { control: Rotate, position: "topright" },
     zoom: { control: Zoom, position: "topleft" },
-    layerSwitcher: { control: LayerSwitcher, position: "topright" }
   };
   export let defaults: (keyof typeof controls)[] = ["zoom", "rotate"];
   const { map } = getOlContext();

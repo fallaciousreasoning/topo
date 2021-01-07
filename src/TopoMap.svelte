@@ -73,7 +73,7 @@ import MapFeatures from "./components/MapFeatures.svelte";
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['layerSwitcher', 'rotate', 'scaleline']}>
+    <Controls defaults={['rotate', 'scaleline']}>
       <MapZoom />
       <MapLocator />
       <MapSearch
