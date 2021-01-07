@@ -11,8 +11,8 @@
     import { getOlContext } from "../ol/Map.svelte";
     import Button from "./Button.svelte";
     import MapControl from "./MapControl.svelte";
-import { key } from "localforage";
-import { onMount } from "svelte";
+    import { key } from "localforage";
+    import { onMount } from "svelte";
 
     const { map } = getOlContext();
     let open = true;
@@ -38,9 +38,9 @@ import { onMount } from "svelte";
         }
     }
 
-    $: nonGroupLayers = allLayers.filter(l => !(l instanceof LayerGroup));
+    $: nonGroupLayers = allLayers.filter((l) => !(l instanceof LayerGroup));
 
-    $: baseLayers = nonGroupLayers.filter(l => l.get('type') === "base");
+    $: baseLayers = nonGroupLayers.filter((l) => l.get("type") === "base");
     let selectedBaseLayer = 0;
     $: {
         // Handle selecting a different base layer.
@@ -48,11 +48,13 @@ import { onMount } from "svelte";
         baseLayers[selectedBaseLayer].set("visible", true);
     }
 
-    $: featureLayers = nonGroupLayers.filter(l => l.get('type') !== 'base');
+    $: featureLayers = nonGroupLayers.filter((l) => l.get("type") !== "base");
+    $: canSelectAllFeatures = featureLayers.find((l) => !l.get("visible"));
+    $: canSelectNoFeatures = featureLayers.find((l) => l.get("visible"));
 
     onMount(() => {
-        selectedBaseLayer = baseLayers.findIndex(l => l.get('visible'));
-    })
+        selectedBaseLayer = baseLayers.findIndex((l) => l.get("visible"));
+    });
 </script>
 
 <MapControl position="topright">
@@ -74,7 +76,27 @@ import { onMount } from "svelte";
                 </div>
             {/each}
             <div class="w-auto border-t border-foreground my-2" />
-            <h4 class="text-foreground font-bold">Features</h4>
+            <h4 class="text-foreground font-bold">
+                Features
+                {#if canSelectAllFeatures}
+                    <button
+                        class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
+                        on:click={() => {
+                            for (const layer of featureLayers) layer.set('visible', true);
+                        }}>
+                        All
+                    </button>
+                {/if}
+                {#if canSelectNoFeatures}
+                    <button
+                        class="appearance-none text-blue-500 active:text-blue-400 hover:underline focus:outline-none"
+                        on:click={() => {
+                            for (const layer of featureLayers) layer.set('visible', false);
+                        }}>
+                        None
+                    </button>
+                {/if}
+            </h4>
             {#each featureLayers as layer}
                 <div>
                     <label>
