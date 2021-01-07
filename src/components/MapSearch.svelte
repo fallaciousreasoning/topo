@@ -47,6 +47,7 @@
     <div
       class="flex rounded items-start border ${searching && 'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary'}">
       <button
+        tabindex=-1
         class={`transition-colors map-button flex-shrink-0 ${searching && 'bg-primary focus:bg-primary-hover hover:bg-primary-hover'}`}>
         <span class="-mx-2">🔎</span>
       </button>
@@ -66,7 +67,7 @@
         {#each results as result}
           <div
             class="opacity-95 hover:bg-background-hover"
-            on:click={() => selectResult(result)}>
+            on:mouseup={() => selectResult(result)}>
             {result.name}
           </div>
         {/each}
