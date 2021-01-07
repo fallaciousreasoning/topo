@@ -7,7 +7,7 @@
     import grow from "../transitions/grow";
 
     const { map } = getOlContext();
-    let open = true;
+    let open = false;
 
     const getAllLayers = (): BaseLayer[] =>
         map

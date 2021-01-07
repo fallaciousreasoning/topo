@@ -65,15 +65,17 @@
     on:focusout={close}>
     <div
       class="transition-colors divide-purple-200 flex rounded items-start border ${open && 'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary'}">
+      {#if !searching}
       <button
         tabindex="-1"
         class={`transition-colors duration-200 map-button flex-shrink-0 ${open && 'bg-primary focus:bg-primary-hover hover:bg-primary-hover'}`}>
-        {#if !searching}
           <span class="-mx-2">🔎</span>
-        {:else}
-          <Spinner />
-        {/if}
       </button>
+      {:else}
+        <div class="w-11 bg-primary rounded">
+          <Spinner class="text-background"/>
+        </div>
+      {/if}
 
       {#if open}
         <input

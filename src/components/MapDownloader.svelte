@@ -7,7 +7,6 @@
   import MapControl from "./MapControl.svelte";
   import Spinner from "./Spinner.svelte";
 
-
   const { map } = getOlContext();
 
   let zoom = map.getView().getZoom();
@@ -41,7 +40,9 @@
         ⤓
       </button>
     {:else}
-      <Spinner />
+      <div class="w-11">
+        <Spinner />
+      </div>
     {/if}
   </MapControl>
 {/if}
