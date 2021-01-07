@@ -12,6 +12,7 @@
     import Button from "./Button.svelte";
     import MapControl from "./MapControl.svelte";
 import { key } from "localforage";
+import { onMount } from "svelte";
 
     const { map } = getOlContext();
     let open = true;
@@ -29,6 +30,7 @@ import { key } from "localforage";
             )
             .filter((l) => l.get("title"));
     let allLayers = getAllLayers();
+    // Handle layers changing.
     map.getLayers().on("change", () => (allLayers = getAllLayers()));
     $: {
         for (const layer of allLayers) {
@@ -36,26 +38,21 @@ import { key } from "localforage";
         }
     }
 
-    const noGroups = (layers: BaseLayer[]) => layers.filter(l => !(l instanceof LayerGroup));
+    $: nonGroupLayers = allLayers.filter(l => !(l instanceof LayerGroup));
 
-    const getLayersOfType = (type: "base" | "feature") =>
-        allLayers
-            .filter((l) => !(l instanceof LayerGroup))
-            .filter((l) => {
-                const layerType = l.get("type");
-                if (type === "base") return layerType === type;
-                return layerType !== "base";
-            });
-
-    let baseLayers = noGroups(allLayers).filter(l => l.get('type') === "base");
-    let selectedBaseLayer = baseLayers.findIndex((l) => l.get("visible"));
+    $: baseLayers = nonGroupLayers.filter(l => l.get('type') === "base");
+    let selectedBaseLayer = 0;
     $: {
         // Handle selecting a different base layer.
         for (const baseLayer of baseLayers) baseLayer.set("visible", false);
         baseLayers[selectedBaseLayer].set("visible", true);
     }
 
-    $: featureLayers = noGroups(allLayers).filter(l => l.get('type') !== 'base');
+    $: featureLayers = nonGroupLayers.filter(l => l.get('type') !== 'base');
+
+    onMount(() => {
+        selectedBaseLayer = baseLayers.findIndex(l => l.get('visible'));
+    })
 </script>
 
 <MapControl position="topright">
