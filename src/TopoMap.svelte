@@ -1,7 +1,7 @@
 <script lang="ts">
   import "ol/ol.css";
   import OSM from "ol/source/OSM";
-  import cachingSource from "./caching/cachingSource";
+  import cachingSource from "./sources/cachingSource";
   import MapDownloader from "./components/MapDownloader.svelte";
   import MapLocator from "./components/MapLocator.svelte";
   import MapMeasure from "./components/MapMeasure.svelte";
@@ -18,6 +18,8 @@
   import View from "./ol/View.svelte";
   import { setLabel } from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
+  import { linzAerialLayerUrl } from "./layers/linzAerialSource";
+import MapFeatures from "./components/MapFeatures.svelte";
 </script>
 
 <style>
@@ -58,7 +60,7 @@
         title="LINZ Aerial Imagery"
         type="base"
         visible={false}
-        source={'https://tiles-{a-c}.data-cdn.linz.govt.nz/services;key=fcac9d10d1c84527bd2a1ca2a35681d8/tiles/v4/set=4702/EPSG:3857/{z}/{x}/{y}.png'} />
+        source={linzAerialLayerUrl} />
       <TileLayer
         title="LINZ Topo"
         type="base"
@@ -71,7 +73,7 @@
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['layerSwitcher', 'rotate', 'scaleline']}>
+    <Controls defaults={['rotate', 'scaleline']}>
       <MapZoom />
       <MapLocator />
       <MapSearch
@@ -81,6 +83,7 @@
         }} />
       <MapMeasure />
       <MapDownloader />
+      <MapFeatures/>
     </Controls>
     <MapLabel />
   </Map>

@@ -5,7 +5,7 @@ import { Coordinate } from 'ol/coordinate';
 import { TileCoord } from 'ol/tilecoord';
 import * as localforage from 'localforage'
 import { tileCacheId } from '../layers/linzTopoSource';
-import { getTileCacher } from '../caching/cachingSource';
+import { getTileCacher } from '../sources/cachingSource';
 import Tile from 'ol/Tile';
 import TileState from 'ol/TileState';
 const ESTIMATED_TILE_SIZE = 40 * 1024; // Estimate each tile at 40kb.
