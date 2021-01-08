@@ -1,25 +1,25 @@
 <script lang="ts">
   import "ol/ol.css";
   import OSM from "ol/source/OSM";
-  import cachingSource from "./sources/cachingSource";
   import MapDownloader from "./components/MapDownloader.svelte";
+  import MapFeatures from "./components/MapFeatures.svelte";
   import MapLocator from "./components/MapLocator.svelte";
   import MapMeasure from "./components/MapMeasure.svelte";
+  import MapSearch from "./components/MapSearch.svelte";
   import MapZoom from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
-  import { tileCacheId, linzTopoSource } from "./layers/linzTopoSource";
+  import { linzTopo, openTopo } from "./layers/layerDefinitions";
+  import { linzAerialLayerUrl } from "./layers/linzAerialSource";
   import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
-  import MapSearch from "./components/MapSearch.svelte";
   import Controls from "./ol/Controls.svelte";
   import LayerGroup from "./ol/LayerGroup.svelte";
   import Map from "./ol/Map.svelte";
   import TileLayer from "./ol/TileLayer.svelte";
   import View from "./ol/View.svelte";
+  import cachingSource from "./sources/cachingSource";
   import { setLabel } from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
-  import { linzAerialLayerUrl } from "./layers/linzAerialSource";
-import MapFeatures from "./components/MapFeatures.svelte";
 </script>
 
 <style>
@@ -55,7 +55,7 @@ import MapFeatures from "./components/MapFeatures.svelte";
         title="Open Topo Maps"
         type="base"
         visible={false}
-        source={'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'} />
+        source={cachingSource(openTopo)} />
       <TileLayer
         title="LINZ Aerial Imagery"
         type="base"
@@ -64,10 +64,7 @@ import MapFeatures from "./components/MapFeatures.svelte";
       <TileLayer
         title="LINZ Topo"
         type="base"
-        source={cachingSource({
-          tileUrlFunction: linzTopoSource,
-          getCacheId: tileCacheId,
-        })} />
+        source={cachingSource(linzTopo)} />
     </LayerGroup>
     <LayerGroup title="Features">
       <FeatureLayers />
@@ -83,7 +80,7 @@ import MapFeatures from "./components/MapFeatures.svelte";
       <MapLocator />
       <MapMeasure />
       <MapDownloader />
-      <MapFeatures/>
+      <MapFeatures />
     </Controls>
     <MapLabel />
   </Map>

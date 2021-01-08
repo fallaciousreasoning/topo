@@ -1,3 +1,4 @@
+import BaseLayer from "ol/layer/Base";
 import { TileCoord } from "ol/tilecoord";
 import { linzAerialTileUrl } from "./linzAerialSource";
 import { linzTopoSource } from "./linzTopoSource";
@@ -7,7 +8,7 @@ export interface BaseLayerDefinition {
     description: string;
 }
 
-export interface TileLayerDefinition {
+export type TileLayerDefinition = BaseLayerDefinition & {
     type: 'base';
     url: string | ((tile: TileCoord) => string);
 }
@@ -19,25 +20,30 @@ export interface FeatureLayerDefinition {
 export type LayerDefinition = BaseLayerDefinition
     & (TileLayerDefinition | FeatureLayerDefinition);
 
-export const layerDefinitions: LayerDefinition[] = [
-    {
-        name: "LINZ Topo",
-        description: "The LINZ topographic map",
-        type: "base",
-        url: linzTopoSource,
-    },
+export const linzTopo: TileLayerDefinition =
+{
+    name: "LINZ Topo",
+    description: "The LINZ topographic map",
+    type: "base",
+    url: linzTopoSource,
+};
+
+export const openTopo: TileLayerDefinition = 
+{
+    name: "Open Topo Maps",
+    description: "Topographic maps based on publicly available data",
+    type: 'base',
+    url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
+};
+
+export const layerDefinitions: LayerDefinition[] = [linzTopo,
     {
         name: "Open Street Maps",
         description: "Street maps provided by openstreetmaps",
         type: 'base',
         url: ''
     },
-    {
-        name: "Open Topo Maps",
-        description: "Topographic maps based on publicly available data",
-        type: 'base',
-        url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
-    },
+    openTopo,
     {
         name: 'LINZ Aerial Imagery',
         description: "High resolution imagery of New Zealand, provided by LINZ",
