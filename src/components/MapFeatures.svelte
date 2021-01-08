@@ -55,6 +55,7 @@
 
 <MapControl position="topright">
     <div
+        class="shadow rounded"
         on:mouseenter={(e) => (open = true)}
         on:mouseleave={(e) => (open = false)}>
         <button class="map-button"> <span class="-ml-1">↔️</span> </button>
