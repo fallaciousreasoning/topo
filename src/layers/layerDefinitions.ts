@@ -41,7 +41,7 @@ export const layerDefinitions: LayerDefinition[] = [linzTopo,
         name: "Open Street Maps",
         description: "Street maps provided by openstreetmaps",
         type: 'base',
-        url: ''
+        url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
     },
     openTopo,
     {
