@@ -13,7 +13,9 @@ interface Store {
         lat: number;
         lng: number;
         text: string;
-    }
+    },
+
+    page: string;
 }
 
 // Number of decimal places to keep in the url.
@@ -34,7 +36,8 @@ const parseHash = (): Store => {
             lat: getNum('lla'),
             lng: getNum('llo'),
             text: params.get('lab')
-        }
+        },
+        page: params.get('page')
     }
 }
 
@@ -69,7 +72,8 @@ export default readable<Store>({
         lat: undefined,
         lng: undefined,
         text: undefined,
-    }
+    },
+    page: undefined
 }, set => {
     const update =() => {
         set(parseHash());

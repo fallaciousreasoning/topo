@@ -1,20 +1,10 @@
 <script lang="ts">
     import slide from "../transitions/slide";
     import { expoInOut as easing } from 'svelte/easing';
-    import onMountTick from "../utils/onMountTick";
+    import fragment from '../stores/fragment';
 
     export let page: string;
-    let fragment = window.location.hash;
-    $: searchParams = new URLSearchParams(fragment);
-    $: currentPage = searchParams.get('page');
-    
-    onMountTick(() => {
-        const listener =  () => fragment = window.location.hash;
-        window.addEventListener('hashchange', listener);
-        return () => {
-            window.removeEventListener('hashchange', listener);
-        }
-    })
+    $: currentPage = $fragment.page;
 </script>
 
 {#if currentPage === page}
