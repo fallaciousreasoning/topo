@@ -74,13 +74,13 @@ import MapFeatures from "./components/MapFeatures.svelte";
     </LayerGroup>
 
     <Controls defaults={['rotate', 'scaleline']}>
-      <MapZoom />
-      <MapLocator />
       <MapSearch
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat];
           setLabel({ lat, lng, text: e.detail.result.name });
         }} />
+      <MapZoom />
+      <MapLocator />
       <MapMeasure />
       <MapDownloader />
       <MapFeatures/>
