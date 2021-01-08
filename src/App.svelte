@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Section from "./components/Section.svelte";
+import { layerDefinitions } from "./layers/layerDefinitions";
 	import TopoMap from "./TopoMap.svelte";
 </script>
 
@@ -14,5 +15,11 @@
 	<div class="w-full border-t border-foreground mt-1" />
 	<div>
 		<h4 class="mt-2 font-semibold text-base">Layers</h4>
+		{#each layerDefinitions.filter(l => l.type === "base") as layer}
+			<div>
+				<h5 class="font-medium">{layer.name}</h5>
+				{layer.description}
+			</div>
+		{/each}
 	</div>
 </Section>

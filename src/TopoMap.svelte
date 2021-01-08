@@ -7,7 +7,7 @@
   import MapMeasure from "./components/MapMeasure.svelte";
   import MapZoom from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
-  import { tileCacheId, tileUrlFunction } from "./layers/linzTopoSource";
+  import { tileCacheId, linzTopoSource } from "./layers/linzTopoSource";
   import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
   import MapSearch from "./components/MapSearch.svelte";
@@ -65,7 +65,7 @@ import MapFeatures from "./components/MapFeatures.svelte";
         title="LINZ Topo"
         type="base"
         source={cachingSource({
-          tileUrlFunction: tileUrlFunction,
+          tileUrlFunction: linzTopoSource,
           getCacheId: tileCacheId,
         })} />
     </LayerGroup>

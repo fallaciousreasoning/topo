@@ -2,7 +2,7 @@ import { UrlFunction } from "ol/Tile";
 import { pickRandom } from "../utils/random";
 import { TileCoord } from "ol/tilecoord";
 
-export const tileUrlFunction = (tile: TileCoord): string => {
+export const linzTopoSource = (tile: TileCoord): string => {
     const source = pickRandom('abc');
     return tileUrl(tile, source)
 }
