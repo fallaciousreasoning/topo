@@ -57,7 +57,7 @@ export const setPosition = (position: Store["position"]) => {
     params.set("lat", roundedS(position.lat));
     params.set("lng", roundedS(position.lng));
     params.set("zoom", roundedS(position.zoom));
-    params.set("rotation", roundedS(position.rotation));
+    params.set("rotation", roundedS(isNaN(position.rotation) ? 0 : position.rotation));
     window.location.hash = params.toString();
 }
 
