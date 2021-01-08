@@ -61,6 +61,16 @@ export const setPosition = (position: Store["position"]) => {
     window.location.hash = params.toString();
 }
 
+export const setPage = (page: string) => {
+    const params = getParams();
+    if (page) {
+        params.set("page", page);
+    } else {
+        params.delete("page");
+    }
+    window.location.hash = params.toString();
+}
+
 export default readable<Store>({
     position: {
         lat: undefined,
@@ -75,7 +85,7 @@ export default readable<Store>({
     },
     page: undefined
 }, set => {
-    const update =() => {
+    const update = () => {
         set(parseHash());
     };
     update();

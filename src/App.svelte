@@ -4,7 +4,7 @@
 </script>
 
 <TopoMap/>
-<Section page="settings">
+<Section page="settings" title="Settings">
 	The quick brown fox jumps over the lazy dog 
     The quick brown fox jumps over the lazy dog 
 </Section>
