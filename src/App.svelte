@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Section from "./components/Section.svelte";
+	import Checkbox from "./components/Checkbox.svelte";
+import Section from "./components/Section.svelte";
 import { layerDefinitions } from "./layers/layerDefinitions";
 	import TopoMap from "./TopoMap.svelte";
 </script>
@@ -17,8 +18,8 @@ import { layerDefinitions } from "./layers/layerDefinitions";
 		<h4 class="mt-2 font-semibold text-base">Layers</h4>
 		{#each layerDefinitions.filter(l => l.type === "base") as layer}
 			<div>
-				<h5 class="font-medium">{layer.name}</h5>
-				{layer.description}
+				<Checkbox label={layer.name}></Checkbox>
+				<div>{layer.description}</div>
 			</div>
 		{/each}
 	</div>

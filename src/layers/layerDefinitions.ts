@@ -36,7 +36,8 @@ export const openTopo: TileLayerDefinition =
     url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
 };
 
-export const layerDefinitions: LayerDefinition[] = [linzTopo,
+export const layerDefinitions: LayerDefinition[] = [
+    linzTopo,
     {
         name: "Open Street Maps",
         description: "Street maps provided by openstreetmaps",
