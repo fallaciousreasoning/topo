@@ -34,6 +34,7 @@ onMount(() => {
 				<Checkbox label="Cache Viewed Tiles"
 					checked={$settings.baseLayers[layer.name].cache}
 					on:change={e => settings.updateBaseLayer(layer.name, { cache: e.target['checked'] })}/>
+				<div>Currently using 0 bytes of storage.</div>
 			</div>
 		{/each}
 	</div>
