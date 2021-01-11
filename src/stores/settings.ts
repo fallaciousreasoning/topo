@@ -4,6 +4,7 @@ import localForage from 'localforage';
 import { debounce } from '../utils/debounce';
 import BaseLayer from 'ol/layer/Base';
 import { applyUpdate } from '../utils/assign';
+import { layerDefinitions } from '../layers/layerDefinitions';
 
 interface BaseLayerSettings {
     cache: boolean;
@@ -28,7 +29,7 @@ const defaultBaseLayerSettings: BaseLayerSettings = {
 };
 
 const defaultValue: Store = {
-    baseLayers: {},
+    baseLayers: layerDefinitions.reduce((prev, next) => ({ ...prev, [next.name]: defaultBaseLayerSettings }), {}),
     theme: {
         primaryThemeColor: 'purple',
         seconaryThemeColor: 'orange',
@@ -60,7 +61,10 @@ const createStore = () => {
         });
     }
 
-    subscribe(store => saveSettings(store))
+    subscribe(store => {
+        saveSettings(store);
+        console.log("Updated", store);
+    })
 
     return {
         subscribe,
