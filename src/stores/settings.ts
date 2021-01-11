@@ -63,7 +63,6 @@ const createStore = () => {
 
     subscribe(store => {
         saveSettings(store);
-        console.log("Updated", store);
     })
 
     return {
