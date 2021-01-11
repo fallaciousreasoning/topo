@@ -1,10 +1,11 @@
 import { create } from 'ol/transform';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 import localForage from 'localforage';
 import { debounce } from '../utils/debounce';
 import BaseLayer from 'ol/layer/Base';
 import { applyUpdate } from '../utils/assign';
 import { layerDefinitions } from '../layers/layerDefinitions';
+import { resolvable } from '../utils/promise';
 
 interface BaseLayerSettings {
     cache: boolean;
@@ -40,6 +41,7 @@ const defaultValue: Store = {
 const loadSettings = () => localForage.getItem<Store>(settingsKey);
 const saveSettings = (settings: Store) => localForage.setItem(settingsKey, settings);
 
+const { resolve, promise } = resolvable<Store>();
 const createStore = () => {
     const {subscribe, set, update } = writable<Store>(defaultValue);
 
@@ -48,6 +50,7 @@ const createStore = () => {
         if (!settings)
             return;
         set(settings);
+        resolve(settings)
     });
 
     const updaterFor = <Key extends keyof Store>(key: Key) => (newSettings: Partial<Store[Key]>) => {
@@ -73,4 +76,10 @@ const createStore = () => {
     }
 }
 
-export default createStore();
+const store = createStore();
+export default store;
+
+export const getCurrentSettings = async () => {
+    await promise;
+    return get(store);
+};
