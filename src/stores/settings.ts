@@ -4,7 +4,7 @@ import localForage from 'localforage';
 import { debounce } from '../utils/debounce';
 import BaseLayer from 'ol/layer/Base';
 import { applyUpdate } from '../utils/assign';
-import { layerDefinitions } from '../layers/layerDefinitions';
+import { layerDefinitions, linzTopo } from '../layers/layerDefinitions';
 import { resolvable } from '../utils/promise';
 
 interface BaseLayerSettings {
@@ -37,6 +37,7 @@ const defaultValue: Store = {
         background: 'auto'
     }
 };
+defaultValue.baseLayers[linzTopo.name].cache = true;
 
 const loadSettings = () => localForage.getItem<Store>(settingsKey);
 const saveSettings = (settings: Store) => localForage.setItem(settingsKey, settings);
