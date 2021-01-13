@@ -28,14 +28,6 @@ export const linzTopo: TileLayerDefinition =
     url: linzTopoSource,
 };
 
-export const openTopo: TileLayerDefinition = 
-{
-    name: "Open Topo Maps",
-    description: "Topographic maps based on publicly available data",
-    type: 'base',
-    url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
-};
-
 export const layerDefinitions: TileLayerDefinition[] = [
     linzTopo,
     {
@@ -44,7 +36,12 @@ export const layerDefinitions: TileLayerDefinition[] = [
         type: 'base',
         url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
     },
-    openTopo,
+    {
+        name: "Open Topo Maps",
+        description: "Topographic maps based on publicly available data",
+        type: 'base',
+        url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
+    },
     {
         name: 'LINZ Aerial Imagery',
         description: "High resolution imagery of New Zealand, provided by LINZ",

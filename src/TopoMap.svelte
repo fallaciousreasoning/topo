@@ -8,8 +8,7 @@
   import MapSearch from "./components/MapSearch.svelte";
   import MapZoom from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
-  import { layerDefinitions, linzTopo, openTopo } from "./layers/layerDefinitions";
-  import { linzAerialLayerUrl } from "./layers/linzAerialSource";
+  import { layerDefinitions } from "./layers/layerDefinitions";
   import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
   import Controls from "./ol/Controls.svelte";
