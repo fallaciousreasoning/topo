@@ -36,7 +36,7 @@ export const openTopo: TileLayerDefinition =
     url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
 };
 
-export const layerDefinitions: LayerDefinition[] = [
+export const layerDefinitions: TileLayerDefinition[] = [
     linzTopo,
     {
         name: "Open Street Maps",
@@ -50,10 +50,5 @@ export const layerDefinitions: LayerDefinition[] = [
         description: "High resolution imagery of New Zealand, provided by LINZ",
         type: 'base',
         url: linzAerialTileUrl
-    },
-    {
-        name: "NZ Live Weather",
-        description: "Live weather, as reported from stations around New Zealand",
-        type: 'feature'
     }
 ]

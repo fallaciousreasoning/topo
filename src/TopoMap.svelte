@@ -8,7 +8,7 @@
   import MapSearch from "./components/MapSearch.svelte";
   import MapZoom from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
-  import { linzTopo, openTopo } from "./layers/layerDefinitions";
+  import { layerDefinitions, linzTopo, openTopo } from "./layers/layerDefinitions";
   import { linzAerialLayerUrl } from "./layers/linzAerialSource";
   import MapLabel from "./MapLabel.svelte";
   import MapPositioner from "./MapPositioner.svelte";
@@ -46,25 +46,13 @@
       initialView={nzBounds} />
     <MapPositioner />
     <LayerGroup title="Base Layers">
-      <TileLayer
-        title="Open Street Maps"
-        type="base"
-        visible={false}
-        source={new OSM()} />
-      <TileLayer
-        title="Open Topo Maps"
-        type="base"
-        visible={false}
-        source={cachingSource(openTopo)} />
-      <TileLayer
-        title="LINZ Aerial Imagery"
-        type="base"
-        visible={false}
-        source={linzAerialLayerUrl} />
-      <TileLayer
-        title="LINZ Topo"
-        type="base"
-        source={cachingSource(linzTopo)} />
+      {#each layerDefinitions as definition}
+        <TileLayer
+          title={definition.name}
+          type="base"
+          visible={false}
+          source={cachingSource(definition)}/>
+      {/each}
     </LayerGroup>
     <LayerGroup title="Features">
       <FeatureLayers />
