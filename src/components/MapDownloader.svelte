@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { linzTopoSource } from "../layers/linzTopoSource";
+import { linzTopo } from "../layers/layerDefinitions";
+
   import { getOlContext } from "../ol/Map.svelte";
   import { friendlyBytes } from "../utils/bytes";
   import onMountTick from "../utils/onMountTick";
@@ -33,7 +34,7 @@
           const message = `Would you like to download tiles?\nThis will use approximately ${friendlyBytes(downloader.estimatedSize())} of storage.`;
           if (!window.confirm(message)) return;
           downloading = true;
-          await downloader.downloadTiles(linzTopoSource, console.log);
+          await downloader.downloadTiles(linzTopo.url, console.log);
           downloading = false;
           alert('Downloaded tiles!');
         }}>

@@ -4,10 +4,8 @@ import { toLonLat } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { TileCoord } from 'ol/tilecoord';
 import * as localforage from 'localforage'
-import { tileCacheId } from '../layers/linzTopoSource';
-import { getTileCacher } from '../sources/cachingSource';
-import Tile from 'ol/Tile';
-import TileState from 'ol/TileState';
+import { getCacheId, getTileCacher } from '../sources/cachingSource';
+import { linzTopo } from '../layers/layerDefinitions';
 const ESTIMATED_TILE_SIZE = 40 * 1024; // Estimate each tile at 40kb.
 type TileUrl = string | ((tile: TileCoord) => string)
 
@@ -80,7 +78,7 @@ export class TileDownloader {
         const totalTiles = this.numTiles();
         let downloadedTiles = 0;
 
-        const cacher = getTileCacher(tileCacheId);
+        const cacher = getTileCacher(linzTopo);
         const queue = this.tiles();
 
         const worker = async () => {
@@ -88,7 +86,7 @@ export class TileDownloader {
             while (!result.done) {
                 const tile = result.value;
                 const url = urlFunc([tile.z, tile.x, tile.y]);
-                const cacheId = tileCacheId([tile.z, tile.x, tile.y]);
+                const cacheId = getCacheId(linzTopo, [tile.z, tile.x, tile.y]);
                 await cacher([tile.z, tile.x, tile.y], url);
                 // Only download tiles we haven't seen.
                 if (!await localforage.getItem(cacheId)) {

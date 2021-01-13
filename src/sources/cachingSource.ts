@@ -1,9 +1,8 @@
-import XYZ from "ol/source/XYZ";
-import { Options } from "ol/source/XYZ";
 import * as localforage from "localforage";
+import XYZ, { Options } from "ol/source/XYZ";
 import { TileCoord } from "ol/tilecoord";
-import settings, { getCurrentSettings } from '../stores/settings';
-import { get } from 'svelte/store';
+import { LayerDefinition } from "../layers/layerDefinitions";
+import { getCurrentSettings } from '../stores/settings';
 
 type CacheOptions = Omit<Options, "url"> & {
     name: string;
@@ -15,9 +14,11 @@ const getShouldCache = async (layer: { name: string }) => {
     return store.baseLayers[layer.name].cache;
 }
 
-export const getTileCacher = ({ name }: { name: string }) => async (tile: TileCoord, source: string) => {
-    const shouldCache = getShouldCache({ name });
-    const cacheId = `${name}/${tile[2]}/${tile[0]}/${tile[1]}`;
+export const getCacheId = (props: { name }, tile: TileCoord) => `${props.name}/${tile[2]}/${tile[0]}/${tile[1]}`;
+
+export const getTileCacher = (props: { name: string }) => async (tile: TileCoord, source: string) => {
+    const shouldCache = getShouldCache(props);
+    const cacheId = getCacheId(props, tile);
 
     let data: Blob;
     if (shouldCache) {

@@ -1,7 +1,6 @@
 import BaseLayer from "ol/layer/Base";
 import { TileCoord } from "ol/tilecoord";
-import { linzAerialTileUrl } from "./linzAerialSource";
-import { linzTopoSource } from "./linzTopoSource";
+import { pickRandom } from "../utils/random";
 
 export interface BaseLayerDefinition {
     name: string;
@@ -25,7 +24,10 @@ export const linzTopo: TileLayerDefinition =
     name: "LINZ Topo",
     description: "The LINZ topographic map",
     type: "base",
-    url: linzTopoSource,
+    url: ([z,x,y]: TileCoord) => {
+        const layer = z < 13 ? '50798' : '50767';
+        return `https://tiles-${pickRandom('abc')}.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=${layer}/EPSG:3857/${z}/${x}/${y}.png`;
+    },
 };
 
 export const layerDefinitions: TileLayerDefinition[] = [
@@ -46,6 +48,9 @@ export const layerDefinitions: TileLayerDefinition[] = [
         name: 'LINZ Aerial Imagery',
         description: "High resolution imagery of New Zealand, provided by LINZ",
         type: 'base',
-        url: linzAerialTileUrl
+        url: ([z,x,y]: TileCoord) => {
+            const layer = '4702';
+            return `https://tiles-${pickRandom('abc')}.data-cdn.linz.govt.nz/services;key=fcac9d10d1c84527bd2a1ca2a35681d8/tiles/v4/set=${layer}/EPSG:3857/${z}/${x}/${y}.png`;
+        }
     }
 ]
