@@ -44,13 +44,12 @@ const saveSettings = (settings: Store) => localForage.setItem(settingsKey, setti
 
 const { resolve, promise } = resolvable<Store>();
 const createStore = () => {
-    const {subscribe, set, update } = writable<Store>(defaultValue);
+    const { subscribe, set, update } = writable<Store>(defaultValue);
 
     // Load settings from disk.
     loadSettings().then(settings => {
-        if (!settings)
-            return;
-        set(settings);
+        if (settings)
+            set(settings);
         resolve(settings)
     });
 
@@ -60,7 +59,7 @@ const createStore = () => {
 
     const baseLayerUpdater = (id: string, layer: Partial<BaseLayerSettings>) => {
         return update(oldStore => {
-            const wholeLayer: BaseLayerSettings = {...defaultBaseLayerSettings, ...oldStore.baseLayers[id], ...layer };
+            const wholeLayer: BaseLayerSettings = { ...defaultBaseLayerSettings, ...oldStore.baseLayers[id], ...layer };
             return applyUpdate("baseLayers", oldStore, { [id]: wholeLayer })
         });
     }
