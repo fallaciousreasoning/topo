@@ -1,4 +1,4 @@
-import { readable } from 'svelte/store';
+import { readable, writable } from 'svelte/store';
 import round from '../utils/round';
 
 interface Store {
@@ -44,48 +44,56 @@ const parseHash = (): Store => {
     }
 }
 
-const getParams = () => new URLSearchParams(window.location.hash.substr(1));
-const roundedS = (n: number) => round(n, DPS).toString();
-
-export const setLabel = (label: Store['label']) => {
+const updateHashFromStore = (store: Store) => {
+    const { position, label, baseLayer, page } = store;
     const params = getParams();
-    params.set('lla', roundedS(label.lat));
-    params.set('llo', roundedS(label.lng));
-    params.set('lab', label.text);
-    window.location.hash = params.toString();
-}
 
-export const setPosition = (position: Store["position"]) => {
-    const params = getParams();
+    // Set position.
     params.set("lat", roundedS(position.lat));
     params.set("lng", roundedS(position.lng));
     params.set("zoom", roundedS(position.zoom));
     params.set("rotation", roundedS(isNaN(position.rotation) ? 0 : position.rotation));
-    window.location.hash = params.toString();
-}
 
-export const setPage = (page: string) => {
-    const params = getParams();
+    // Set label
+    if (label.lat && label.lng) {
+        params.set('lla', roundedS(label.lat));
+        params.set('llo', roundedS(label.lng));
+        params.set('lab', label.text);
+    }
+
+    // Set Page
     if (page) {
         params.set("page", page);
     } else {
         params.delete("page");
     }
-    window.location.hash = params.toString();
-}
 
-export const setBaseLayer = (baseLayer: number) => {
-    const params = getParams();
+    // Set base layer
     params.set("baseLayer", baseLayer.toString());
+
     window.location.hash = params.toString();
 }
 
-export default readable<Store>(parseHash(), set => {
-    const update = () => {
-        set(parseHash());
-    };
-    update();
-    window.addEventListener('hashchange', update);
+const getParams = () => new URLSearchParams(window.location.hash.substr(1));
+const roundedS = (n: number) => round(n, DPS).toString();
 
-    return () => window.removeEventListener('hashchange', update);
-});
+const customStore = () => {
+    const initialValue = parseHash();
+    const { subscribe, update, set } = writable(initialValue, () => {
+        const handleHashChange = () => set(parseHash());
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    });
+
+    subscribe(store => {
+        updateHashFromStore(store);
+    })
+
+    return {
+        subscribe,
+        update,
+        set
+    }
+}
+
+export default customStore();

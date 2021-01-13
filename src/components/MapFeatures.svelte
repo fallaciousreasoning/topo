@@ -5,7 +5,7 @@
     import { getOlContext } from "../ol/Map.svelte";
     import MapControl from "./MapControl.svelte";
     import grow from "../transitions/grow";
-    import fragment, { setBaseLayer } from "../stores/fragment";
+    import fragment from "../stores/fragment";
 
     const { map } = getOlContext();
     let open = false;
@@ -34,13 +34,12 @@
     $: nonGroupLayers = allLayers.filter((l) => !(l instanceof LayerGroup));
 
     $: baseLayers = nonGroupLayers.filter((l) => l.get("type") === "base");
-    let selectedBaseLayer = $fragment.baseLayer;
-    fragment.subscribe((s) => (selectedBaseLayer = $fragment.baseLayer));
+    // let selectedBaseLayer = $fragment.baseLayer;
+    // fragment.subscribe((s) => (selectedBaseLayer = $fragment.baseLayer));
     $: {
         // Handle selecting a different base layer.
         for (const baseLayer of baseLayers) baseLayer.set("visible", false);
-        baseLayers[selectedBaseLayer].set("visible", true);
-        setBaseLayer(selectedBaseLayer);
+        baseLayers[$fragment.baseLayer].set("visible", true);
     }
 
     $: featureLayers = nonGroupLayers.filter((l) => l.get("type") !== "base");
@@ -67,7 +66,7 @@
                             <label>
                                 <input
                                     type="radio"
-                                    bind:group={selectedBaseLayer}
+                                    bind:group={$fragment.baseLayer}
                                     value={index} />
                                 {layer.get('title')}
                             </label>

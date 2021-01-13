@@ -3,7 +3,8 @@
   import { getOlContext } from "./ol/Map.svelte";
 
   import Popup from "./ol/Popup.svelte";
-  import fragment, { setLabel } from "./stores/fragment";
+  import fragment from "./stores/fragment";
+import store from "./stores/settings";
 
   const { map } = getOlContext();
 
@@ -20,11 +21,11 @@
 {#if !!labelInfo.text}
   <Popup
     {position}
-    on:close={() => setLabel({
+    on:close={() => $fragment.label = {
         lat: null,
         lng: null,
         text: null,
-      })}>
+      }}>
     <p>{labelInfo.text}</p>
   </Popup>
 {/if}

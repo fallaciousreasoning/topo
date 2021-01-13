@@ -45,7 +45,6 @@
   import Point from "ol/geom/Point";
   import { corsFetch } from "../utils/cors";
   import { Style, Circle, Stroke, Fill, Text } from "ol/style";
-  import { setLabel } from "../stores/fragment";
   import VectorLayer from "../ol/VectorLayer.svelte";
   import VectorSource from "ol/source/Vector";
   import Popup from "../ol/Popup.svelte";

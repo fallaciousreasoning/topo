@@ -18,7 +18,7 @@
   import TileLayer from "./ol/TileLayer.svelte";
   import View from "./ol/View.svelte";
   import cachingSource from "./sources/cachingSource";
-  import { setLabel } from "./stores/fragment";
+  import fragment from "./stores/fragment";
   import { nzBounds } from "./utils/bounds";
 </script>
 
@@ -74,7 +74,7 @@
       <MapSearch
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat];
-          setLabel({ lat, lng, text: e.detail.result.name });
+          $fragment.label = { lat, lng, text: e.detail.result.name };
         }} />
       <MapZoom />
       <MapLocator />

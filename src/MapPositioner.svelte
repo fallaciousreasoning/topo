@@ -4,8 +4,9 @@
   import { fromLonLat, toLonLat } from "ol/proj";
   import round from "./utils/round";
   import { getOlContext } from "./ol/Map.svelte";
-import { onMount } from "svelte";
-import onMountTick from "./utils/onMountTick";
+  import { onMount } from "svelte";
+  import fragment from "./stores/fragment";
+  import { onlyTruthy } from "./utils/assign";
 
   const { map } = getOlContext();
   const localStorageKey = "mapPosition";
@@ -14,90 +15,60 @@ import onMountTick from "./utils/onMountTick";
     view: View,
     position: { lat: number; lng: number; zoom: number; rotation: number }
   ) => {
-    view.setCenter(fromLonLat([position.lng, position.lat]));
-    view.setZoom(position.zoom);
-    view.setRotation(isNaN(position.rotation) ? 0 : position.rotation);
+    if (!isNaN(position.lat) && !isNaN(position.lng)) {
+      view.setCenter(fromLonLat([position.lng, position.lat]));
+    }
+    if (!isNaN(position.zoom)) view.setZoom(position.zoom);
+    if (!isNaN(position.rotation))
+      view.setRotation(isNaN(position.rotation) ? 0 : position.rotation);
   };
 
-  const savePosition = () => {
+  const getMapPosition = () => {
     const view = map.getView();
-    const centre = toLonLat(view.getCenter());
-    const position = {
+    const centre = toLonLat(view.getCenter() || []);
+    return {
       lat: round(centre[1], 5),
       lng: round(centre[0], 5),
       zoom: view.getZoom(),
       rotation: view.getRotation(),
     };
-
-    localStorage.setItem(localStorageKey, JSON.stringify(position));
-
-    const queryParams = new URLSearchParams(location.hash.substr(1));
-    for (const key in position) {
-      queryParams.set(key, position[key]);
-    }
-
-    history.replaceState(null, "", `#${queryParams.toString()}`);
   };
 
-  const positionFromFragment = () => {
-    const queryParams = new URLSearchParams(location.hash.substr(1));
-    const position = {};
-
-    for (const [key, value] of queryParams) {
-      position[key] = value;
-    }
-
-    return position;
+  const savePosition = () => {
+    const position = getMapPosition();
+    localStorage.setItem(localStorageKey, JSON.stringify(position));
+    $fragment.position = position;
   };
 
   const positionFromLocalStorage = () => {
     const positionJSON = localStorage.getItem(localStorageKey);
     if (!positionJSON) return;
-
     return JSON.parse(positionJSON);
   };
 
   const restorePosition = () => {
-    const fragmentPosition = positionFromFragment();
     const localPosition = positionFromLocalStorage();
-
     // Prefer position from fragment string.
-    const position = { ...localPosition, ...fragmentPosition };
-
-    if (isNaN(position.lat) || isNaN(position.lng) || isNaN(position.zoom) || isNaN(position.rotation)) {
-      return;
-    }
-
+    const position = { ...localPosition, ...onlyTruthy($fragment.position) };
     updateView(map.getView(), position);
   };
 
-  const debounced = debounce(savePosition, 500);
+  const debouncedSavePosition = debounce(savePosition, 500);
+  map.on("moveend", debouncedSavePosition);
+  map.on("zoom", debouncedSavePosition);
 
-  window.addEventListener("hashchange", () => {
-    const view = map.getView();
-    const center = toLonLat(view.getCenter());
-    const oldPosition = {
-      lat: round(center[1], 5),
-      lng: round(center[0], 5),
-      zoom: view.getZoom(),
-      rotation: view.getRotation(),
-    };
-
-    const newPosition = { ...oldPosition, ...positionFromFragment() };
+  $: {
+    const oldPosition = getMapPosition();
+    const newPosition = { ...oldPosition, ...onlyTruthy($fragment.position) };
 
     if (
-      oldPosition.lat === newPosition.lat &&
-      oldPosition.lng === newPosition.lng &&
-      oldPosition.zoom === newPosition.zoom
+      oldPosition.lat !== newPosition.lat ||
+      oldPosition.lng !== newPosition.lng ||
+      oldPosition.zoom !== newPosition.zoom
     ) {
-      return;
+      updateView(map.getView(), newPosition);
     }
-
-    updateView(map.getView(), newPosition);
-  });
-
-  map.on("moveend", debounced);
-  map.on("zoom", debounced);
+  }
 
   onMount(restorePosition);
 </script>
