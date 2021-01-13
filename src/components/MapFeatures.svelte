@@ -5,6 +5,7 @@
     import { getOlContext } from "../ol/Map.svelte";
     import MapControl from "./MapControl.svelte";
     import grow from "../transitions/grow";
+    import fragment, { setBaseLayer } from "../stores/fragment";
 
     const { map } = getOlContext();
     let open = false;
@@ -33,13 +34,13 @@
     $: nonGroupLayers = allLayers.filter((l) => !(l instanceof LayerGroup));
 
     $: baseLayers = nonGroupLayers.filter((l) => l.get("type") === "base");
-    let selectedBaseLayer = -1;
+    let selectedBaseLayer = $fragment.baseLayer;
+    fragment.subscribe((s) => (selectedBaseLayer = $fragment.baseLayer));
     $: {
-        if (selectedBaseLayer !== -1) {
-            // Handle selecting a different base layer.
-            for (const baseLayer of baseLayers) baseLayer.set("visible", false);
-            baseLayers[selectedBaseLayer].set("visible", true);
-        }
+        // Handle selecting a different base layer.
+        for (const baseLayer of baseLayers) baseLayer.set("visible", false);
+        baseLayers[selectedBaseLayer].set("visible", true);
+        setBaseLayer(selectedBaseLayer);
     }
 
     $: featureLayers = nonGroupLayers.filter((l) => l.get("type") !== "base");
@@ -47,10 +48,6 @@
     $: canSelectNoFeatures = featureLayers.find((l) => l.get("visible"));
     const toggleAllFeatures = (visible: boolean) =>
         featureLayers.forEach((l) => l.set("visible", visible));
-
-    onMount(() => {
-        selectedBaseLayer = baseLayers.findIndex((l) => l.get("visible"));
-    });
 </script>
 
 <MapControl position="topright">

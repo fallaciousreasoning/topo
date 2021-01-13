@@ -7,7 +7,9 @@ interface Store {
         lng: number;
         zoom: number;
         rotation: number;
-    }
+    },
+
+    baseLayer: number;
 
     label: {
         lat: number;
@@ -32,6 +34,7 @@ const parseHash = (): Store => {
             zoom: getNum('zoom'),
             rotation: getNum('rotation')
         },
+        baseLayer: parseInt(params.get('baseLayer')) || 0,
         label: {
             lat: getNum('lla'),
             lng: getNum('llo'),
@@ -71,20 +74,13 @@ export const setPage = (page: string) => {
     window.location.hash = params.toString();
 }
 
-export default readable<Store>({
-    position: {
-        lat: undefined,
-        lng: undefined,
-        zoom: undefined,
-        rotation: 0
-    },
-    label: {
-        lat: undefined,
-        lng: undefined,
-        text: undefined,
-    },
-    page: undefined
-}, set => {
+export const setBaseLayer = (baseLayer: number) => {
+    const params = getParams();
+    params.set("baseLayer", baseLayer.toString());
+    window.location.hash = params.toString();
+}
+
+export default readable<Store>(parseHash(), set => {
     const update = () => {
         set(parseHash());
     };
