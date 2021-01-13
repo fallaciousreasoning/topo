@@ -1,4 +1,4 @@
-import { readable, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import round from '../utils/round';
 
 interface Store {
@@ -49,16 +49,23 @@ const updateHashFromStore = (store: Store) => {
     const params = getParams();
 
     // Set position.
-    params.set("lat", roundedS(position.lat));
-    params.set("lng", roundedS(position.lng));
-    params.set("zoom", roundedS(position.zoom));
+    if (position.lat)
+        params.set("lat", roundedS(position.lat));
+    if (position.lng)
+        params.set("lng", roundedS(position.lng));
+    if (position.zoom)
+        params.set("zoom", roundedS(position.zoom));
     params.set("rotation", roundedS(isNaN(position.rotation) ? 0 : position.rotation));
 
     // Set label
-    if (label.lat && label.lng) {
+    if (label.lat && label.lng && label.text) {
         params.set('lla', roundedS(label.lat));
         params.set('llo', roundedS(label.lng));
         params.set('lab', label.text);
+    } else {
+        params.delete('lla');
+        params.delete('llo');
+        params.delete('lab');
     }
 
     // Set Page
