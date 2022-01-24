@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import fragment from "./stores/fragment";
   import { onlyTruthy } from "./utils/assign";
+  import { areSimilar } from "./utils/equal";
 
   const { map } = getOlContext();
   const localStorageKey = "mapPosition";
@@ -61,11 +62,11 @@
     const oldPosition = getMapPosition();
     const newPosition = { ...oldPosition, ...onlyTruthy($fragment.position) };
 
-    if (
-      oldPosition.lat !== newPosition.lat ||
-      oldPosition.lng !== newPosition.lng ||
-      oldPosition.zoom !== newPosition.zoom
-    ) {
+    if (!areSimilar(
+      [oldPosition.lat, oldPosition.lng, oldPosition.zoom],
+      [newPosition.lat, newPosition.lng, newPosition.zoom],
+      3
+    )) {
       updateView(map.getView(), newPosition);
     }
   }

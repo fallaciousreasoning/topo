@@ -4,16 +4,20 @@
 
   import Popup from "./ol/Popup.svelte";
   import fragment from "./stores/fragment";
-import store from "./stores/settings";
+  import { shallowEqual } from "./utils/equal";
 
   const { map } = getOlContext();
 
+  let lastLabel = $fragment.label;
   $: labelInfo = $fragment.label;
   $: position = fromLonLat([labelInfo.lng, labelInfo.lat]);
 
   $: {
-    if (labelInfo.text && position[0] && position[1]) {
-      map.getView().animate({ center: position });
+    if (!shallowEqual(lastLabel, labelInfo)) {
+      lastLabel = labelInfo;
+      if (labelInfo.text && position[0] && position[1]) {
+        map.getView().animate({ center: position });
+      }
     }
   }
 </script>
@@ -21,11 +25,13 @@ import store from "./stores/settings";
 {#if !!labelInfo.text}
   <Popup
     {position}
-    on:close={() => $fragment.label = {
+    on:close={() =>
+      ($fragment.label = {
         lat: null,
         lng: null,
         text: null,
-      }}>
+      })}
+  >
     <p>{labelInfo.text}</p>
   </Popup>
 {/if}

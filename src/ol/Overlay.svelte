@@ -4,7 +4,7 @@
     import type { Coordinate } from "ol/coordinate";
   
     export let position: Coordinate;
-    export let autoPan: boolean;
+    export let autoPan: boolean | undefined;
 
     const { map } = getOlContext();
   

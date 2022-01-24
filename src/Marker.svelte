@@ -8,7 +8,7 @@
   export let position: Coordinate;
 </script>
 
-<Overlay {position}>
+<Overlay {position} autoPan={false}>
   <div
     class="marker"
     style="position: absolute; left: -{width / 2}px; top: -{height}px">
