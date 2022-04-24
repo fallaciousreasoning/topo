@@ -1,4 +1,4 @@
-const bypassCors = "https://cors-anywhere.herokuapp.com/";
+const bypassCors = "https://progrssive-cors.herokuapp.com/";
 
 export const corsFetch = (request: string, init?: RequestInit) => {
     const url = `${bypassCors}${request}`;
