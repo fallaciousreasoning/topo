@@ -8,7 +8,7 @@
   import grow from "../transitions/grow";
   import { debounce } from "../utils/debounce";
   import Spinner from "./Spinner.svelte";
-  import {nameIsMatch } from '../search/match';
+  import { filterResults } from "../search/match";
 
   const dispatcher = createEventDispatcher();
   const { map } = getOlContext();
@@ -25,7 +25,7 @@
 
   let open = false;
   let results: GeocodeResult[] = [];
-  $: filteredResults = results.filter(r => nameIsMatch(r.name, query));
+  $: filteredResults = filterResults(results, query);
 
   let shouldClose = false;
   const close = () => {
@@ -46,8 +46,7 @@
 
   $: searching = debouncedQuery !== query;
   $: {
-    if (debouncedQuery !== query)
-      debouncedOnlineSearch();
+    if (debouncedQuery !== query) debouncedOnlineSearch();
   }
 
   const selectResult = (result: GeocodeResult) => {
@@ -67,14 +66,14 @@
     <div
       class="transition-colors divide-purple-200 flex rounded items-start border ${open && 'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary'}">
       {#if !searching}
-      <button
-        tabindex="-1"
-        class={`transition-colors duration-200 map-button flex-shrink-0 ${open && 'bg-primary focus:bg-primary-hover hover:bg-primary-hover'}`}>
+        <button
+          tabindex="-1"
+          class={`transition-colors duration-200 map-button flex-shrink-0 ${open && 'bg-primary focus:bg-primary-hover hover:bg-primary-hover'}`}>
           <span class="-mx-2">🔎</span>
-      </button>
+        </button>
       {:else}
         <div class="w-11 bg-primary rounded">
-          <Spinner class="text-background"/>
+          <Spinner class="text-background" />
         </div>
       {/if}
 
@@ -88,7 +87,8 @@
       {/if}
     </div>
     {#if open}
-      <div class={`max-h-72 overflow-y-auto ${!!filteredResults.length && 'mt-1'}`}>
+      <div
+        class={`max-h-72 overflow-y-auto ${!!filteredResults.length && 'mt-1'}`}>
         {#each filteredResults.slice(0, 20) as result}
           <div
             class="opacity-95 hover:bg-background-hover px-2 py-1"

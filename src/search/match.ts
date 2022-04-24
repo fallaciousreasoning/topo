@@ -1,3 +1,5 @@
+import { GeocodeResult } from "./geocode";
+
 // Note: Note all of these are supported by the search service...
 const substitutions = {
     'mt': 'mount',
@@ -5,14 +7,15 @@ const substitutions = {
     'pt': 'point'
 };
 
-export const nameIsMatch = (place: string, query: string) => {
+export const filterResults = (results: GeocodeResult[], query: string) => {
     query = query.toLowerCase();
-    place = place.toLowerCase();
     const queries = [query];
+
+    // Work out all the variations.
     for (const [abbr, full] of Object.entries(substitutions)) {
         if (query.includes(abbr))
         queries.push(query.replace(abbr, full));
     }
 
-    return queries.some(q => place.includes(q));
+    return results.filter(r => queries.some(q => r.name.toLowerCase().includes(q)));
 }
