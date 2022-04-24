@@ -8,6 +8,7 @@
   import grow from "../transitions/grow";
   import { debounce } from "../utils/debounce";
   import Spinner from "./Spinner.svelte";
+  import {nameIsMatch } from '../search/match';
 
   const dispatcher = createEventDispatcher();
   const { map } = getOlContext();
@@ -24,8 +25,10 @@
 
   let open = false;
   let results: GeocodeResult[] = [];
-  $: filteredResults = results.filter(r => r.name.toLowerCase().includes(query.toLowerCase()));
-
+  $: filteredResults = results.filter(r => nameIsMatch(r.name, query));
+  $: {
+    console.log(filteredResults)
+  }
   let shouldClose = false;
   const close = () => {
     shouldClose = true;
