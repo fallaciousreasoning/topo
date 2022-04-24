@@ -24,7 +24,9 @@ const downloadFirstRunAssets = async () => {
     '/build/extra.css',
     '/build/tailwind.css',
     '/build/bundle.js',
-    '/data/huts.json'
+    '/data/huts.json',
+    '/icons/marker.svg',
+    '/icons/location-indicator.svg'
   ]);
 };
 
