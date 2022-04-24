@@ -26,9 +26,7 @@
   let open = false;
   let results: GeocodeResult[] = [];
   $: filteredResults = results.filter(r => nameIsMatch(r.name, query));
-  $: {
-    console.log(filteredResults)
-  }
+
   let shouldClose = false;
   const close = () => {
     shouldClose = true;
