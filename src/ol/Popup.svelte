@@ -9,6 +9,7 @@
   export let position: Coordinate;
   export let closable: boolean = true;
   export let autoPan: boolean = false;
+  export let width: string = ''; // Should be a tailwind width.
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -39,7 +40,7 @@
 
 <!-- svelte-ignore a11y-missing-content -->
 <Overlay {position} {autoPan} let:overlay>
-  <div class="ol-popup absolute shadow-lg bg-white rounded-md p-4 pt-6 max-w-5xl w-48 border-gray-500">
+  <div class={`ol-popup absolute shadow-lg bg-white rounded-md p-4 pt-6 max-w-5xl border-gray-500 ${width}`}>
     {#if closable}
       <a
         href="#close"

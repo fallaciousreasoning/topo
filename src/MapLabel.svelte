@@ -24,6 +24,7 @@
 
 {#if !!labelInfo.text}
   <Popup
+    width='w-48'
     {position}
     on:close={() =>
       ($fragment.label = {
