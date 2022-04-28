@@ -17,10 +17,12 @@
     })
 </script>
 
-<MapControl position="topright">
-    <div class="flex flex-col">
-        <button class="map-button" on:click={resetRotation}>
-            <div style={`transform:rotate(${rotation + Math.PI/2}rad); transform-origin:center`}>⥷</div>
-        </button>
-    </div>
-</MapControl>
+{#if rotation != 0}
+    <MapControl position="topright">
+        <div class="flex flex-col">
+            <button class="map-button" on:click={resetRotation}>
+                <div style={`transform:rotate(${rotation + Math.PI/2}rad); transform-origin:center`}>⥷</div>
+            </button>
+        </div>
+    </MapControl>
+{/if}
