@@ -14,7 +14,7 @@
         class="bg-background px-4 py-2 z-20 shadow h-screen max-w-md w-screen absolute left-0 top-0">
         <h2 class="font-semibold text-lg">
             {#if closable}
-                <button on:click={e => $fragment.page = null}>🡸</button>
+                <button on:click={e => $fragment.page = null}>☰</button>
             {/if}
             {title}
         </h2>
