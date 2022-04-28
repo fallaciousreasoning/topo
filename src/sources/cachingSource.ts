@@ -1,6 +1,7 @@
 import * as localforage from "localforage";
 import XYZ, { Options } from "ol/source/XYZ";
 import { TileCoord } from "ol/tilecoord";
+import TileState from "ol/TileState";
 import { LayerDefinition } from "../layers/layerDefinitions";
 import { getCurrentSettings } from '../stores/settings';
 
@@ -45,9 +46,13 @@ export default (options: CacheOptions) => {
     return new XYZ({
         ...rest,
         tileLoadFunction: async (tile, source) => {
-            const url = await cacher(tile.getTileCoord(), source);
-            const image: HTMLImageElement = tile['getImage']();
-            image.src = url;
+            try {
+                const url = await cacher(tile.getTileCoord(), source);
+                const image: HTMLImageElement = tile['getImage']();
+                image.src = url;
+            } catch (err) {
+                tile.setState(TileState.ERROR);
+            }
         }
     })
 }
