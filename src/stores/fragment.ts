@@ -58,10 +58,10 @@ const updateHashFromStore = (store: Store) => {
     params.set("rotation", roundedS(isNaN(position.rotation) ? 0 : position.rotation));
 
     // Set label
-    if (label.lat && label.lng && label.text) {
+    if (label.lat && label.lng) {
         params.set('lla', roundedS(label.lat));
         params.set('llo', roundedS(label.lng));
-        params.set('lab', label.text);
+        params.set('lab', label.text ?? '');
     } else {
         params.delete('lla');
         params.delete('llo');

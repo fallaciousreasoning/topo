@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fromLonLat } from "ol/proj";
+import Marker from "./Marker.svelte";
   import { getOlContext } from "./ol/Map.svelte";
 
   import Popup from "./ol/Popup.svelte";
@@ -35,4 +36,6 @@
   >
     <p>{labelInfo.text}</p>
   </Popup>
+{:else}
+  <Marker {position}></Marker>
 {/if}
