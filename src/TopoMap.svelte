@@ -5,6 +5,7 @@
   import MapFeatures from "./components/MapFeatures.svelte";
   import MapLocator from "./components/MapLocator.svelte";
   import MapMeasure from "./components/MapMeasure.svelte";
+import MapRotate from "./components/MapRotate.svelte";
   import MapSearch from "./components/MapSearch.svelte";
   import MapZoom from "./components/MapZoom.svelte";
   import FeatureLayers from "./layers/FeatureLayers.svelte";
@@ -57,7 +58,7 @@
       <FeatureLayers />
     </LayerGroup>
 
-    <Controls defaults={['rotate', 'scaleline']}>
+    <Controls defaults={['scaleline']}>
       <MapSearch
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat];
@@ -68,6 +69,7 @@
       <MapMeasure />
       <MapDownloader />
       <MapFeatures />
+      <MapRotate />
     </Controls>
     <MapLabel />
   </Map>
