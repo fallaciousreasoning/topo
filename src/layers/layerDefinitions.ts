@@ -49,7 +49,7 @@ export const layerDefinitions: TileLayerDefinition[] = [
         description: "High resolution imagery of New Zealand, provided by LINZ",
         type: 'base',
         url: ([z,x,y]: TileCoord) => {
-            return `https://basemaps.linz.govt.nz/v1/tiles/aerial/EPSG:3857/${z}/${x}/${y}.webp?api=c01g1q2gnvqa6n7pdnjf0k8y50z`;
+            return `https://basemaps.linz.govt.nz/v1/tiles/aerial/EPSG:3857/${z}/${x}/${y}.webp?api=d01fbtg0ar3v159zx4e0ajt0n09`;
         }
     }
 ]
