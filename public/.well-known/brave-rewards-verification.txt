@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: topos.nz
+Token: c17eff72b7cd2603ee92ef84e44a55f996bdc0bec2d4295fbcf99ecca50b3664 
