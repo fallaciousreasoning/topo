@@ -1,5 +1,5 @@
 import { Dexie, Table } from "dexie";
-import { Track } from "./track";
+import type { Track } from "./track";
 import { v4 } from 'uuid'
 
 type TableNames = 'tracks';
@@ -31,4 +31,8 @@ export const insertItem = async <TableName extends TableNames>(table: TableName,
 
     await getTable(table).add(insert, insert.id);
     return insert;
+}
+
+export const updateItem = async <TableName extends TableNames>(table: TableName, id: string, update: Partial<TableTypes[TableName]>) => {
+    await getTable(table).update(id, update);
 }
