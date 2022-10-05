@@ -12,6 +12,7 @@ import { linzTopo } from "../layers/layerDefinitions";
 
   let zoom = map.getView().getZoom();
   let downloading = false;
+  let progress = 0;
 
   onMountTick(() => {
     const handler = () => {
@@ -28,13 +29,15 @@ import { linzTopo } from "../layers/layerDefinitions";
       <button
         class="map-button"
         on:click={async () => {
+          progress = 0;
+
           const view = map.getView();
           const extent = view.calculateExtent();
           const downloader = new TileDownloader(extent, view.getZoom());
           const message = `Would you like to download tiles?\nThis will use approximately ${friendlyBytes(downloader.estimatedSize())} of storage.`;
           if (!window.confirm(message)) return;
           downloading = true;
-          await downloader.downloadTiles(linzTopo.url, console.log);
+          await downloader.downloadTiles(linzTopo.url, p => progress = p);
           downloading = false;
           alert('Downloaded tiles!');
         }}>
@@ -42,7 +45,7 @@ import { linzTopo } from "../layers/layerDefinitions";
       </button>
     {:else}
       <div class="w-11">
-        <Spinner />
+        <Spinner mode='determinate' percent={progress}/>
       </div>
     {/if}
   </MapControl>
