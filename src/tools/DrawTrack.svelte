@@ -18,16 +18,44 @@
   import round from '../utils/round'
   import { db, insertItem, updateItem } from '../db'
   import { liveQuery } from 'dexie'
+  import type { Observable } from 'dexie'
   import { lineStringToLatLngs, trackToGeometry } from '../db/track'
   import type { Track } from '../db/track'
   import Feature from 'ol/Feature'
 
-  export let trackId: string;
+  export let trackId: string
 
   const { map } = getOlContext()
+
+  const trackListener = (t: Track) => {
+    source.clear()
+
+    const geometry = trackToGeometry(t)
+    const feature = new Feature(geometry)
+    source.addFeature(feature)
+
+    map.removeInteraction(interaction)
+
+    if (t.points.length >= 2) {
+      interaction = new Modify({
+        source,
+      })
+    } else {
+      interaction = new Draw({
+        source,
+        type: GeometryType.LINE_STRING,
+        style: styleFunction,
+      })
+      if (t.points.length) interaction.extend(feature)
+    }
+    map.addInteraction(interaction)
+  }
+
   $: track = liveQuery(() => {
     return db.tracks.where({ id: trackId }).first()
   })
+
+  $: track.subscribe(trackListener)
 
   const styleFunction: StyleLike = (feature) => {
     const stroke = 'white'
@@ -74,37 +102,7 @@
     updateWhileAnimating: true,
   })
 
-  let interaction: Draw | Modify = new Draw({
-    source: source,
-    type: GeometryType.LINE_STRING,
-
-    style: styleFunction,
-  })
-
-  $: track.subscribe((t) => {
-    source.clear()
-
-    const geometry = trackToGeometry(t);
-    const feature = new Feature(geometry);
-    source.addFeature(feature);
-
-    map.removeInteraction(interaction)
-
-    if (t.points.length >= 2) {
-      interaction = new Modify({
-        source,
-      })
-    } else {
-      interaction = new Draw({
-        source,
-        type: GeometryType.LINE_STRING,
-        style: styleFunction
-      });
-      if (t.points.length)
-        interaction.extend(feature)
-    }
-    map.addInteraction(interaction)
-  })
+  let interaction: Draw | Modify
 
   let popupPosition: Coordinate
   let popupMessage: string
@@ -112,7 +110,7 @@
   let heights: { height: number; percent: number }[]
 
   $: {
-    interaction.on(
+    interaction?.on(
       interaction instanceof Modify ? 'modifystart' : 'drawstart',
       (e) => {
         const feature = e.feature ?? source.getFeatures()[0]
@@ -128,7 +126,7 @@
     )
 
     // When the draw finished, start modifying the layerer.
-    interaction.on(
+    interaction?.on(
       interaction instanceof Modify ? 'modifyend' : 'drawend',
       async (e) => {
         const feature = e.feature ?? source.getFeatures()[0]
@@ -136,7 +134,9 @@
         popupMessage = null
 
         const geometry = feature.getGeometry() as LineString
-        updateItem('tracks', trackId, { points: lineStringToLatLngs(geometry) })
+        updateItem('tracks', trackId, {
+          points: lineStringToLatLngs(geometry),
+        })
         heights = await getPathHeight(geometry)
 
         interaction = new Modify({
@@ -148,10 +148,8 @@
   }
 
   onMountTick(() => {
-    map.addInteraction(interaction)
     map.addLayer(layer)
     return () => {
-      map.removeInteraction(interaction)
       map.removeLayer(layer)
     }
   })
@@ -181,8 +179,7 @@
       data={{
         labels: heights.map((h) => round(h.percent * distance, 0)),
         datasets: [{ values: heights.map((h) => h.height) }],
-      }}
-    />
+      }} />
   </div>
 {/if}
 
