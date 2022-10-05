@@ -36,10 +36,6 @@
     return db.tracks.where({ id: trackId }).first()
   })
 
-  $: {
-    console.log('Track: ', track)
-  }
-
   const styleFunction: StyleLike = (feature) => {
     const stroke = 'white'
     const fill = '#0099ff'
@@ -77,10 +73,6 @@
   }
 
   const source = new VectorSource()
-  track.subscribe(t => {
-    source.clear();
-    source.addFeature(new Feature(trackToGeometry(t)));
-  });
 
   const layer = new VectorLayer({
     source,
@@ -95,6 +87,20 @@
 
     style: styleFunction,
   })
+
+  track.subscribe(t => {
+    source.clear();
+
+    if (!t) return;
+
+    source.addFeature(new Feature(trackToGeometry(t)));
+    
+    map.removeInteraction(interaction)
+    interaction = new Modify({
+      source
+    })
+    map.addInteraction(interaction);
+  });
 
   let popupPosition: Coordinate
   let popupMessage: string
