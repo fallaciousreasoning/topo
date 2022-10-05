@@ -39,9 +39,14 @@
                     name: e.target['value'],
                   })} />
             </span>
-            <span
-              ><span class="font-semibold">Points:</span>
-              {track.points.length}</span>
+            <span>
+                <span class="font-semibold">Points:</span>
+                {track.points.length}
+            </span>
+            <span>
+                <span class="font-semibold">Distance:</span>
+                {track.distance}
+            </span>
             <div class="flex flex-row gap-2">
               <Button class="" on:click={(e) => deleteTrack(track)}>🗑</Button>
               <Button
@@ -54,7 +59,7 @@
       {/each}
     {/if}
     <Button on:click={async (e) => {
-        const track = await insertItem('tracks', { name: 'Untitled Track', points: [], draft: true })
+        const track = await insertItem('tracks', { name: 'Untitled Track', points: [], draft: true, created: Date.now(), updated: Date.now(), distance: 0 })
         $fragment.page = `tracks/${track.id}`
     }}>
       Create Track

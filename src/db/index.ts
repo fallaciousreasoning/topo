@@ -39,5 +39,5 @@ export const insertItem = async <TableName extends TableNames>(table: TableName,
 }
 
 export const updateItem = async <TableName extends TableNames>(table: TableName, id: string, update: Partial<TableTypes[TableName]>) => {
-    await getTable(table).update(id, update);
+    await getTable(table).update(id, { ...update, updated: Date.now() });
 }

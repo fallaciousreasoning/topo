@@ -136,6 +136,7 @@
         const geometry = feature.getGeometry() as LineString
         updateItem('tracks', trackId, {
           points: lineStringToLatLngs(geometry),
+          distance: getLength(geometry)
         })
         heights = await getPathHeight(geometry)
 
