@@ -15,9 +15,9 @@ export class Db extends Dexie {
 
     constructor() {
         super('db');
-        this.version(2)
+        this.version(3)
             .stores({
-                tracks: 'id',
+                tracks: 'id,created,updated,distance',
                 tiles: 'id,layer'
             });
     }
