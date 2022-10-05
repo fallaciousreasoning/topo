@@ -9,8 +9,10 @@
 
 <MapControl>
   <button
-    class={`map-button ${drawing && 'bg-primary hover:bg-primary-hover text-background'}`}
-    on:click={(e) => ($fragment.page = 'tracks')}>
+    class={`map-button ${
+      drawing && 'bg-primary hover:bg-primary-hover text-background'
+    }`}
+    on:click={(e) => ($fragment.page = drawing ? null : 'tracks')}>
     <span class="-m-2">📏</span>
   </button>
 </MapControl>
