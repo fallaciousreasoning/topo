@@ -7,9 +7,10 @@
     export let page: string;
     export let title = '';
     export let closable = true;
+    export let exact = false;
 </script>
 
-<Route path={page}>
+<Route path={page} {exact}>
     <div
         transition:slide={{ easing }}
         class="bg-gray-100 px-4 py-2 z-20 shadow h-screen max-w-md w-screen absolute left-0 top-0">
