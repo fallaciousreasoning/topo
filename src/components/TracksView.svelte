@@ -1,7 +1,7 @@
 <script lang="ts">
   import Section from './Section.svelte'
   import { liveQuery } from 'dexie'
-  import { db, updateItem } from '../db'
+  import { db, insertItem, updateItem } from '../db'
   import Button from './Button.svelte'
   import Card from './Card.svelte'
   import Route from './Route.svelte'
@@ -24,7 +24,7 @@
 
 <Section page="tracks" title="Tracks">
   <div class="w-full border-t border-foreground mt-1" />
-  <div class="my-2">
+  <div class="my-2 flex flex-col gap-2">
     {#if $tracks}
       {#each $tracks as track}
         <Card>
@@ -44,12 +44,21 @@
               {track.points.length}</span>
             <div class="flex flex-row gap-2">
               <Button class="" on:click={(e) => deleteTrack(track)}>🗑</Button>
-              <Button class="" on:click={e => $fragment.page = `tracks/${track.id}`}>✎</Button>
+              <Button
+                class=""
+                on:click={(e) => ($fragment.page = `tracks/${track.id}`)}
+                >✎</Button>
             </div>
           </div>
         </Card>
       {/each}
     {/if}
+    <Button on:click={async (e) => {
+        const track = await insertItem('tracks', { name: 'Untitled Track', points: [], draft: true })
+        $fragment.page = `tracks/${track.id}`
+    }}>
+      Create Track
+    </Button>
     <div />
   </div>
 </Section>

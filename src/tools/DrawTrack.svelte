@@ -23,21 +23,9 @@
   import Feature from 'ol/Feature'
 
   export let trackId: string;
-  const createTrack = (id = undefined) => {
-    const toInsert: Track = {
-      id,
-      name: 'Untitled Track',
-      points: [],
-      draft: true,
-    }
-    insertItem('tracks', toInsert)
-    trackId = toInsert.id
-  }
-
-  if (!trackId) createTrack()
 
   const { map } = getOlContext()
-  let track = liveQuery(() => {
+  $: track = liveQuery(() => {
     return db.tracks.where({ id: trackId }).first()
   })
 
@@ -93,13 +81,8 @@
     style: styleFunction,
   })
 
-  track.subscribe((t) => {
+  $: track.subscribe((t) => {
     source.clear()
-
-    if (!t) {
-      createTrack(trackId)
-      return
-    }
 
     const geometry = trackToGeometry(t);
     const feature = new Feature(geometry);
