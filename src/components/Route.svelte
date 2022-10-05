@@ -1,6 +1,8 @@
 <script lang="ts">
   import fragment from '../stores/fragment'
+
   export let path: string = ''
+  export let exact: boolean = false
 
   const getMatchInfo = (page) => {
     if (!page)
@@ -9,10 +11,10 @@
     const pathParts = path.split('/');
     const pageParts = page.split('/')
 
-    if (pageParts.length !== pathParts.length) return false
+    if (exact && pageParts.length !== pathParts.length) return false
 
     const params = {}
-    for (let i = 0; i < pageParts.length; ++i) {
+    for (let i = 0; i < pathParts.length; ++i) {
       const pathPart = pathParts[i]
       const pagePart = pageParts[i]
 
@@ -27,7 +29,7 @@
     return params
   }
 
-  $: params = getMatchInfo($fragment.page);
+  $: params = getMatchInfo($fragment.page) as { [key: string]: string };
 </script>
 
 {#if params}
