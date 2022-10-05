@@ -4,6 +4,8 @@
   import { db, updateItem } from '../db'
   import Button from './Button.svelte'
   import Card from './Card.svelte'
+  import Route from './Route.svelte'
+  import fragment from '../stores/fragment'
 
   const tracks = liveQuery(() => db.tracks.toArray())
 </script>
@@ -14,7 +16,7 @@
     {#if $tracks}
       {#each $tracks as track}
         <Card>
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col gap-1" on:click={() => $fragment.page = `tracks/${track.id}`}>
             <span><span class="font-semibold">Id:</span> {track.id}</span>
             <span>
               <span class="font-semibold">Name:</span>
@@ -41,4 +43,5 @@
       {/each}
     {/if}
     <div />
-  </div></Section>
+  </div>
+</Section>
