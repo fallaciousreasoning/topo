@@ -20,6 +20,10 @@
 
       if (pathPart.startsWith(':')) {
         params[pathPart.substring(1)] = pagePart
+
+        // We can't have empty path parts, unless the user has said they can be
+        // empty.
+        if (!pathPart && !pagePart.endsWith('?')) return false;
         continue
       }
 

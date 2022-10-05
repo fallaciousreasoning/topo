@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import round from '../utils/round';
 
-type Page = `menu` | `settings` | `tracks` | `tracks/${string}`;
+type Pages = `menu` | `settings` | `tracks` | `tracks/${string}`;
 
 interface Store {
     position: {
@@ -19,7 +19,7 @@ interface Store {
         text: string;
     },
 
-    page: Page;
+    page: Pages;
 }
 
 // Number of decimal places to keep in the url.
@@ -42,7 +42,7 @@ const parseHash = (): Store => {
             lng: getNum('llo'),
             text: params.get('lab')
         },
-        page: params.get('page') as Page
+        page: params.get('page') as Pages
     }
 }
 

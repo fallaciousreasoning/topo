@@ -20,11 +20,9 @@
   import { liveQuery } from 'dexie'
   import { lineStringToLatLngs, trackToGeometry } from '../db/track'
   import type { Track } from '../db/track'
-  import { toLonLat } from 'ol/proj'
-  import type { LatLng } from '../db/latlng'
   import Feature from 'ol/Feature'
 
-  export let trackId: string = undefined// '27e6a394-3b88-45ec-b709-90a5959b0fe3'
+  export let trackId: string;
   const createTrack = (id = undefined) => {
     const toInsert: Track = {
       id,

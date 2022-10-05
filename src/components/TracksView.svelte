@@ -6,8 +6,20 @@
   import Card from './Card.svelte'
   import Route from './Route.svelte'
   import fragment from '../stores/fragment'
+  import type { Track } from '../db/track'
+  import { tick } from 'svelte'
 
   const tracks = liveQuery(() => db.tracks.toArray())
+  const deleteTrack = async (track: Track) => {
+    if (!window.confirm(`Are you sure you want to delete '${track.name}'?`))
+      return
+
+    // If we're currently viewing this track we should stop.
+    if ($fragment.page.includes(track.id)) $fragment.page = 'tracks'
+
+    await tick()
+    await db.tracks.delete(track.id)
+  }
 </script>
 
 <Section page="tracks" title="Tracks">
@@ -16,7 +28,7 @@
     {#if $tracks}
       {#each $tracks as track}
         <Card>
-          <div class="flex flex-col gap-1" on:click={() => $fragment.page = `tracks/${track.id}`}>
+          <div class="flex flex-col gap-1">
             <span><span class="font-semibold">Id:</span> {track.id}</span>
             <span>
               <span class="font-semibold">Name:</span>
@@ -31,12 +43,8 @@
               ><span class="font-semibold">Points:</span>
               {track.points.length}</span>
             <div class="flex flex-row gap-2">
-              <Button
-                class=""
-                on:click={(e) =>
-                  window.confirm('Are you sure?') && db.tracks.delete(track.id)}
-                >🗑</Button>
-              <Button class="">✎</Button>
+              <Button class="" on:click={(e) => deleteTrack(track)}>🗑</Button>
+              <Button class="" on:click={e => $fragment.page = `tracks/${track.id}`}>✎</Button>
             </div>
           </div>
         </Card>
