@@ -1,20 +1,24 @@
 import { Dexie, Table } from "dexie";
 import type { Track } from "./track";
 import { v4 } from 'uuid'
+import { Tile } from "./tile";
 
-type TableNames = 'tracks';
+type TableNames = 'tracks' | 'tiles';
 type TableTypes = {
     tracks: Track;
+    tiles: Tile;
 }
 
 export class Db extends Dexie {
     tracks: Table<Track, string>;
+    tiles: Table<Tile, string>;
 
     constructor() {
         super('db');
-        this.version(1)
+        this.version(2)
             .stores({
-                tracks: 'id'
+                tracks: 'id',
+                tiles: 'id,layer'
             });
     }
 }
@@ -22,7 +26,7 @@ export class Db extends Dexie {
 export const db = new Db();
 
 export const getTable = <TableName extends TableNames>(table: TableName): Dexie.Table<TableTypes[TableName]> => {
-    return db[table];
+    return db[table as any];
 }
 
 export const insertItem = async <TableName extends TableNames>(table: TableName, item: Omit<TableTypes[TableName], 'id'>) => {
