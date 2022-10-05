@@ -6,6 +6,20 @@ import Section from "./Section.svelte";
 import Checkbox from './Checkbox.svelte';
 import { onMount } from "svelte";
     import Card from "./Card.svelte"
+    import { liveQuery } from "dexie"
+    import { db } from "../db"
+    import { friendlyBytes } from "../utils/bytes"
+
+const sizes = liveQuery(async () => {
+	const result = {}
+	await db.tiles.each((t) => {
+		if (!result[t.layer]) result[t.layer] = 0
+		result[t.layer] += t.data.size
+	})
+	return result
+})
+
+$: console.log($sizes)
 
 onMount(() => {
     for (const layer of layerDefinitions) {
@@ -30,7 +44,7 @@ onMount(() => {
 				<Checkbox label="Cache Viewed Tiles"
 					checked={$settings.baseLayers[layer.name].cache}
 					on:change={e => settings.updateBaseLayer(layer.name, { cache: e.target['checked'] })}/>
-				<div>Currently using 0 bytes of storage.</div>
+				<div>Currently using {friendlyBytes($sizes?.[layer.name] ?? 0)} bytes of storage.</div>
 			</Card>
 		{/each}
 	</div>
