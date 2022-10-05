@@ -7,7 +7,7 @@
   import fragment from '../stores/fragment'
   import { tick } from 'svelte'
   import Chart from 'svelte-frappe-charts'
-    import round from '../utils/round'
+  import round from '../utils/round'
 
   export let track: Track
 
@@ -52,15 +52,21 @@
       <div class="chart">
         <Chart
           type="line"
-          axisOptions={{ xIsSeries: true, xAxisMode: 'tick' }}
+          axisOptions={{
+            xIsSeries: true,
+            xAxisMode: 'tick',
+            shortenYAxisNumbers: true,
+          }}
           lineOptions={{ regionFill: 1, hideDots: true }}
-          height={200}
+          height={150}
           tooltipOptions={{
             formatTooltipX: (d) => `→ ${friendlyDistance(d)}`,
             formatTooltipY: (d) => `↑ ${d}m`,
           }}
           data={{
-            labels: track.elevations.map((h) => round(h.percent * track.distance, 0)),
+            labels: track.elevations.map((h) =>
+              round(h.percent * track.distance, 0)
+            ),
             datasets: [{ values: track.elevations.map((h) => h.elevation) }],
           }} />
       </div>
