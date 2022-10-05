@@ -5,9 +5,6 @@
   import SettingsView from './components/SettingsView.svelte'
   import TracksView from './components/TracksView.svelte'
   import TopoMap from './TopoMap.svelte'
-  import fragment from './stores/fragment'
-
-  $: console.log($fragment.page)
 </script>
 
 <TopoMap />

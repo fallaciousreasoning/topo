@@ -15,6 +15,8 @@
 
     if (!parsed.updated) parsed.updated = Date.now()
 
+    if (!parsed.distance) parsed.distance = 0;
+
     insertItem('tracks', parsed).then(
       (t) => ($fragment.page = `tracks/${t.id}`)
     )
