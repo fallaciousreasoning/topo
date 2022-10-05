@@ -25,7 +25,6 @@
 
 <Card>
   <div class="flex flex-col gap-1">
-    <span><span class="font-semibold">Id:</span> {track.id}</span>
     <span>
       <span class="font-semibold">Name:</span>
       <input
