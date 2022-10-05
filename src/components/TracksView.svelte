@@ -5,11 +5,14 @@
   import Button from './Button.svelte'
   import fragment from '../stores/fragment'
   import TrackCard from './TrackCard.svelte'
+  import { isMobile } from '../stores/mediaQueries'
 
-  const tracks = liveQuery(() => db.tracks.orderBy('updated').reverse().toArray())
+  const tracks = liveQuery(() =>
+    db.tracks.orderBy('updated').reverse().toArray()
+  )
 </script>
 
-<Section page="tracks" title="Tracks">
+<Section page="tracks" title="Tracks" exact={$isMobile}>
   <div class="w-full border-t border-foreground mt-1" />
   <div class="my-2 flex flex-col gap-2">
     {#if $tracks}
