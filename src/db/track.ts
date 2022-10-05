@@ -4,6 +4,7 @@ import { LatLng } from "./latlng";
 
 export interface Track {
     id: string;
+    name: string;
     draft?: boolean;
     points: LatLng[];
 }

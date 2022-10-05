@@ -11,7 +11,7 @@
 {#if $fragment.page === page}
     <div
         transition:slide={{ easing }}
-        class="bg-background px-4 py-2 z-20 shadow h-screen max-w-md w-screen absolute left-0 top-0">
+        class="bg-gray-100 px-4 py-2 z-20 shadow h-screen max-w-md w-screen absolute left-0 top-0">
         <h2 class="font-semibold text-lg">
             {#if closable}
                 <button on:click={e => $fragment.page = null}>☰</button>

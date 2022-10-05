@@ -3,10 +3,10 @@
   import fragment from '../stores/fragment'
 
   const toggleMenu = () => {
-    if ($fragment.page === 'settings') {
+    if ($fragment.page === 'menu') {
       history.go(-1)
     } else {
-      fragment.update((p) => ({ ...p, page: 'settings' }))
+      fragment.update((p) => ({ ...p, page: 'menu' }))
     }
   }
 </script>

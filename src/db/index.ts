@@ -27,7 +27,8 @@ export const getTable = <TableName extends TableNames>(table: TableName): Dexie.
 
 export const insertItem = async <TableName extends TableNames>(table: TableName, item: Omit<TableTypes[TableName], 'id'>) => {
     const insert = item as TableTypes[TableName];
-    insert.id = v4();
+    if (!insert.id)
+        insert.id = v4();
 
     await getTable(table).add(insert, insert.id);
     return insert;
