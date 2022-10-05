@@ -9,6 +9,7 @@ import { onMount } from "svelte";
     import { liveQuery } from "dexie"
     import { db } from "../db"
     import { friendlyBytes } from "../utils/bytes"
+    import Button from "./Button.svelte"
 
 const sizes = liveQuery(async () => {
 	const result = {}
@@ -45,6 +46,14 @@ onMount(() => {
 					checked={$settings.baseLayers[layer.name].cache}
 					on:change={e => settings.updateBaseLayer(layer.name, { cache: e.target['checked'] })}/>
 				<div>Currently using {friendlyBytes($sizes?.[layer.name] ?? 0)} bytes of storage.</div>
+				{#if $sizes?.[layer.name]}
+					<Button on:click={async e => {
+						if (window.confirm(`Are you sure you want to delete the tiles for ${layer.name}? They will not be available offline.`)) {
+							const tiles = await db.tiles.where({ layer: layer.name }).toArray();
+							await db.tiles.bulkDelete(tiles.map(t => t.id));
+						}
+					}}>Delete Tiles</Button>
+				{/if}
 			</Card>
 		{/each}
 	</div>
