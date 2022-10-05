@@ -8,6 +8,7 @@
   import fragment from '../stores/fragment'
   import type { Track } from '../db/track'
   import { tick } from 'svelte'
+    import { friendlyDistance } from '../utils/friendlyUnits'
 
   const tracks = liveQuery(() => db.tracks.toArray())
   const deleteTrack = async (track: Track) => {
@@ -45,7 +46,7 @@
             </span>
             <span>
                 <span class="font-semibold">Distance:</span>
-                {track.distance}
+                {friendlyDistance(track.distance)}
             </span>
             <div class="flex flex-row gap-2">
               <Button class="" on:click={(e) => deleteTrack(track)}>🗑</Button>
