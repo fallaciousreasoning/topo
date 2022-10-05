@@ -19,12 +19,12 @@
   import { db, insertItem, updateItem } from '../db'
   import { liveQuery } from 'dexie'
   import { lineStringToLatLngs, trackToGeometry } from '../db/track'
-  import type {Track} from '../db/track'
+  import type { Track } from '../db/track'
   import { toLonLat } from 'ol/proj'
   import type { LatLng } from '../db/latlng'
-    import Feature from 'ol/Feature'
+  import Feature from 'ol/Feature'
 
-  export let trackId: string = '078f0775-e2cc-4b4e-a1e6-154117dbb11e'
+  export let trackId: string = '27e6a394-3b88-45ec-b709-90a5959b0fe3'
   if (!trackId) {
     const toInsert: Track = { id: undefined, points: [], draft: true }
     insertItem('tracks', toInsert)
@@ -88,50 +88,54 @@
     style: styleFunction,
   })
 
-  track.subscribe(t => {
-    source.clear();
+  track.subscribe((t) => {
+    source.clear()
 
-    if (!t) return;
+    if (!t) return
 
-    source.addFeature(new Feature(trackToGeometry(t)));
-    
+    source.addFeature(new Feature(trackToGeometry(t)))
+
     map.removeInteraction(interaction)
     interaction = new Modify({
-      source
+      source,
     })
-    map.addInteraction(interaction);
-  });
+    map.addInteraction(interaction)
+  })
 
   let popupPosition: Coordinate
   let popupMessage: string
   let distance: number
   let heights: { height: number; percent: number }[]
 
-  interaction.on('drawstart', ({ feature }) => {
-    const geometry = feature.getGeometry() as LineString;
-    popupMessage = `Click last point to finish line.`
+  $: {
+    interaction.on(interaction instanceof Modify ? 'modifystart' : 'drawstart', (e) => {
+      const feature = source.getFeatures()[0];
+      const geometry = feature.getGeometry() as LineString
+      popupMessage = `Click last point to finish line.`
 
-    geometry.on('change', () => {
-      popupPosition = geometry['getLastCoordinate']()
-      distance = getLength(geometry)
+      geometry.on('change', () => {
+        popupPosition = geometry['getLastCoordinate']()
+        distance = getLength(geometry)
+      })
+    })
 
+    // When the draw finished, start modifying the layerer.
+    interaction.on(interaction instanceof Modify ? 'modifyend' : 'drawend', async e => {
+      const feature = source.getFeatures()[0];
+      map.removeInteraction(interaction)
+      popupMessage = null
+
+      const geometry = feature.getGeometry() as LineString
       updateItem('tracks', trackId, { points: lineStringToLatLngs(geometry) })
+      heights = await getPathHeight(geometry)
+
+
+      interaction = new Modify({
+        source,
+      })
+      map.addInteraction(interaction)
     })
-  })
-
-  // When the draw finished, start modifying the layerer.
-  interaction.on('drawend', async ({ feature }) => {
-    map.removeInteraction(interaction)
-    popupMessage = null
-
-    const geometry = feature.getGeometry() as LineString
-    heights = await getPathHeight(geometry)
-
-    interaction = new Modify({
-      source,
-    })
-    map.addInteraction(interaction)
-  })
+  }
 
   onMountTick(() => {
     map.addInteraction(interaction)
