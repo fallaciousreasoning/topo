@@ -9,6 +9,7 @@ export interface Track {
     updated: number;
     draft?: boolean;
     distance: number;
+    elevations?: { percent: number; elevation: number }[];
     points: LatLng[];
 }
 

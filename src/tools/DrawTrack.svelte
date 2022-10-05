@@ -13,12 +13,9 @@
   import { getLength } from 'ol/sphere'
   import Popup from '../ol/Popup.svelte'
   import { friendlyDistance } from '../utils/friendlyUnits'
-  import { getPathHeight } from '../search/height'
-  import Chart from 'svelte-frappe-charts'
-  import round from '../utils/round'
+  import { getPathElevations } from '../search/height'
   import { db, insertItem, updateItem } from '../db'
   import { liveQuery } from 'dexie'
-  import type { Observable } from 'dexie'
   import { lineStringToLatLngs, trackToGeometry } from '../db/track'
   import type { Track } from '../db/track'
   import Feature from 'ol/Feature'
@@ -107,7 +104,6 @@
   let popupPosition: Coordinate
   let popupMessage: string
   let distance: number
-  let heights: { height: number; percent: number }[]
 
   $: {
     interaction?.on(
@@ -138,7 +134,9 @@
           points: lineStringToLatLngs(geometry),
           distance: getLength(geometry)
         })
-        heights = await getPathHeight(geometry)
+
+        const elevations = await getPathElevations(geometry)
+        await updateItem('tracks', trackId, { elevations })
 
         interaction = new Modify({
           source,
@@ -166,24 +164,6 @@
   </div>
 </Popup>
 
-{#if heights}
-  <div class="chart">
-    <Chart
-      type="line"
-      axisOptions={{ xIsSeries: true, xAxisMode: 'tick' }}
-      lineOptions={{ regionFill: 1, hideDots: true }}
-      height={200}
-      tooltipOptions={{
-        formatTooltipX: (d) => `→ ${friendlyDistance(d)}`,
-        formatTooltipY: (d) => `↑ ${d}m`,
-      }}
-      data={{
-        labels: heights.map((h) => round(h.percent * distance, 0)),
-        datasets: [{ values: heights.map((h) => h.height) }],
-      }} />
-  </div>
-{/if}
-
 <style>
   .popup-content {
     white-space: nowrap;
@@ -191,15 +171,5 @@
     cursor: none;
     user-select: none;
     -moz-user-select: none;
-  }
-
-  .chart {
-    position: absolute;
-    background: white;
-    left: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 200px;
-    z-index: 1000;
   }
 </style>

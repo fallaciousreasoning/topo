@@ -58,17 +58,17 @@ export const heightAtPoint = async (lat: number, lng: number) => {
     return feature.properties.elevation;
 }
 
-export const getPathHeight = async (path: LineString, step = 100 /*metres*/) => {
+export const getPathElevations = async (path: LineString, step = 100 /*metres*/) => {
     const length = getLength(path);
     const percentStep = Math.min(1, step / length);
 
-    const heightPromises: Promise<{ height: number, percent: number }>[] = [];
+    const heightPromises: Promise<{ elevation: number, percent: number }>[] = [];
     const addPoint = (percent: number) => {
         const point = path.getCoordinateAt(percent);
         const [lon, lat] = toLonLat(point);
 
-        heightPromises.push(heightAtPoint(lat, lon).then(height => ({
-            height,
+        heightPromises.push(heightAtPoint(lat, lon).then(elevation => ({
+            elevation,
             percent
         })));
     }
@@ -79,5 +79,5 @@ export const getPathHeight = async (path: LineString, step = 100 /*metres*/) => 
 
     addPoint(1);
 
-    return (await Promise.all(heightPromises)).filter(r => r.height !== null);
+    return (await Promise.all(heightPromises)).filter(r => r.elevation !== null);
 }
