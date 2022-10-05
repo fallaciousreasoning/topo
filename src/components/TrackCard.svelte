@@ -1,7 +1,7 @@
 <script lang="ts">
   import { db, updateItem } from '../db'
   import type { Track } from '../db/track'
-  import { copyTrackImportLink } from '../db/track'
+  import { getTrackImportLink } from '../db/track'
   import { friendlyDistance } from '../utils/friendlyUnits'
   import Button from './Button.svelte'
   import Card from './Card.svelte'
@@ -21,6 +21,19 @@
 
     await tick()
     await db.tracks.delete(track.id)
+  }
+
+  const shareTrack = async () => {
+    const importLink = await getTrackImportLink(track);
+    if (!('share' in navigator)) {
+        // Copy to clipboard, nothing else we can do.
+        await navigator.clipboard.writeText(importLink);
+        return;
+    }
+
+    await navigator.share({
+        url: importLink
+    });
   }
 </script>
 
@@ -49,7 +62,7 @@
         >✎</Button>
       <Button
         class=""
-        on:click={(e) => copyTrackImportLink(track)}>
+        on:click={(e) => shareTrack()}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"

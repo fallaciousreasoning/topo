@@ -15,8 +15,7 @@ export interface Track {
 
 export const lineStringToLatLngs = (line: LineString) => line.getCoordinates().map(c => toLonLat(c)).map(([a, b]) => [b, a] as LatLng);
 export const trackToGeometry = (track: Track) => new LineString(track.points.map(([lat, lng]) => fromLonLat([lng, lat])))
-export const copyTrackImportLink = async (track: Track) => {
+export const getTrackImportLink = async (track: Track) => {
     const json = JSON.stringify(track);
-    const link = `${window.location.origin}#page=importTrack/${encodeURIComponent(json)}`;
-    await navigator.clipboard.writeText(link);
+    return `${window.location.origin}#page=importTrack/${encodeURIComponent(json)}`;
 }
