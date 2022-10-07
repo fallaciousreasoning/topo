@@ -1,8 +1,7 @@
-import * as localforage from "localforage";
 import XYZ, { Options } from "ol/source/XYZ";
 import { TileCoord } from "ol/tilecoord";
 import TileState from "ol/TileState";
-import { LayerDefinition } from "../layers/layerDefinitions";
+import { db } from "../db";
 import { getCurrentSettings } from '../stores/settings';
 
 type CacheOptions = Omit<Options, "url"> & {
@@ -23,15 +22,17 @@ export const getTileCacher = (props: { name: string }) => async (tile: TileCoord
 
     let data: Blob;
     if (shouldCache) {
-        data = await localforage.getItem(cacheId);
+        const tile = await db.tiles.get(cacheId);
+        data = tile?.data;
     }
 
     if (!data) {
         const response = await fetch(source);
         data = await response.blob();
 
-        if (shouldCache)
-            localforage.setItem(cacheId, data);
+        if (shouldCache) {
+            db.tiles.put({ id: cacheId, data, layer: props.name }, cacheId)
+        }
     }
     return URL.createObjectURL(data);
 }

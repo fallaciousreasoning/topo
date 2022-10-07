@@ -1,28 +1,63 @@
 <script lang="ts">
-  import VectorLayer from "ol/layer/Vector";
-  import VectorSource from "ol/source/Vector";
-  import { Draw, Modify } from "ol/interaction";
-  import GeometryType from "ol/geom/GeometryType";
-  import onMountTick from "../utils/onMountTick";
-  import Map, { getOlContext } from "../ol/Map.svelte";
-  import { Style, Stroke, Fill, Text } from "ol/style";
-  import type { Coordinate } from "ol/coordinate";
-  import { Point, LineString } from "ol/geom";
-  import type { StyleLike } from "ol/style/Style";
-  import CircleStyle from "ol/style/Circle";
-  import { getLength } from "ol/sphere";
-  import Popup from "../ol/Popup.svelte";
-  import { friendlyDistance } from "../utils/friendlyUnits";
-  import { getPathHeight } from "../search/height";
-  import Chart from "svelte-frappe-charts";
-  import round from "../utils/round";
+  import VectorLayer from 'ol/layer/Vector'
+  import VectorSource from 'ol/source/Vector'
+  import { Draw, Modify } from 'ol/interaction'
+  import GeometryType from 'ol/geom/GeometryType'
+  import onMountTick from '../utils/onMountTick'
+  import Map, { getOlContext } from '../ol/Map.svelte'
+  import { Style, Stroke, Fill, Text } from 'ol/style'
+  import type { Coordinate } from 'ol/coordinate'
+  import { Point, LineString } from 'ol/geom'
+  import type { StyleLike } from 'ol/style/Style'
+  import CircleStyle from 'ol/style/Circle'
+  import { getLength } from 'ol/sphere'
+  import Popup from '../ol/Popup.svelte'
+  import { friendlyDistance } from '../utils/friendlyUnits'
+  import { getPathElevations } from '../search/height'
+  import { db, insertItem, updateItem } from '../db'
+  import { liveQuery } from 'dexie'
+  import { lineStringToLatLngs, trackToGeometry } from '../db/track'
+  import type { Track } from '../db/track'
+  import Feature from 'ol/Feature'
 
-  const { map } = getOlContext();
+  export let trackId: string
+
+  const { map } = getOlContext()
+
+  const trackListener = (t: Track) => {
+    source.clear()
+
+    const geometry = trackToGeometry(t)
+    const feature = new Feature(geometry)
+    source.addFeature(feature)
+
+    map.removeInteraction(interaction)
+
+    if (t.points.length >= 2) {
+      interaction = new Modify({
+        source,
+      })
+    } else {
+      interaction = new Draw({
+        source,
+        type: GeometryType.LINE_STRING,
+        style: styleFunction,
+      })
+      if (t.points.length) interaction.extend(feature)
+    }
+    map.addInteraction(interaction)
+  }
+
+  $: track = liveQuery(() => {
+    return db.tracks.where({ id: trackId }).first()
+  })
+
+  $: track.subscribe(trackListener)
 
   const styleFunction: StyleLike = (feature) => {
-    const stroke = "white";
-    const fill = "#0099ff";
-    const width = 5;
+    const stroke = 'white'
+    const fill = '#0099ff'
+    const width = 5
 
     const styles = [
       new Style({
@@ -31,10 +66,10 @@
           width: width,
         }),
       }),
-    ];
+    ]
 
-    const geometry = feature.getGeometry();
-    const coordinates = geometry["getCoordinates"]();
+    const geometry = feature.getGeometry()
+    const coordinates = geometry['getCoordinates']()
     for (const coordinate of coordinates) {
       styles.push(
         new Style({
@@ -49,84 +84,75 @@
             }),
           }),
         })
-      );
+      )
     }
 
-    return styles;
-  };
+    return styles
+  }
 
-  const source = new VectorSource();
+  const source = new VectorSource()
+
   const layer = new VectorLayer({
     source,
     style: styleFunction,
     updateWhileInteracting: true,
     updateWhileAnimating: true,
-  });
+  })
 
-  let interaction: Draw | Modify = new Draw({
-    source: source,
-    type: GeometryType.LINE_STRING,
-    style: styleFunction,
-  });
+  let interaction: Draw | Modify
 
-  let popupPosition: Coordinate;
-  let popupMessage: string;
-  let distance: number;
-  let heights: { height: number; percent: number }[];
+  let popupPosition: Coordinate
+  let popupMessage: string
+  let distance: number
 
-  interaction.on("drawstart", ({ feature }) => {
-    const geometry = feature.getGeometry();
-    popupMessage = `Click last point to finish line.`;
+  $: {
+    interaction?.on(
+      interaction instanceof Modify ? 'modifystart' : 'drawstart',
+      (e) => {
+        const feature = e.feature ?? source.getFeatures()[0]
 
-    geometry.on("change", () => {
-      popupPosition = geometry["getLastCoordinate"]();
-      distance = getLength(geometry);
-    });
-  });
+        const geometry = feature.getGeometry() as LineString
+        popupMessage = `Click last point to finish line.`
 
-  // When the draw finished, start modifying the layerer.
-  interaction.on("drawend", async ({ feature }) => {
-    map.removeInteraction(interaction);
-    popupMessage = null;
+        geometry.on('change', () => {
+          popupPosition = geometry['getLastCoordinate']()
+          distance = getLength(geometry)
+        })
+      }
+    )
 
-    const geometry = feature.getGeometry() as LineString;
-    heights = await getPathHeight(geometry);
+    // When the draw finished, start modifying the layerer.
+    interaction?.on(
+      interaction instanceof Modify ? 'modifyend' : 'drawend',
+      async (e) => {
+        const feature = e.feature ?? source.getFeatures()[0]
+        map.removeInteraction(interaction)
+        popupMessage = null
 
-    interaction = new Modify({
-      source,
-    });
-    map.addInteraction(interaction);
-  });
+        const geometry = feature.getGeometry() as LineString
+        updateItem('tracks', trackId, {
+          points: lineStringToLatLngs(geometry),
+          distance: getLength(geometry)
+        })
+
+        const elevations = await getPathElevations(geometry)
+        await updateItem('tracks', trackId, { elevations })
+
+        interaction = new Modify({
+          source,
+        })
+        map.addInteraction(interaction)
+      }
+    )
+  }
 
   onMountTick(() => {
-    map.addInteraction(interaction);
-    map.addLayer(layer);
+    map.addLayer(layer)
     return () => {
-      map.removeInteraction(interaction);
-      map.removeLayer(layer);
-    };
-  });
+      map.removeLayer(layer)
+    }
+  })
 </script>
-
-<style>
-  .popup-content {
-    white-space: nowrap;
-    pointer-events: none;
-    cursor: none;
-    user-select: none;
-    -moz-user-select: none;
-  }
-
-  .chart {
-    position: absolute;
-    background: white;
-    left: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 200px;
-    z-index: 1000;
-  }
-</style>
 
 <Popup position={popupPosition} closable={false}>
   <div class="popup-content">
@@ -138,19 +164,12 @@
   </div>
 </Popup>
 
-{#if heights}
-  <div class="chart">
-    <Chart
-      type="line"
-      axisOptions={{ xIsSeries: true, xAxisMode: 'tick' }}
-      lineOptions={{ regionFill: 1, hideDots: true }}
-      height={200}
-      tooltipOptions={{
-        formatTooltipX: d => `→ ${friendlyDistance(d)}`,
-        formatTooltipY: d => `↑ ${d}m`
-      }}
-      data={{ labels: heights.map((h) =>
-          round(h.percent * distance, 0)
-        ), datasets: [{ values: heights.map((h) => h.height) }] }} />
-  </div>
-{/if}
+<style>
+  .popup-content {
+    white-space: nowrap;
+    pointer-events: none;
+    cursor: none;
+    user-select: none;
+    -moz-user-select: none;
+  }
+</style>
