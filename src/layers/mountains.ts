@@ -48,7 +48,10 @@ export default {
         })
     },
     onFeatureClicked: (feature: Feature) => {
-        const originalFeature = feature.get('features')[0] as Feature
+        const features = feature.get('features');
+        if (features.length > 1) return;
+
+        const originalFeature = features[0] as Feature
         const mountain = mountains[originalFeature.getId()] as typeof Mountains[keyof typeof Mountains];
 
         fragment.update(value => ({
@@ -56,7 +59,7 @@ export default {
             label: {
                 lat: mountain.latlng[0],
                 lng: mountain.latlng[1],
-                text: `${mountain.name} (${mountain.altitude})&NewLine;
+                text: `${mountain.name} (${mountain.altitude})
 ${mountain.routes.length} Routes:
 ${mountain.routes.map(r => `- ${r.name} (${r.grade})`).join('\n')}`
             }
