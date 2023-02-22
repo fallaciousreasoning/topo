@@ -15,7 +15,7 @@ export default {
     source: "https://github.com/fallaciousreasoning/nz-mountains",
     view: "cluster",
     clusterDistance: 50,
-    visible: true,
+    visible: false,
     style: feature => {
         const size = feature.get('features').length;
         if (!styleCache[size]) {
