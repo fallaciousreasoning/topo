@@ -15,22 +15,8 @@
   enableZoomToCluster(map)
 </script>
 
-{#await huts.getFeatures() then hutFeatures}
-  <ClusterLayer
-    distance={huts.clusterDistance}
-    title={huts.name}
-    visible={false}
-    features={hutFeatures}
-    style={huts.style} />
-{/await}
+<ClusterLayer options={huts} />
 
-{#await mountains.getFeatures() then mountainFeatures}
-  <ClusterLayer
-    title={mountains.name}
-    distance={mountains.clusterDistance}
-    visible={true}
-    features={mountainFeatures}
-    style={mountains.style} />
-{/await}
+<ClusterLayer options={mountains} />
 
 <LiveWeather />

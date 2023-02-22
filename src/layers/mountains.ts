@@ -3,13 +3,19 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
 
+import type Mountains from '../../public/data/mountains.json'
+import fragment from '../stores/fragment';
+
 const styleCache = {};
+let mountains: typeof Mountains = {} as any;
+
 export default {
-    name: "Mountains",
+    title: "Mountains",
     description: "A list of mountains with routes from Climb NZ",
     source: "https://github.com/fallaciousreasoning/nz-mountains",
     view: "cluster",
     clusterDistance: 50,
+    visible: true,
     style: feature => {
         const size = feature.get('features').length;
         if (!styleCache[size]) {
@@ -32,11 +38,29 @@ export default {
     getFeatures: async () => {
         const url = "/data/mountains.json"
         const response = await fetch(url);
-        const data = await response.json() as { [link: string]: { name: string, latlng?: [number, number] } };
-        const mountains = Object.values(data).filter(a => a.latlng);
-        return mountains.map(mountain => {
+        mountains = await response.json() as typeof Mountains;
+        const points = Object.values(mountains).filter(a => a.latlng);
+        return points.map(mountain => {
             const coords = fromLonLat([mountain.latlng[1], mountain.latlng[0]]);
-            return new Feature(new Point(coords));
+            const feature = new Feature(new Point(coords));
+            feature.setId(mountain.link)
+            return feature;
         })
+    },
+    onFeatureClicked: (feature: Feature) => {
+        const originalFeature = feature.get('features')[0] as Feature
+        const mountain = mountains[originalFeature.getId()] as typeof Mountains[keyof typeof Mountains];
+
+        fragment.update(value => ({
+            ...value,
+            label: {
+                lat: mountain.latlng[0],
+                lng: mountain.latlng[1],
+                text: `${mountain.name} (${mountain.altitude})&NewLine;
+${mountain.routes.length} Routes:
+${mountain.routes.map(r => `- ${r.name} (${r.grade})`).join('\n')}`
+            }
+        }))
+
     }
 }

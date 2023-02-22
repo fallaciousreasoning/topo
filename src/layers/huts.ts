@@ -6,8 +6,9 @@ import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
 
 const styleCache = {};
 export default {
-    name: "Huts",
+    title: "Huts",
     description: "A list of backcountry huts and bivvies in NZ",
+    visible: false,
     url: "/DOC_Huts.geojson",
     source: "https://catalogue.data.govt.nz/dataset/doc-huts/resource/4ccb1724-4969-4ae0-961c-0a3b073e5e55",
     type: "geojson",
@@ -37,6 +38,6 @@ export default {
         return data.map(hut => {
             const coords = fromLonLat([hut.lon, hut.lat]);
             return new Feature(new Point(coords));
-        })
+        }) as Feature[]
     }
 }
