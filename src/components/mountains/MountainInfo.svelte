@@ -1,7 +1,7 @@
 <script lang="ts">
   import mountains from '../../stores/mountains'
   import type { Mountain } from '../../stores/mountains'
-    import TopoText from '../TopoText.svelte'
+  import TopoText from '../TopoText.svelte'
 
   export let id: string
   $: mountain = $mountains[id] || ({} as Mountain)
@@ -13,7 +13,7 @@
 {/if}
 {#if mountain.description}
   <span class="font-bold">Access</span>
-  <p>{mountain.description || ''}</p>
+  <p><TopoText text={mountain.description || ''} /></p>
 {/if}
 {#if mountain.routes?.length}
   <span class="font-bold mt-4">Routes</span>
@@ -28,13 +28,12 @@
       {route.quality ? `Quality: ${route.quality}` : ''}
     </div>
     <div>
-        <TopoText text={route.description}/>
+      <TopoText text={route.description} />
     </div>
   {/each}
 {/if}
 <div>
   <a
-    class="text-blue-500 hover:text-blue-700 underline"
     href={mountain.link}
     title={mountain.name}
     target="_blank"
