@@ -30,5 +30,6 @@ export const convertNZMGReferenceToLatLng = (reference: string) => {
         coordToMap(matchingMap.xmin, matchingMap.xmax, easting),
         coordToMap(matchingMap.ymin, matchingMap.ymax, northing)
     ]
-    return proj4('EPSG:27200', 'WGS84', result)
+    const [lng, lat] = proj4('EPSG:27200', 'WGS84', result)
+    return [lat, lng]
 }

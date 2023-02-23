@@ -1,30 +1,30 @@
 <script lang="ts">
-    import fragment from '../stores/fragment'
+  import fragment from '../stores/fragment'
 
   export let text: string
 
-  import {
-    convertNZMGReferenceToLatLng,
-  } from '../utils/mapReference'
-  const regex = /([a-zA-z]\d{0,2}\s?\d{2,3}\s?\d{2,3})/gmi
-  const parts = text.split(regex)
-    .map(p => convertNZMGReferenceToLatLng(p) || p)
+  import { convertNZMGReferenceToLatLng } from '../utils/mapReference'
+  const regex = /([a-zA-z]\d{0,2}\s?\d{2,3}\s?\d{2,3})/gim
+  const parts = text
+    .split(regex)
+    .map((p) => ({ latlng: convertNZMGReferenceToLatLng(p), text: p }))
 </script>
 
 {#each parts as part}
-  {#if Array.isArray(part) }
-    <a href="#lat=${part[0]}&lng=${part[1]}" on:click={(e) => {
+  {#if part.latlng}
+    <a
+      on:click={(e) => {
         e.preventDefault()
-        fragment.update(v => ({
-            ...v, 
-        position: {
-...v.position,
-lat: part[1],
-lng: part[0]
-        }
+        fragment.update((v) => ({
+          ...v,
+          label: {
+            lat: part.latlng[0],
+            lng: part.latlng[1],
+            text: part.text
+          }
         }))
-    }}>{part}</a>
+      }}>{part.text}</a>
   {:else}
-    {part}
+    {part.text}
   {/if}
 {/each}
