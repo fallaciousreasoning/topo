@@ -1,5 +1,6 @@
 <script lang="ts">
   import fragment from '../stores/fragment'
+    import { isMobile } from '../stores/mediaQueries'
 
   export let text: string
 
@@ -25,6 +26,8 @@
             lng: part.latlng[1],
             text: part.text,
           },
+          // On mobile, close the mountain view.
+          page: $isMobile ? undefined : v.page
         }))
       }}>{part.text}</a>
   {:else}
