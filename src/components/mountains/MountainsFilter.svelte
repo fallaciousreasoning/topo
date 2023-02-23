@@ -34,6 +34,12 @@
         e.preventDefault()
         fragment.update((value) => ({
           ...value,
+          position: {
+            ...value.position,
+            lat: mountain.latlng[0],
+            lng: mountain.latlng[1],
+            zoom: 14,
+          },
           page: `mountains/${encodeURIComponent(mountain.link)}`,
         }))
       }}
