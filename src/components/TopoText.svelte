@@ -13,6 +13,9 @@
 {#each parts as part}
   {#if part.latlng}
     <a
+      href={`#lla=${part.latlng[0]}&llo=${
+        part.latlng[1]
+      }&lab=${encodeURIComponent(part.text)}`}
       on:click={(e) => {
         e.preventDefault()
         fragment.update((v) => ({
@@ -20,8 +23,8 @@
           label: {
             lat: part.latlng[0],
             lng: part.latlng[1],
-            text: part.text
-          }
+            text: part.text,
+          },
         }))
       }}>{part.text}</a>
   {:else}
