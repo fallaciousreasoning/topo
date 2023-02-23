@@ -1,17 +1,11 @@
-const production = !process.env.ROLLUP_WATCH;
 const colors = require('tailwindcss/colors');
 
 module.exports = {
-  purge: {
-    content: [
-      "./src/**/*.svelte",
-      "./public/**/*.html"
-    ],
-    public: [
-      "./public/**/.css"
-    ],
-    enabled: production
-  },
+  content: [
+    "./src/**/*.svelte",
+    "./public/**/*.html",
+    "./public/**/*.css",
+  ],
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
