@@ -54,7 +54,7 @@
     updateView(map.getView(), position);
   };
 
-  const debouncedSavePosition = debounce(savePosition, 2000);
+  const debouncedSavePosition = debounce(savePosition, 500);
   map.on("moveend", debouncedSavePosition);
   map.on("zoom", debouncedSavePosition);
 

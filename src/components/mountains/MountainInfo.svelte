@@ -2,6 +2,7 @@
   import mountains from '../../stores/mountains'
   import type { Mountain } from '../../stores/mountains'
   import TopoText from '../TopoText.svelte'
+    import { repeatString } from '../../utils/array'
 
   export let id: string
   $: mountain = $mountains[id] || ({} as Mountain)
@@ -25,7 +26,7 @@
       {route.grade && `(${route.grade})`}
       {route.bolts && `${route.bolts} bolts`}
       {route.natural_pro ? 'trad' : ''}
-      {route.quality ? `Quality: ${route.quality}` : ''}
+      {repeatString('★', route.quality)}
     </div>
     <div>
       <TopoText text={route.description} />
