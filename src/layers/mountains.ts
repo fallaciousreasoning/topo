@@ -3,11 +3,10 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
 
-import type Mountains from '../../public/data/mountains.json'
 import fragment from '../stores/fragment';
+import mountains, { Mountain, Mountains } from '../stores/mountains';
 
 const styleCache = {};
-let mountains: typeof Mountains = {} as any;
 
 export default {
     title: "Mountains",
@@ -15,7 +14,7 @@ export default {
     source: "https://github.com/fallaciousreasoning/nz-mountains",
     view: "cluster",
     clusterDistance: 50,
-    visible: false,
+    visible: true,
     style: feature => {
         const size = feature.get('features').length;
         if (!styleCache[size]) {
@@ -38,8 +37,10 @@ export default {
     getFeatures: async () => {
         const url = "/data/mountains.json"
         const response = await fetch(url);
-        mountains = await response.json() as typeof Mountains;
-        const points = Object.values(mountains).filter(a => a.latlng);
+        const result = await response.json() as Mountains;
+        mountains.set(result);
+
+        const points = Object.values(result).filter(a => a.latlng);
         return points.map(mountain => {
             const coords = fromLonLat([mountain.latlng[1], mountain.latlng[0]]);
             const feature = new Feature(new Point(coords));
@@ -52,17 +53,10 @@ export default {
         if (features.length > 1) return;
 
         const originalFeature = features[0] as Feature
-        const mountain = mountains[originalFeature.getId()] as typeof Mountains[keyof typeof Mountains];
 
         fragment.update(value => ({
             ...value,
-            label: {
-                lat: mountain.latlng[0],
-                lng: mountain.latlng[1],
-                text: `${mountain.name} (${mountain.altitude})
-${mountain.routes.length} Routes:
-${mountain.routes.map(r => `- ${r.name} (${r.grade})`).join('\n')}`
-            }
+            page: `mountains/${encodeURIComponent(originalFeature.getId())}`
         }))
 
     }

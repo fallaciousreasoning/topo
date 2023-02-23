@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import round from '../utils/round';
 
-type Pages = null | `menu` | `settings` | `tracks` | `tracks/${string}`;
+type Pages = null | `menu` | `settings` | `tracks` | `tracks/${string}` | `mountain` | `mountains/${string}`;
 
 interface Store {
     position: {
