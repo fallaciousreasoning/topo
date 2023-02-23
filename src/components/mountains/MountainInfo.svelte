@@ -15,10 +15,11 @@
   <p>{mountain.description || ''}</p>
 {/if}
 {#if mountain.routes?.length}
-  <span class="font-bold">Routes</span>
+  <span class="font-bold mt-4">Routes</span>
 
   {#each mountain.routes as route}
-    <div>
+    <hr />
+    <div class="font-bold mt-4">
       {route.name}
       {route.grade && `(${route.grade})`}
       {route.bolts && `${route.bolts} bolts`}
