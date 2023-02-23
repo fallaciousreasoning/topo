@@ -40,6 +40,7 @@
     "human-date": "^1.4.0",
     "localforage": "^1.9.0",
     "ol": "^6.5.0",
+    "proj4": "^2.8.1",
     "svelte-frappe-charts": "^1.2.0",
     "uuid": "^9.0.0"
   }
