@@ -1,6 +1,7 @@
 <script lang="ts">
   import mountains from '../../stores/mountains'
   import type { Mountain } from '../../stores/mountains'
+    import TopoText from '../TopoText.svelte'
 
   export let id: string
   $: mountain = $mountains[id] || ({} as Mountain)
@@ -27,7 +28,7 @@
       {route.quality ? `Quality: ${route.quality}` : ''}
     </div>
     <div>
-        {route.description}
+        <TopoText text={route.description}/>
     </div>
   {/each}
 {/if}
