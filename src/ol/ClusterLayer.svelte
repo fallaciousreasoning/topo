@@ -6,12 +6,12 @@
   import type { StyleLike } from 'ol/style/Style'
 
   export let options: {
+    id: string
     clusterDistance: number
     getFeatures: () => Promise<Feature[]>
     style: StyleLike
     onFeatureClicked?: (feature: Feature) => void
     title: string
-    visible: boolean
   }
 
   const onFeatureClicked = options.onFeatureClicked
@@ -31,9 +31,9 @@
 
 {#await clustersPromise then clusters}
   <VectorLayer
+    id={options.id}
     source={clusters}
     style={options.style}
     title={options.title}
-    visible={options.visible}
     on:featureClick={onFeatureClicked} />
 {/await}

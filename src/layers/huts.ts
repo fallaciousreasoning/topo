@@ -6,6 +6,7 @@ import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
 
 const styleCache = {};
 export default {
+    id: "huts",
     title: "Huts",
     description: "A list of backcountry huts and bivvies in NZ",
     visible: false,

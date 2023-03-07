@@ -11,6 +11,8 @@ interface Store {
         rotation: number;
     },
 
+    featureLayers: string[];
+
     baseLayer: number;
 
     label: {
@@ -26,7 +28,7 @@ interface Store {
 const DPS = 5;
 
 const parseHash = (): Store => {
-    const params = new URLSearchParams(window.location.hash.substr(1));
+    const params = new URLSearchParams(window.location.hash.substring(1));
     const getNum = (key: string) => parseFloat(params.get(key));
 
     return {
@@ -36,6 +38,7 @@ const parseHash = (): Store => {
             zoom: getNum('zoom'),
             rotation: getNum('rotation')
         },
+        featureLayers: (params.get('layers') ?? '').split(','),
         baseLayer: parseInt(params.get('baseLayer')) || 0,
         label: {
             lat: getNum('lla'),
@@ -60,6 +63,10 @@ const updateHashFromStore = (store: Store) => {
     if (position.zoom)
         params.set("zoom", roundedS(position.zoom));
     params.set("rotation", roundedS(isNaN(position.rotation) ? 0 : position.rotation));
+
+    if (store.featureLayers?.length) {
+        params.set("layers", store.featureLayers.join(','))
+    }
 
     // Set label
     if (label.lat && label.lng) {

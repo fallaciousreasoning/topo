@@ -9,12 +9,12 @@ import mountains, { Mountain, Mountains } from '../stores/mountains';
 const styleCache = {};
 
 export default {
+    id: "mountains",
     title: "Mountains",
     description: "A list of mountains with routes from Climb NZ",
     source: "https://github.com/fallaciousreasoning/nz-mountains",
     view: "cluster",
     clusterDistance: 50,
-    visible: true,
     style: feature => {
         const size = feature.get('features').length;
         if (!styleCache[size]) {
