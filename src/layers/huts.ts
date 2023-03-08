@@ -3,6 +3,7 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
+import fragment from '../stores/fragment';
 
 const styleCache = {};
 export default {
@@ -35,10 +36,28 @@ export default {
     getFeatures: async () => {
         const url = "/data/huts.json"
         const response = await fetch(url);
-        const data = await response.json();
+        const data = await response.json() as any[];
         return data.map(hut => {
             const coords = fromLonLat([hut.lon, hut.lat]);
-            return new Feature(new Point(coords));
-        }) as Feature[]
+            const feature = new Feature(new Point(coords));
+            feature.set('hut', hut);
+            return feature
+        })
+    },
+    onFeatureClicked: (feature: Feature) => {
+        const features = feature.get('features');
+        if (features.length > 1) return;
+
+        const originalFeature = features[0] as Feature
+        const hut = originalFeature.get('hut') as { lon: number, lat: number, name: string }
+        fragment.update(u => ({
+            ...u,
+            label: {
+                lat: hut.lat,
+                lng: hut.lon,
+                text: hut.name
+            }
+        }))
+
     }
 }
