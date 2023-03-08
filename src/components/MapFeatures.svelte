@@ -1,7 +1,6 @@
 <script lang="ts">
     import BaseLayer from "ol/layer/Base";
     import LayerGroup from "ol/layer/Group";
-    import { onMount } from "svelte";
     import { getOlContext } from "../ol/Map.svelte";
     import MapControl from "./MapControl.svelte";
     import grow from "../transitions/grow";
@@ -34,8 +33,6 @@
     $: nonGroupLayers = allLayers.filter((l) => !(l instanceof LayerGroup));
 
     $: baseLayers = nonGroupLayers.filter((l) => l.get("type") === "base");
-    // let selectedBaseLayer = $fragment.baseLayer;
-    // fragment.subscribe((s) => (selectedBaseLayer = $fragment.baseLayer));
     $: {
         // Handle selecting a different base layer.
         for (const baseLayer of baseLayers) baseLayer.set("visible", false);
@@ -43,10 +40,21 @@
     }
 
     $: featureLayers = nonGroupLayers.filter((l) => l.get("type") !== "base");
-    $: canSelectAllFeatures = featureLayers.find((l) => !l.get("visible"));
-    $: canSelectNoFeatures = featureLayers.find((l) => l.get("visible"));
-    const toggleAllFeatures = (visible: boolean) =>
-        featureLayers.forEach((l) => l.set("visible", visible));
+    $: canSelectAllFeatures = $fragment.featureLayers.length !== featureLayers.length;
+    $: canSelectNoFeatures = $fragment.featureLayers.length !== 0;
+    const setLayerVisible = (layer, visible: boolean) => {
+        fragment.update(u => {
+            const id = layer.get('id')
+            return {
+                ...u,
+                featureLayers: visible ? [...u.featureLayers, id].filter(l => l) : u.featureLayers.filter(u => u !== id)
+            }
+        })
+    }
+    const toggleAllFeatures = (visible: boolean) => {
+        if (!visible) $fragment.featureLayers = []
+        else $fragment.featureLayers = featureLayers.map(l => l.get('id'))
+    };
 </script>
 
 <MapControl position="topright">
@@ -95,10 +103,8 @@
                             <label>
                                 <input
                                     type="checkbox"
-                                    checked={layer.get('visible')}
-                                    on:change={(e) => {
-                                        layer.set('visible', e.target['checked']);
-                                    }} />
+                                    checked={$fragment.featureLayers.includes(layer.get('id'))}
+                                    on:change={(e) => setLayerVisible(layer, e.target['checked'])} />
                                 {layer.get('title')}
                             </label>
                         </div>

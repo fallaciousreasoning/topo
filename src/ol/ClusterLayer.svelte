@@ -1,25 +1,39 @@
 <script lang="ts">
-  import VectorSource from "ol/source/Vector";
-  import Feature from "ol/Feature";
-  import { getOlContext } from "../ol/Map.svelte";
+  import VectorSource from 'ol/source/Vector'
+  import Feature from 'ol/Feature'
+  import VectorLayer from '../ol/VectorLayer.svelte'
+  import { Cluster } from 'ol/source'
+  import type { StyleLike } from 'ol/style/Style'
 
-  import VectorLayer from "../ol/VectorLayer.svelte";
-  import onMountTick from "../utils/onMountTick";
-  import { Cluster } from "ol/source";
-  import type { StyleLike } from "ol/style/Style";
+  export let options: {
+    id: string
+    clusterDistance: number
+    getFeatures: () => Promise<Feature[]>
+    style: StyleLike
+    onFeatureClicked?: (feature: Feature) => void
+    title: string
+  }
 
-  export let distance = 50;
-  export let features: Feature[];
-  export let style: StyleLike = undefined;
-  export let title: string = undefined;
-  export let visible: boolean = true;
+  const onFeatureClicked = options.onFeatureClicked
+    ? (e) => options.onFeatureClicked(e.detail.feature)
+    : undefined
 
-  const clusters = new Cluster({
-    distance,
-    source: new VectorSource({
-      features,
-    }),
-  });
+  const clustersPromise = options.getFeatures().then(
+    (features) =>
+      new Cluster({
+        distance: options.clusterDistance,
+        source: new VectorSource({
+          features,
+        }),
+      })
+  )
 </script>
 
-<VectorLayer source={clusters} {style} {title} {visible} />
+{#await clustersPromise then clusters}
+  <VectorLayer
+    id={options.id}
+    source={clusters}
+    style={options.style}
+    title={options.title}
+    on:featureClick={onFeatureClicked} />
+{/await}
