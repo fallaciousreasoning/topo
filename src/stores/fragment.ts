@@ -38,7 +38,7 @@ const parseHash = (): Store => {
             zoom: getNum('zoom'),
             rotation: getNum('rotation')
         },
-        featureLayers: (params.get('layers') ?? '').split(','),
+        featureLayers: (params.get('layers') ?? '').split(',').filter(x => x),
         baseLayer: parseInt(params.get('baseLayer')) || 0,
         label: {
             lat: getNum('lla'),
@@ -66,6 +66,8 @@ const updateHashFromStore = (store: Store) => {
 
     if (store.featureLayers?.length) {
         params.set("layers", store.featureLayers.join(','))
+    } else {
+        params.delete("layers");
     }
 
     // Set label
