@@ -109,7 +109,7 @@ const updateHashFromStore = (store: Store) => {
 
 }
 
-const getParams = () => new URLSearchParams(window.location.hash.substr(1));
+const getParams = () => new URLSearchParams(window.location.hash.substring(1));
 const roundedS = (n: number) => round(n, DPS).toString();
 
 const customStore = () => {

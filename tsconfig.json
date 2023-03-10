@@ -8,6 +8,7 @@
       "noImplicitAny": false,
       "target": "ES2018",
       "resolveJsonModule": true,
-      "importsNotUsedAsValues": "remove"
+      "importsNotUsedAsValues": "remove",
+      "preserveValueImports": false
   }
 }
