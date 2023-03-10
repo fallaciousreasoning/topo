@@ -1,12 +1,21 @@
 <script lang="ts">
   import fragment from '../../stores/fragment'
-  import mountains from '../../stores/mountains'
+  import mountains, { Mountain } from '../../stores/mountains'
 
   let search: string = ''
   let hasGrade: number;
+  let onlyWithPicture: boolean = false
+
+  const hasPicture = (mountain: Mountain) => {
+    return mountain.image || mountain.routes.some(r => r.image)
+      || mountain.places.some(p => hasPicture(p));
+  }
+
   $: filteredMountains = Object.values($mountains).filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase())
-  ).filter(p => !hasGrade || p.routes.some(r => r.grade?.includes(hasGrade))).sort((a, b) => a.name.localeCompare(b.name))
+  )
+  .filter(p => !onlyWithPicture || hasPicture(p))
+  .filter(p => !hasGrade || p.routes.some(r => r.grade?.includes(hasGrade))).sort((a, b) => a.name.localeCompare(b.name))
 </script>
 
 <h1 class="font-bold">Mountains</h1>
@@ -26,7 +35,12 @@
       <option value="5">5</option>
     </select>
   </label>
+  <label>
+    Only with picture
+    <input type="checkbox" bind:checked={onlyWithPicture}/>
+  </label>
 </div>
+<div class="my-2">({filteredMountains.length} mountains)</div>
 {#each filteredMountains as mountain}
   <div>
     <a
