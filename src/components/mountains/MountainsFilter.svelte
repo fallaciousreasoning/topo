@@ -1,6 +1,7 @@
 <script lang="ts">
   import fragment from '../../stores/fragment'
   import mountains, { Mountain } from '../../stores/mountains'
+  import { allRoutes } from '../../utils/routes'
   import MountainCard from './MountainCard.svelte'
 
   let search: string = ''
@@ -19,7 +20,7 @@
     .filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
     .filter((p) => !onlyWithPicture || hasPicture(p))
     .filter(
-      (p) => !hasGrade || p.routes.some((r) => r.grade?.includes(hasGrade))
+      (p) => !hasGrade || allRoutes(p).some((r) => r.grade?.includes(hasGrade))
     )
     .sort((a, b) => a.name.localeCompare(b.name))
 </script>
@@ -50,6 +51,7 @@
 <div class="flex flex-col gap-2">
   {#each filteredMountains as mountain}
     <div
+      class="cursor-pointer"
       on:click={(e) => {
         e.preventDefault()
         fragment.update((value) => ({
