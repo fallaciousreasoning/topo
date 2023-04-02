@@ -11,7 +11,7 @@
     unsorted: Item[]
     sorted: Item[]
     options: Option[]
-    sortBy?: keyof Item
+    sortIndex: number
   }
 
   export let options: Option[]
@@ -20,7 +20,7 @@
   export let unsorted: Item[]
   export let sorted: Item[]
 
-  let selectedIndex = 0
+  export let selectedIndex = 0
   $: sortBy = options[selectedIndex]
 
   $: {

@@ -5,10 +5,10 @@
   import MountainCard from './MountainCard.svelte'
   import VirtualList from '@sveltejs/svelte-virtual-list'
   import SortyBy from '../SortyBy.svelte'
+  import { direction, sortBy, onlyWithPicture } from '../../stores/mountainFilters'
 
   let search: string = ''
   let hasGrade: number
-  let onlyWithPicture: boolean = false
 
   const viewMountain = (mountain: Mountain) => {
     fragment.update((value) => ({
@@ -26,7 +26,7 @@
   $: totalMountains = Object.keys($mountains).length
   $: filteredMountains = Object.values($mountains)
     .filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((p) => !onlyWithPicture || getPicture(p))
+    .filter((p) => !$onlyWithPicture || getPicture(p))
     .filter(
       (p) => !hasGrade || allRoutes(p).some((r) => r.grade?.includes(hasGrade))
     )
@@ -55,7 +55,7 @@
     </label>
     <label>
       Only with picture
-      <input type="checkbox" bind:checked={onlyWithPicture} />
+      <input type="checkbox" bind:checked={$onlyWithPicture} />
     </label>
   </div>
   <SortyBy
@@ -66,6 +66,8 @@
       { name: 'areas', getter: (m) => m.places.length },
     ]}
     unsorted={filteredMountains}
+    bind:direction={$direction}
+    bind:selectedIndex={$sortBy}
     bind:sorted />
   <div class="my-2">
     (showing {filteredMountains.length} of {totalMountains} mountains)
