@@ -5,6 +5,8 @@
   import MountainCard from './MountainCard.svelte'
   import VirtualList from '@sveltejs/svelte-virtual-list'
   import MountainInfo from './MountainInfo.svelte'
+  import SortyBy from '../SortyBy.svelte'
+  import { filterResults } from '../../search/match'
 
   let search: string = ''
   let hasGrade: number
@@ -39,6 +41,8 @@
       (p) => !hasGrade || allRoutes(p).some((r) => r.grade?.includes(hasGrade))
     )
     .sort((a, b) => a.name.localeCompare(b.name))
+
+  let sorted: Mountain[] = []
 </script>
 
 <div class="flex flex-col page w-full">
@@ -64,9 +68,20 @@
       <input type="checkbox" bind:checked={onlyWithPicture} />
     </label>
   </div>
-  <div class="my-2">(showing {filteredMountains.length} of {totalMountains} mountains)</div>
+  <SortyBy
+    options={[
+      'name',
+      { name: 'altitude', getter: (m) => parseInt(m.altitude) },
+      { name: 'routes', getter: (m) => allRoutes(m).length },
+      { name: 'areas', getter: (m) => m.places.length },
+    ]}
+    unsorted={filteredMountains}
+    bind:sorted />
+  <div class="my-2">
+    (showing {filteredMountains.length} of {totalMountains} mountains)
+  </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <VirtualList items={filteredMountains} let:item>
+    <VirtualList items={sorted} let:item>
       <div
         class="cursor-pointer px-4 py-2"
         on:keyup={(e) => {
