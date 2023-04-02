@@ -5,9 +5,8 @@
   import MountainCard from './MountainCard.svelte'
   import VirtualList from '@sveltejs/svelte-virtual-list'
   import SortyBy from '../SortyBy.svelte'
-  import { direction, sortBy, onlyWithPicture } from '../../stores/mountainFilters'
+  import { direction, sortBy, onlyWithPicture, filterText } from '../../stores/mountainFilters'
 
-  let search: string = ''
   let hasGrade: number
 
   const viewMountain = (mountain: Mountain) => {
@@ -25,7 +24,7 @@
 
   $: totalMountains = Object.keys($mountains).length
   $: filteredMountains = Object.values($mountains)
-    .filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((m) => m.name.toLowerCase().includes($filterText.toLowerCase()))
     .filter((p) => !$onlyWithPicture || getPicture(p))
     .filter(
       (p) => !hasGrade || allRoutes(p).some((r) => r.grade?.includes(hasGrade))
@@ -40,7 +39,7 @@
   <input
     class="w-full border-black border-solid border p-2 rounded"
     type="text"
-    bind:value={search} />
+    bind:value={$filterText} />
   <div class="flex flex-row justify-between w-full">
     <label>
       Has Route at Grade
