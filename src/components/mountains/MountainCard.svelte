@@ -1,15 +1,16 @@
 <script lang="ts">
   import { Mountain } from '../../stores/mountains'
-  import { allRoutes } from '../../utils/routes'
+  import { allRoutes, getPicture } from '../../utils/routes'
 
   export let mountain: Mountain
 
   $: routes = allRoutes(mountain)
+  $: imageUrl = getPicture(mountain)
 </script>
 
 <div class="w-full bg-white shadow-md rounded overflow-hidden">
-  {#if mountain.image}
-    <img class="max-h-64 w-full object-cover object-top" src={mountain.image} />
+  {#if imageUrl}
+    <img class="max-h-64 w-full object-cover object-top" src={imageUrl} />
   {/if}
   <div class="p-2">
     <h3 class="font-bold text-lg">{mountain.name} ({mountain.altitude})</h3>

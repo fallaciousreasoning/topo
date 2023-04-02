@@ -1,24 +1,14 @@
 <script lang="ts">
   import fragment from '../../stores/fragment'
   import mountains, { Mountain } from '../../stores/mountains'
-  import { allRoutes } from '../../utils/routes'
+  import { allRoutes, getPicture } from '../../utils/routes'
   import MountainCard from './MountainCard.svelte'
   import VirtualList from '@sveltejs/svelte-virtual-list'
-  import MountainInfo from './MountainInfo.svelte'
   import SortyBy from '../SortyBy.svelte'
-  import { filterResults } from '../../search/match'
 
   let search: string = ''
   let hasGrade: number
   let onlyWithPicture: boolean = false
-
-  const hasPicture = (mountain: Mountain) => {
-    return (
-      mountain.image ||
-      mountain.routes.some((r) => r.image) ||
-      mountain.places.some((p) => hasPicture(p))
-    )
-  }
 
   const viewMountain = (mountain: Mountain) => {
     fragment.update((value) => ({
@@ -36,7 +26,7 @@
   $: totalMountains = Object.keys($mountains).length
   $: filteredMountains = Object.values($mountains)
     .filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((p) => !onlyWithPicture || hasPicture(p))
+    .filter((p) => !onlyWithPicture || getPicture(p))
     .filter(
       (p) => !hasGrade || allRoutes(p).some((r) => r.grade?.includes(hasGrade))
     )
