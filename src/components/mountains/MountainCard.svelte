@@ -7,7 +7,7 @@
   $: routes = allRoutes(mountain)
 </script>
 
-<div class="w-full bg-white shadow-lg rounded overflow-hidden">
+<div class="w-full bg-white shadow-md rounded overflow-hidden">
   {#if mountain.image}
     <img class="max-h-64 w-full object-cover object-top" src={mountain.image} />
   {/if}
