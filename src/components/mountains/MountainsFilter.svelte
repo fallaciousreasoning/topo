@@ -5,7 +5,18 @@
   import MountainCard from './MountainCard.svelte'
   import VirtualList from '@sveltejs/svelte-virtual-list'
   import SortyBy from '../SortyBy.svelte'
-  import { direction, sortBy, onlyWithPicture, filterText } from '../../stores/mountainFilters'
+  import {
+    direction,
+    sortBy,
+    onlyWithPicture,
+    filterText,
+    visibleOnly,
+  } from '../../stores/mountainFilters'
+  import { getOlContext } from '../../ol/Map.svelte'
+  import onMountTick from '../../utils/onMountTick'
+  import { fromLonLat } from 'ol/proj'
+  import { extent } from '../../stores/map'
+    import { containsCoordinate } from 'ol/extent'
 
   let hasGrade: number
 
@@ -28,6 +39,11 @@
     .filter((p) => !$onlyWithPicture || getPicture(p))
     .filter(
       (p) => !hasGrade || allRoutes(p).some((r) => r.grade?.includes(hasGrade))
+    )
+    .filter(
+      (p) =>
+        !$visibleOnly ||
+        p.latlng && containsCoordinate($extent, fromLonLat([p.latlng[1], p.latlng[0]]))
     )
     .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -55,6 +71,10 @@
     <label>
       Only with picture
       <input type="checkbox" bind:checked={$onlyWithPicture} />
+    </label>
+    <label>
+      Visible on map
+      <input type="checkbox" bind:checked={$visibleOnly} />
     </label>
   </div>
   <SortyBy
