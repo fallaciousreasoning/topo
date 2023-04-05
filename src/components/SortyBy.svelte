@@ -32,7 +32,6 @@
         ? (item: Item) => item[sortBy as any]
         : sortBy.getter
 
-    console.log('Sorting', sortBy)
     sorted = unsorted.sort((a, b) => {
       const aValue = getValue(a)
       const bValue = getValue(b)

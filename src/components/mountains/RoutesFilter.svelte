@@ -36,6 +36,7 @@
   $: filteredRoutes = routes
     .filter(([m, r]) =>
       r.name.toLowerCase().includes($filterText.toLowerCase())
+      || m.name.toLowerCase().includes($filterText.toLowerCase())
     )
     .filter(([m, r]) => !$onlyWithPicture || r.image)
     .filter(
