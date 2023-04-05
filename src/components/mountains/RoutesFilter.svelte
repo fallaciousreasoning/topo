@@ -15,7 +15,7 @@
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
   import { containsCoordinate } from 'ol/extent'
-    import Grade from './Grade.svelte'
+  import Grade from './Grade.svelte'
 
   let hasGrade: number
 
@@ -69,7 +69,13 @@
   <SortyBy
     options={[
       { name: 'name', getter: ([m, r]) => r.name },
-      { name: 'length', getter: ([m, r]) => parseInt(r.length) },
+      {
+        name: 'length',
+        getter: ([m, r]) => {
+          const length = parseInt(r.length)
+          return isNaN(length) ? 0 : length
+        },
+      },
       { name: 'pitches', getter: ([m, r]) => r.pitches.length },
       { name: 'grade', getter: ([m, r]) => r.grade },
     ]}
@@ -91,8 +97,11 @@
         on:click={() => viewMountain(item[0])}>
         <Card imageUrl={item[1].image}>
           <div slot="title">
-            <Grade route={item[1]}/>
+            <Grade route={item[1]} />
             {item[1].name}
+            {#if item[1].length}
+              ({item[1].length})
+            {/if}
           </div>
           <div slot="pretitle">
             {item[0].name}
