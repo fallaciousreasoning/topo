@@ -1,8 +1,7 @@
 <script lang="ts">
   import fragment from '../../stores/fragment'
   import mountains, { Mountain, Route } from '../../stores/mountains'
-  import { allRoutes, getPicture } from '../../utils/routes'
-  import MountainCard from './MountainCard.svelte'
+  import { allRoutes } from '../../utils/routes'
   import VirtualList from '@sveltejs/svelte-virtual-list'
   import SortyBy from '../SortyBy.svelte'
   import {
@@ -16,6 +15,7 @@
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
   import { containsCoordinate } from 'ol/extent'
+    import Grade from './Grade.svelte'
 
   let hasGrade: number
 
@@ -91,8 +91,7 @@
         on:click={() => viewMountain(item[0])}>
         <Card imageUrl={item[1].image}>
           <div slot="title">
-            <span class="p-1 bg-orange-400 rounded text-white"
-              >{item[1].grade}</span>
+            <Grade route={item[1]}/>
             {item[1].name}
           </div>
           <div slot="pretitle">
@@ -108,10 +107,6 @@
 </div>
 
 <style>
-  .grade {
-    background: orange;
-    color: white;
-  }
   .page {
     height: calc(100% - 2.875rem);
   }
