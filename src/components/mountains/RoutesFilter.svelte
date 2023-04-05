@@ -109,6 +109,7 @@
           </div>
           <div>
             {item[1].description}
+            <div class="italic text-gray-600">{item[1].ascent}</div>
           </div>
         </Card>
       </div>
