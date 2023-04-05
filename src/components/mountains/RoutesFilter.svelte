@@ -17,8 +17,6 @@
   import { containsCoordinate } from 'ol/extent'
   import Grade from './Grade.svelte'
 
-  let hasGrade: number
-
   const viewMountain = (mountain: Mountain) => {
     fragment.update((value) => ({
       ...value,
@@ -100,7 +98,9 @@
             <Grade route={item[1]} />
             {item[1].name}
             {#if item[1].length}
-              ({item[1].length})
+              <span class="font-normal text-gray-700">
+                ({item[1].length})
+              </span>
             {/if}
           </div>
           <div slot="pretitle">
