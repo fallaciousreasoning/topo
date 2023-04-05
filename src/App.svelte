@@ -1,8 +1,9 @@
 <script lang="ts">
   import ImportTrack from './components/ImportTrack.svelte'
   import MenuView from './components/MenuView.svelte'
-    import MountainView from './components/MountainView.svelte'
+  import MountainView from './components/MountainView.svelte'
   import Route from './components/Route.svelte'
+  import RoutesView from './components/RoutesView.svelte'
   import SettingsView from './components/SettingsView.svelte'
   import TracksView from './components/TracksView.svelte'
   import TopoMap from './TopoMap.svelte'
@@ -12,7 +13,8 @@
 <MenuView />
 <SettingsView />
 <TracksView />
-<MountainView/>
+<MountainView />
+<RoutesView />
 <Route path="importTrack/:data" let:params>
   <ImportTrack data={params.data} />
 </Route>

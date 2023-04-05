@@ -15,5 +15,8 @@
   <button on:click={(e) => fragment.update((s) => ({ ...s, page: 'mountains' }))}>
     Mountains
   </button>
+  <button on:click={(e) => fragment.update((s) => ({ ...s, page: 'routes' }))}>
+    Routes
+  </button>
 </div>
 </Section>
