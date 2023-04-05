@@ -12,13 +12,7 @@
     filterText,
     visibleOnly,
   } from '../../stores/mountainFilters'
-  import { getOlContext } from '../../ol/Map.svelte'
-  import onMountTick from '../../utils/onMountTick'
-  import { fromLonLat } from 'ol/proj'
-  import { extent } from '../../stores/map'
-  import { containsCoordinate } from 'ol/extent'
-  import { all } from 'ol/events/condition'
-  import RouteCard from './RouteCard.svelte'
+  import Card from '../Card.svelte'
 
   let hasGrade: number
 
@@ -35,17 +29,20 @@
     }))
   }
 
-  $: routes = Object.values($mountains).flatMap((m) => allRoutes(m)) as Route[]
+  $: routes = Object.values($mountains).flatMap((m) =>
+    allRoutes(m).map((r) => [m, r])
+  ) as [Mountain, Route][]
   $: filteredRoutes = routes
-    .filter((m) => m.name.toLowerCase().includes($filterText.toLowerCase()))
-    .filter((p) => !$onlyWithPicture || p.image)
-    // .filter(
-    //   (p) =>
-    //     !$visibleOnly ||
-    //     (p.latlng &&
-    //       containsCoordinate($extent, fromLonLat([p.latlng[1], p.latlng[0]])))
-    // )
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .filter(([m, r]) =>
+      r.name.toLowerCase().includes($filterText.toLowerCase())
+    )
+    .filter(([m, r]) => !$onlyWithPicture || r.image)
+  // .filter(
+  //   (p) =>
+  //     !$visibleOnly ||
+  //     (p.latlng &&
+  //       containsCoordinate($extent, fromLonLat([p.latlng[1], p.latlng[0]])))
+  // )
 
   let sorted: Route[] = []
 </script>
@@ -68,12 +65,12 @@
   </div>
   <SortyBy
     options={[
-      'name',
-      { name: 'length', getter: (m) => parseInt(m.altitude) },
-      { name: 'pitches', getter: (m) => allRoutes(m).length },
-      { name: 'grade', getter: (m) => m.grade },
+      { name: 'name', getter: ([m, r]) => r.name },
+      { name: 'length', getter: ([m, r]) => parseInt(r.length) },
+      { name: 'pitches', getter: ([m, r]) => r.pitches.length },
+      { name: 'grade', getter: ([m, r]) => r.grade },
     ]}
-    unsorted={routes}
+    unsorted={filteredRoutes}
     bind:direction={$direction}
     bind:selectedIndex={$sortBy}
     bind:sorted />
@@ -86,9 +83,17 @@
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
           if (e.key !== 'Enter') return
-          // viewMountain(item)
-        }}>
-        <RouteCard route={item} />
+          viewMountain(item[0])
+        }}
+        on:click={() => viewMountain(item[0])}>
+        <Card imageUrl={item[1].image}>
+          <div slot="title">
+            {item[1].name}
+          </div>
+          <div>
+            {item[1].description}
+          </div>
+        </Card>
       </div>
     </VirtualList>
   </div>
