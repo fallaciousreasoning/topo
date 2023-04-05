@@ -13,6 +13,9 @@
     visibleOnly,
   } from '../../stores/mountainFilters'
   import Card from '../Card.svelte'
+  import { fromLonLat } from 'ol/proj'
+  import { extent } from '../../stores/map'
+  import { containsCoordinate } from 'ol/extent'
 
   let hasGrade: number
 
@@ -37,12 +40,12 @@
       r.name.toLowerCase().includes($filterText.toLowerCase())
     )
     .filter(([m, r]) => !$onlyWithPicture || r.image)
-  // .filter(
-  //   (p) =>
-  //     !$visibleOnly ||
-  //     (p.latlng &&
-  //       containsCoordinate($extent, fromLonLat([p.latlng[1], p.latlng[0]])))
-  // )
+    .filter(
+      ([m, r]) =>
+        !$visibleOnly ||
+        (m.latlng &&
+          containsCoordinate($extent, fromLonLat([m.latlng[1], m.latlng[0]])))
+    )
 
   let sorted: Route[] = []
 </script>
@@ -88,7 +91,12 @@
         on:click={() => viewMountain(item[0])}>
         <Card imageUrl={item[1].image}>
           <div slot="title">
+            <span class="p-1 bg-orange-400 rounded text-white"
+              >{item[1].grade}</span>
             {item[1].name}
+          </div>
+          <div slot="pretitle">
+            {item[0].name}
           </div>
           <div>
             {item[1].description}
@@ -100,6 +108,10 @@
 </div>
 
 <style>
+  .grade {
+    background: orange;
+    color: white;
+  }
   .page {
     height: calc(100% - 2.875rem);
   }
