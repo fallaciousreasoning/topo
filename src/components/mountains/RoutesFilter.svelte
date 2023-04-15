@@ -10,12 +10,17 @@
     onlyWithPicture,
     filterText,
     visibleOnly,
+    rock,
+    alpine,
+    ice,
+    mixed,
   } from '../../stores/mountainFilters'
   import Card from '../Card.svelte'
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
   import { containsCoordinate } from 'ol/extent'
   import Grade from './Grade.svelte'
+    import { parseGrade } from '../../utils/grade'
 
   const viewMountain = (mountain: Mountain) => {
     fragment.update((value) => ({
@@ -34,9 +39,10 @@
     allRoutes(m).map((r) => [m, r])
   ) as [Mountain, Route][]
   $: filteredRoutes = routes
-    .filter(([m, r]) =>
-      r.name.toLowerCase().includes($filterText.toLowerCase())
-      || m.name.toLowerCase().includes($filterText.toLowerCase())
+    .filter(
+      ([m, r]) =>
+        r.name.toLowerCase().includes($filterText.toLowerCase()) ||
+        m.name.toLowerCase().includes($filterText.toLowerCase())
     )
     .filter(([m, r]) => !$onlyWithPicture || r.image)
     .filter(
@@ -45,6 +51,13 @@
         (m.latlng &&
           containsCoordinate($extent, fromLonLat([m.latlng[1], m.latlng[0]])))
     )
+    .filter(([,r]) => {
+      const grade = parseGrade(r.grade)
+      return (grade.alpine && $alpine)
+        || (grade.ewbank && $rock)
+        || (grade.ice && $ice)
+        || (grade.mixed && $mixed)
+    })
 
   let sorted: Route[] = []
 </script>
@@ -63,6 +76,24 @@
     <label>
       Visible on map
       <input type="checkbox" bind:checked={$visibleOnly} />
+    </label>
+  </div>
+  <div class="flex flex-row justify-between w-full">
+    <label>
+      Alpine
+      <input type="checkbox" bind:checked={$alpine} />
+    </label>
+    <label>
+      Rock
+      <input type="checkbox" bind:checked={$rock} />
+    </label>
+    <label>
+      Ice
+      <input type="checkbox" bind:checked={$ice} />
+    </label>
+    <label>
+      Mixed
+      <input type="checkbox" bind:checked={$mixed} />
     </label>
   </div>
   <SortyBy
