@@ -2,7 +2,7 @@
   import fragment from '../../stores/fragment'
   import mountains, { Mountain, Route } from '../../stores/mountains'
   import { allRoutes } from '../../utils/routes'
-  import VirtualList from '@sveltejs/svelte-virtual-list'
+  import VirtualList from '../VirtualList.svelte'
   import SortyBy from '../SortyBy.svelte'
   import {
     direction,

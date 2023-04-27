@@ -3,7 +3,7 @@
   import mountains, { Mountain } from '../../stores/mountains'
   import { allRoutes, getPicture } from '../../utils/routes'
   import MountainCard from './MountainCard.svelte'
-  import VirtualList from '@sveltejs/svelte-virtual-list'
+  import VirtualList from '../VirtualList.svelte'
   import SortyBy from '../SortyBy.svelte'
   import {
     direction,
