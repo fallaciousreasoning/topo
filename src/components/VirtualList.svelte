@@ -5,6 +5,7 @@
 	export let items;
 	export let height = '100%';
 	export let itemHeight = undefined;
+	export let top = 0;
 
 	// read-only, but visible to consumers via bind:start
 	export let start = 0;
@@ -19,7 +20,6 @@
 	let visible;
 	let mounted;
 
-	let top = 0;
 	let bottom = 0;
 	let average_height;
 
@@ -60,6 +60,8 @@
 		bottom = remaining * average_height;
 		height_map.length = items.length;
 
+		await tick();
+		viewport.scrollTop = top
 	}
 
 	async function handle_scroll() {
