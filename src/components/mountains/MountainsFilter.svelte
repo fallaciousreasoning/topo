@@ -92,7 +92,7 @@
     (showing {filteredMountains.length} of {totalMountains} mountains)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <VirtualList items={sorted} let:item top={10000}>
+    <VirtualList items={sorted} let:item>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
