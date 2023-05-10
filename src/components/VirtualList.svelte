@@ -36,12 +36,6 @@
 	$: if (mounted) refresh(items, viewport_height, itemHeight);
 
 	async function refresh(items, viewport_height, itemHeight) {
-		const isStartOverflow = items.length < start;
-		
-		if (isStartOverflow) {
-			await scrollToIndex(items.length - 1, {behavior: 'auto'});
-		}
-		
 		const { scrollTop } = viewport;
 
 		await tick(); // wait until the DOM is up to date
@@ -70,7 +64,6 @@
 
 		bottom = remaining * average_height;
 		height_map.length = items.length;
-
 	}
 
 	async function handle_scroll() {
