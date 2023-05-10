@@ -141,20 +141,30 @@
 		await handle_scroll()
 	}
 
-	export async function scrollTo(y: number, opts: any) {
-		await tick();
+	export async function scrollTo(y: number) {
+		let last = -1
+		const dir = viewport.scrollTop < y ? 1 : -1
+		while (((viewport.scrollTop < y && dir < 0) || (viewport.scrollTop > y && dir > 0))
+			&& last !== viewport.scrollTop) {
+			await tick();
 
-		opts = {
-			left: 0,
-			top: y,
-			behavior: 'smooth',
-			...opts
+			const scrollBy = height_map[start] || average_height || height
+
+			console.log(dir, scrollBy, viewport.scrollTop, y)
+			
+			last = viewport.scrollTop
+			viewport.scrollBy({ top: dir * scrollBy })
+
+			await handle_scroll()
 		}
-		viewport.scrollTo(opts)
+
+		const offset = viewport.scrollTop - y
+		viewport.scrollBy({ top: -offset })
+		await handle_scroll()
 	}
 
 	$:window['items'] = items
-	window['scrollListTo'] = scrollToIndex
+	window['scrollListTo'] = scrollTo
 	
 	// trigger initial refresh
 	onMount(() => {
