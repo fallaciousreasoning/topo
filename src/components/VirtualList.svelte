@@ -16,6 +16,8 @@
 		}
 	}
 
+	let lastItems = [];
+
 	// read-only, but visible to consumers via bind:start
 	export let start = 0;
 	export let end = 0;
@@ -69,6 +71,12 @@
 
 		bottom = remaining * average_height;
 		height_map.length = items.length;
+
+		// If some of the items have changed, scroll to the top.
+		if (items.length !== lastItems.length || items.some((a, i) => a !== items[i])) {
+			viewport.scrollTo(0, 0)
+		}
+		lastItems = items
 	}
 
 	async function handle_scroll() {
