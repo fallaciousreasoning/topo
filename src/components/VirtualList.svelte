@@ -9,6 +9,13 @@
 
 	export let scrollPos: number = 0;
 
+	// Handle changes to the scroll binding.
+	$: {
+		if (viewport && scrollPos != viewport?.scrollTop) {
+			setTimeout(() => scrollTo(scrollPos))
+		}
+	}
+
 	// read-only, but visible to consumers via bind:start
 	export let start = 0;
 	export let end = 0;
@@ -25,8 +32,6 @@
 	let top = 0;
 	let bottom = 0;
 	let average_height;
-
-	window['heightMap'] = height_map
 
 	$: visible = items.slice(start, end).map((data, i) => {
 		return { index: i + start, data };

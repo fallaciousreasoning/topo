@@ -49,21 +49,7 @@
     )
     .sort((a, b) => a.name.localeCompare(b.name))
 
-    let jumpTo = $scrollPos;
-    let scrollIndex: number;
-    $: {
-      console.log("Set scroll pos to ", scrollIndex)
-      $scrollPos = scrollIndex
-    }
-
-    let scrollTo: (y: number, opts: any) => Promise<void>;
-    $: window['scrollListTo'] = scrollTo
-    onMountTick(() => {
-      console.log("Jumping to", jumpTo)
-      setTimeout(() => scrollTo(jumpTo, { behavior: 'smooth' }), 100)
-    })
-
-
+  let scrollPos: number;
   let sorted: Mountain[] = []
 </script>
 
@@ -109,7 +95,7 @@
     (showing {filteredMountains.length} of {totalMountains} mountains)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <VirtualList items={sorted} let:item bind:scrollPos={scrollIndex}>
+    <VirtualList items={sorted} let:item bind:scrollPos>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {

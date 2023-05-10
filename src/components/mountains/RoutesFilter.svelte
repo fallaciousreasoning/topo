@@ -14,6 +14,7 @@
     alpine,
     ice,
     mixed,
+    scrollPos
   } from '../../stores/mountainFilters'
   import Card from '../Card.svelte'
   import { fromLonLat } from 'ol/proj'
@@ -21,6 +22,7 @@
   import { containsCoordinate } from 'ol/extent'
   import Grade from './Grade.svelte'
     import { parseGrade } from '../../utils/grade'
+    import { onMount } from 'svelte'
 
   const viewMountain = (mountain: Mountain) => {
     fragment.update((value) => ({
@@ -117,7 +119,7 @@
     (showing {filteredRoutes.length} of {routes.length} routes)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <VirtualList items={sorted} let:item>
+    <VirtualList items={sorted} let:item bind:scrollPos={$scrollPos}>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
