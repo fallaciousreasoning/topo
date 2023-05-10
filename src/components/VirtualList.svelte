@@ -1,18 +1,22 @@
-<script>
+<script lang="ts">
 	import { onMount, tick } from 'svelte';
+    import View from '../ol/View.svelte'
 
 	// props
 	export let items;
 	export let height = '100%';
 	export let itemHeight = undefined;
 
+	export let scrollPos: number = 0;
+
 	// read-only, but visible to consumers via bind:start
 	export let start = 0;
 	export let end = 0;
+
 	// local state
 	let height_map = [];
 	let rows;
-	let viewport;
+	let viewport: HTMLElement;
 	let contents;
 	let viewport_height = 0;
 	let visible;
@@ -21,6 +25,8 @@
 	let top = 0;
 	let bottom = 0;
 	let average_height;
+
+	window['heightMap'] = height_map
 
 	$: visible = items.slice(start, end).map((data, i) => {
 		return { index: i + start, data };
@@ -107,24 +113,48 @@
 		while (i < items.length) height_map[i++] = average_height;
 		bottom = remaining * average_height;
 
+		scrollPos = viewport.scrollTop;
 		// TODO if we overestimated the space these
 		// rows would occupy we may need to add some
 		// more. maybe we can just call handle_scroll again?
 	}
 
-	export async function scrollToIndex (index, opts) {
-		const {scrollTop} = viewport;
-		const itemsDelta = index - start;
-		const _itemHeight = itemHeight || average_height;
-		const distance = itemsDelta * _itemHeight;
+	export async function scrollToIndex (index: number) {
+		let last = -1
+		while (start !== index && last !== start) {
+			await tick()
+
+
+			const dir = start < index ? 1 : -1
+			const scrollBy = height_map[start] || average_height || height
+
+			viewport.scrollBy({ top: dir*scrollBy })
+
+			last = start
+			await handle_scroll()
+		}
+
+		// It's possible that after scrolling we might be a little off, so make
+		// sure we align the item at |index| exactly with the top.
+		const offset = viewport.scrollTop - height_map.slice(0, start).reduce((prev, next) => prev + next, 0)
+		viewport.scrollBy({ top: -offset })
+		await handle_scroll()
+	}
+
+	export async function scrollTo(y: number, opts: any) {
+		await tick();
+
 		opts = {
 			left: 0,
-			top: scrollTop + distance,
+			top: y,
 			behavior: 'smooth',
 			...opts
-		};
-		viewport.scrollTo(opts);
+		}
+		viewport.scrollTo(opts)
 	}
+
+	$:window['items'] = items
+	window['scrollListTo'] = scrollToIndex
 	
 	// trigger initial refresh
 	onMount(() => {
