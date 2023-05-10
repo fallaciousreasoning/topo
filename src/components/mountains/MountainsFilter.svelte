@@ -3,7 +3,7 @@
   import mountains, { Mountain } from '../../stores/mountains'
   import { allRoutes, getPicture } from '../../utils/routes'
   import MountainCard from './MountainCard.svelte'
-  import VirtualList from '@sveltejs/svelte-virtual-list'
+  import VirtualList from '../VirtualList.svelte'
   import SortyBy from '../SortyBy.svelte'
   import {
     direction,
@@ -11,12 +11,14 @@
     onlyWithPicture,
     filterText,
     visibleOnly,
+    scrollPos,
   } from '../../stores/mountainFilters'
   import { getOlContext } from '../../ol/Map.svelte'
   import onMountTick from '../../utils/onMountTick'
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
     import { containsCoordinate } from 'ol/extent'
+    import { onMount } from 'svelte'
 
   let hasGrade: number
 
@@ -92,7 +94,7 @@
     (showing {filteredMountains.length} of {totalMountains} mountains)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <VirtualList items={sorted} let:item>
+    <VirtualList items={sorted} let:item bind:scrollPos={$scrollPos}>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {

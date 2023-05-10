@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Mountain } from '../../stores/mountains'
   import { allRoutes, getPicture } from '../../utils/routes'
+  import Card from '../Card.svelte'
 
   export let mountain: Mountain
 
@@ -8,15 +9,10 @@
   $: imageUrl = getPicture(mountain)
 </script>
 
-<div class="w-full bg-white shadow-md rounded overflow-hidden">
-  {#if imageUrl}
-    <img class="max-h-64 w-full object-cover object-top" src={imageUrl} />
-  {/if}
-  <div class="p-2">
-    <h3 class="font-bold text-lg">{mountain.name} ({mountain.altitude})</h3>
-    <div>
-      {mountain.places.length + 1} areas,
-      {routes.length + 1} routes
-    </div>
+<Card {imageUrl}>
+  <span slot="title">{mountain.name} ({mountain.altitude})</span>
+  <div>
+    {mountain.places.length + 1} areas,
+    {routes.length + 1} routes
   </div>
-</div>
+</Card>

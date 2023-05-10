@@ -26,6 +26,7 @@ export interface Route {
     link: string;
     image?: string;
     grade: string;
+    length: string;
     pitches: Pitch[];
     quality: number;
     bolts: string;
