@@ -7,7 +7,7 @@
   import Card from './Card.svelte'
   import fragment from '../stores/fragment'
   import { tick } from 'svelte'
-  // import Chart from 'svelte-frappe-charts'
+  import Chart from 'svelte-frappe-charts'
   import round from '../utils/round'
 
   export let track: Track
@@ -81,7 +81,7 @@
     </div>
     {#if track.elevations}
       <div class="chart">
-        <!-- <Chart
+        <Chart
           type="line"
           axisOptions={{
             xIsSeries: true,
@@ -99,7 +99,7 @@
               round(h.percent * track.distance, 0)
             ),
             datasets: [{ values: track.elevations.map((h) => h.elevation) }],
-          }} /> -->
+          }} />
       </div>
     {/if}
   </div>
