@@ -2,7 +2,7 @@
   import VectorLayer from 'ol/layer/Vector'
   import VectorSource from 'ol/source/Vector'
   import { Draw, Modify } from 'ol/interaction'
-  import GeometryType from 'ol/geom/GeometryType'
+  import { Type as GeometryType } from 'ol/geom/Geometry'
   import onMountTick from '../utils/onMountTick'
   import Map, { getOlContext } from '../ol/Map.svelte'
   import { Style, Stroke, Fill, Text } from 'ol/style'
@@ -19,6 +19,7 @@
   import { lineStringToLatLngs, trackToGeometry } from '../db/track'
   import type { Track } from '../db/track'
   import Feature from 'ol/Feature'
+    import { draw } from 'svelte/types/runtime/transition'
 
   export let trackId: string
 
@@ -40,7 +41,7 @@
     } else {
       interaction = new Draw({
         source,
-        type: GeometryType.LINE_STRING,
+        type: 'LineString',
         style: styleFunction,
       })
       if (t.points.length) interaction.extend(feature)
@@ -107,9 +108,9 @@
 
   $: {
     interaction?.on(
-      interaction instanceof Modify ? 'modifystart' : 'drawstart',
+      interaction instanceof Modify ? 'modifystart' : 'drawstart' as any,
       (e) => {
-        const feature = e.feature ?? source.getFeatures()[0]
+        const feature = e['feature'] ?? source.getFeatures()[0]
 
         const geometry = feature.getGeometry() as LineString
         popupMessage = `Click last point to finish line.`
@@ -123,9 +124,9 @@
 
     // When the draw finished, start modifying the layerer.
     interaction?.on(
-      interaction instanceof Modify ? 'modifyend' : 'drawend',
+      interaction instanceof Modify ? 'modifyend' : 'drawend' as any,
       async (e) => {
-        const feature = e.feature ?? source.getFeatures()[0]
+        const feature = e['feature'] ?? source.getFeatures()[0]
         map.removeInteraction(interaction)
         popupMessage = null
 

@@ -13,10 +13,10 @@
     "@rollup/plugin-commonjs": "24.1.0",
     "@rollup/plugin-json": "6.0.0",
     "@rollup/plugin-node-resolve": "15.0.2",
+    "@rollup/plugin-terser": "0.4.1",
     "@rollup/plugin-typescript": "11.1.0",
     "@tsconfig/svelte": "3.0.0",
     "@types/human-date": "^1.4.0",
-    "@types/ol": "^6.4.2",
     "autoprefixer": "10.4.13",
     "concurrently": "7.6.0",
     "cross-env": "7.0.3",
@@ -26,7 +26,6 @@
     "rollup-plugin-css-only": "4.3.0",
     "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-svelte": "7.1.4",
-    "@rollup/plugin-terser": "0.4.1",
     "sirv-cli": "2.0.2",
     "svelte": "3.55.1",
     "svelte-check": "3.1.0",
@@ -39,9 +38,9 @@
     "dexie": "3.2.3",
     "human-date": "1.4.0",
     "localforage": "1.10.0",
-    "ol": "^6.5.0",
+    "ol": "7.3.0",
     "proj4": "2.8.1",
-    "svelte-frappe-charts": "^1.2.0",
+    "svelte-frappe-charts": "1.10.0",
     "uuid": "9.0.0"
   }
 }
