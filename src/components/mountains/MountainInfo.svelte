@@ -11,10 +11,10 @@
   $: console.log(id, route)
 </script>
 
-<PlaceInfo {mountain} />
+<PlaceInfo {mountain} scrollToRoute={route} />
 {#each places as place}
   <hr />
-  <PlaceInfo mountain={place} />
+  <PlaceInfo mountain={place} scrollToRoute={route} />
 {/each}
 <div>
   <a

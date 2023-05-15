@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { Mountain } from '../../stores/mountains'
   import TopoText from '../TopoText.svelte'
-    import RouteInfo from './RouteInfo.svelte'
+  import RouteInfo from './RouteInfo.svelte'
+  import { scrollTo } from '../../directives/scrollTo';
 
   export let mountain: Mountain
+  export let scrollToRoute: string | undefined = undefined
 </script>
 
 <h1 class="font-bold text-lg">
@@ -22,7 +24,9 @@
   <span class="font-bold mt-4">Routes</span>
 
   {#each mountain.routes as route}
-    <hr class="mb-4" />
-    <RouteInfo route={route}/>
+  <hr class="mb-4" />
+    <div use:scrollTo={scrollToRoute === route.name}>
+      <RouteInfo {route} />
+    </div>
   {/each}
 {/if}
