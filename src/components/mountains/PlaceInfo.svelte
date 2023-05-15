@@ -24,7 +24,7 @@
   <span class="font-bold mt-4">Routes</span>
 
   {#each mountain.routes as route}
-  <hr class="mb-4" />
+  <hr class="mb-4" class:bg-gray-300={scrollToRoute === route.name} />
     <div use:scrollTo={scrollToRoute === route.name}>
       <RouteInfo {route} />
     </div>
