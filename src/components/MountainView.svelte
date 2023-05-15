@@ -7,8 +7,10 @@
 </script>
 
 <Section page="mountains">
-  <Route path="mountains/:id" let:params exact>
-    <MountainInfo id={decodeURIComponent(params.id)} />
+  <Route path="mountains/:id/:route?" let:params>
+    <MountainInfo
+      id={decodeURIComponent(params.id)}
+      route={decodeURIComponent(params.route)} />
   </Route>
   <Route path="mountains" exact>
     <MountainsFilter />

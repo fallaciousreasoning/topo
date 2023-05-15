@@ -19,7 +19,7 @@
       const pagePart = pageParts[i]
 
       if (pathPart.startsWith(':')) {
-        params[pathPart.substring(1)] = pagePart
+        params[pathPart.replace(/(^:)|(\?$)/gi, '')] = pagePart
 
         // We can't have empty path parts, unless the user has said they can be
         // empty.
