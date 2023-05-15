@@ -2,7 +2,6 @@
   import VectorLayer from 'ol/layer/Vector'
   import VectorSource from 'ol/source/Vector'
   import { Draw, Modify } from 'ol/interaction'
-  import { Type as GeometryType } from 'ol/geom/Geometry'
   import onMountTick from '../utils/onMountTick'
   import Map, { getOlContext } from '../ol/Map.svelte'
   import { Style, Stroke, Fill, Text } from 'ol/style'
@@ -14,12 +13,11 @@
   import Popup from '../ol/Popup.svelte'
   import { friendlyDistance } from '../utils/friendlyUnits'
   import { getPathElevations } from '../search/height'
-  import { db, insertItem, updateItem } from '../db'
+  import { db, updateItem } from '../db'
   import { liveQuery } from 'dexie'
   import { lineStringToLatLngs, trackToGeometry } from '../db/track'
   import type { Track } from '../db/track'
   import Feature from 'ol/Feature'
-    import { draw } from 'svelte/types/runtime/transition'
 
   export let trackId: string
 
