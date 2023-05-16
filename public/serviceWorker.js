@@ -107,7 +107,10 @@ const rules = {
   [self.registration.scope]: networkThenCache,
 
   // Cache doc huts.
-  "https://api.doc.govt.nz/v2/huts?coordinates=wgs84": cacheThenNetwork
+  "https://api.doc.govt.nz/v2/huts?coordinates=wgs84": cacheThenNetwork,
+
+  // Fetch latest mountain data, if we have a network connection.
+  "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json": networkThenCache,
 }
 
 self.addEventListener('fetch', function(e) {

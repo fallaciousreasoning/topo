@@ -35,7 +35,7 @@ export default {
         return styleCache[size];
     },
     getFeatures: async () => {
-        const url = "/data/mountains.json"
+        const url = "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json"
         const response = await fetch(url);
         const result = await response.json() as Mountains;
         mountains.set(result);
