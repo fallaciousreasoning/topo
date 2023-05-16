@@ -14,17 +14,17 @@
     alpine,
     ice,
     mixed,
-    scrollPos
+    scrollPos,
   } from '../../stores/mountainFilters'
   import Card from '../Card.svelte'
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
   import { containsCoordinate } from 'ol/extent'
   import Grade from './Grade.svelte'
-    import { parseGrade } from '../../utils/grade'
-    import { onMount } from 'svelte'
+  import { parseGrade } from '../../utils/grade'
+  import { onMount } from 'svelte'
 
-  const viewMountain = (mountain: Mountain) => {
+  const viewMountain = (mountain: Mountain, route: Route) => {
     fragment.update((value) => ({
       ...value,
       position: {
@@ -33,7 +33,9 @@
         lng: mountain.latlng[1],
         zoom: 14,
       },
-      page: `mountains/${encodeURIComponent(mountain.link)}`,
+      page: `mountains/${encodeURIComponent(
+        mountain.link
+      )}/${encodeURIComponent(route.name)}`,
     }))
   }
 
@@ -53,12 +55,14 @@
         (m.latlng &&
           containsCoordinate($extent, fromLonLat([m.latlng[1], m.latlng[0]])))
     )
-    .filter(([,r]) => {
+    .filter(([, r]) => {
       const grade = parseGrade(r.grade)
-      return (grade.alpine && $alpine)
-        || (grade.ewbank && $rock)
-        || (grade.ice && $ice)
-        || (grade.mixed && $mixed)
+      return (
+        (grade.alpine && $alpine) ||
+        (grade.ewbank && $rock) ||
+        (grade.ice && $ice) ||
+        (grade.mixed && $mixed)
+      )
     })
 
   let sorted: Route[] = []
@@ -124,9 +128,9 @@
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
           if (e.key !== 'Enter') return
-          viewMountain(item[0])
+          viewMountain(item[0], item[1])
         }}
-        on:click={() => viewMountain(item[0])}>
+        on:click={() => viewMountain(item[0], item[1])}>
         <Card imageUrl={item[1].image}>
           <div slot="title">
             <Grade route={item[1]} />

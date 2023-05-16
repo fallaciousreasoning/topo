@@ -16,7 +16,7 @@
 </div>
 {#if route.image}
   <a target="_blank" rel="noopener noreferrer" href={route.image}>
-    <img class="w-full" alt={route.name} src={route.image} />
+    <img class="h-64 w-full object-cover object-scale" alt={route.name} src={route.image} />
   </a>
 {/if}
 <div>

@@ -27,7 +27,7 @@
     const importLink = await getTrackImportLink(track);
     if (!('share' in navigator)) {
         // Copy to clipboard, nothing else we can do.
-        await navigator.clipboard.writeText(importLink);
+        await (navigator as any).clipboard.writeText(importLink);
         return;
     }
 

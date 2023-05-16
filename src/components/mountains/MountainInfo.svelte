@@ -3,15 +3,18 @@
   import type { Mountain } from '../../stores/mountains'
   import PlaceInfo from './PlaceInfo.svelte'
 
-  export let id: string
+  export let id: string;
+  export let route: string = undefined;
+
   $: mountain = $mountains[id] || ({} as Mountain)
   $: places = mountain.places ?? []
+  $: console.log(id, route)
 </script>
 
-<PlaceInfo {mountain} />
+<PlaceInfo {mountain} scrollToRoute={route} />
 {#each places as place}
   <hr />
-  <PlaceInfo mountain={place} />
+  <PlaceInfo mountain={place} scrollToRoute={route} />
 {/each}
 <div>
   <a
