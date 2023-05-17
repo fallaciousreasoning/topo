@@ -77,9 +77,8 @@ import RelativeTime from "../components/RelativeTime.svelte";
   };
 
   const getFeatures = async () => {
-    const url =
-      "https://www.metservice.com/publicData/webdata/maps-radar/weather-stations/nz";
-    const response = await corsFetch(url);
+    const url = "/api/weather";
+    const response = await fetch(url);
     const data = (await response.json()) as MetServiceLiveWeatherResponse;
 
     const observations = data?.layout?.primary?.map?.markers;
