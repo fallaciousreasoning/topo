@@ -1,21 +1,24 @@
 <script lang="ts">
-  import type { Coordinate } from "ol/coordinate";
-  import Geolocation from "ol/Geolocation";
-  import Icon from "ol/style/Icon";
-  import Style from "ol/style/Style";
-import MapControl from "./MapControl.svelte";
-  import Control from "../ol/Control.svelte";
-  import Feature from "../ol/Feature.svelte";
-  import { getOlContext } from "../ol/Map.svelte";
-  import VectorLayer from "../ol/VectorLayer.svelte";
-  import onMountTick from "../utils/onMountTick";
+  import Geolocation from "ol/Geolocation"
+  import type { Coordinate } from "ol/coordinate"
+  import Icon from "ol/style/Icon"
+  import Style from "ol/style/Style"
+  import Feature from "../ol/Feature.svelte"
+  import { getOlContext } from "../ol/Map.svelte"
+  import VectorLayer from "../ol/VectorLayer.svelte"
+  import MapControl from "./MapControl.svelte"
 
   const { map } = getOlContext();
 
   let tracking = false;
   let position: Coordinate;
 
-  let geolocation = new Geolocation({ projection: map.getView().getProjection() });
+  let geolocation = new Geolocation({
+    projection: map.getView().getProjection(),
+    trackingOptions: {
+      enableHighAccuracy: true
+    }
+   });
   geolocation.on("change", (e) => {
     position = geolocation.getPosition();
   });
