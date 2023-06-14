@@ -152,6 +152,7 @@
         },
         { name: 'pitches', getter: ([m, r]) => r.pitches.length },
         { name: 'grade', getter: ([m, r]) => r.grade },
+        { name: 'quality', getter: ([m, r]) => r.quality }
       ]}
       unsorted={filteredRoutes}
       bind:direction={$direction}
