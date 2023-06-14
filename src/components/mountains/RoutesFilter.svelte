@@ -71,56 +71,58 @@
 </script>
 
 <div class="flex flex-col page w-full">
-  <h1 class="font-bold">Routes</h1>
-  <input
-    class="w-full border-black border-solid border p-2 rounded"
-    type="text"
-    bind:value={$filterText} />
-  <div class="flex flex-row justify-between w-full">
-    <label>
-      Only with picture
-      <input type="checkbox" bind:checked={$onlyWithPicture} />
-    </label>
-    <label>
-      Visible on map
-      <input type="checkbox" bind:checked={$visibleOnly} />
-    </label>
-  </div>
-  <div class="flex flex-row justify-between w-full">
-    <label>
-      Alpine
-      <input type="checkbox" bind:checked={$alpine} />
-    </label>
-    <label>
-      Rock
-      <input type="checkbox" bind:checked={$rock} />
-    </label>
-    <label>
-      Ice
-      <input type="checkbox" bind:checked={$ice} />
-    </label>
-    <label>
-      Mixed
-      <input type="checkbox" bind:checked={$mixed} />
-    </label>
-  </div>
-  <SortyBy
-    options={[
-      { name: 'name', getter: ([m, r]) => r.name },
-      {
-        name: 'length',
-        getter: ([m, r]) => {
-          const length = parseInt(r.length)
-          return isNaN(length) ? 0 : length
+  <details open>
+    <summary class="font-bold">Routes</summary>
+    <input
+      class="w-full border-black border-solid border p-2 rounded"
+      type="text"
+      bind:value={$filterText} />
+    <div class="flex flex-row justify-between w-full">
+      <label>
+        Only with picture
+        <input type="checkbox" bind:checked={$onlyWithPicture} />
+      </label>
+      <label>
+        Visible on map
+        <input type="checkbox" bind:checked={$visibleOnly} />
+      </label>
+    </div>
+    <div class="flex flex-row justify-between w-full">
+      <label>
+        Alpine
+        <input type="checkbox" bind:checked={$alpine} />
+      </label>
+      <label>
+        Rock
+        <input type="checkbox" bind:checked={$rock} />
+      </label>
+      <label>
+        Ice
+        <input type="checkbox" bind:checked={$ice} />
+      </label>
+      <label>
+        Mixed
+        <input type="checkbox" bind:checked={$mixed} />
+      </label>
+    </div>
+    <SortyBy
+      options={[
+        { name: 'name', getter: ([m, r]) => r.name },
+        {
+          name: 'length',
+          getter: ([m, r]) => {
+            const length = parseInt(r.length)
+            return isNaN(length) ? 0 : length
+          },
         },
-      },
-      { name: 'pitches', getter: ([m, r]) => r.pitches.length },
-      { name: 'grade', getter: ([m, r]) => r.grade },
-    ]}
-    unsorted={filteredRoutes}
-    bind:direction={$direction}
-    bind:selectedIndex={$sortBy}
-    bind:sorted />
+        { name: 'pitches', getter: ([m, r]) => r.pitches.length },
+        { name: 'grade', getter: ([m, r]) => r.grade },
+      ]}
+      unsorted={filteredRoutes}
+      bind:direction={$direction}
+      bind:selectedIndex={$sortBy}
+      bind:sorted />
+  </details>
   <div class="my-2">
     (showing {filteredRoutes.length} of {routes.length} routes)
   </div>
