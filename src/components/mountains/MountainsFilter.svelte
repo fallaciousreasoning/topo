@@ -3,7 +3,6 @@
   import mountains, { Mountain } from '../../stores/mountains'
   import { allRoutes, getPicture } from '../../utils/routes'
   import MountainCard from './MountainCard.svelte'
-  import VirtualList from '../VirtualList.svelte'
   import SortyBy from '../SortyBy.svelte'
   import {
     direction,
@@ -15,8 +14,8 @@
   } from '../../stores/mountainFilters'
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
-    import { containsCoordinate } from 'ol/extent'
-    import BetterList from '../BetterList.svelte'
+  import { containsCoordinate } from 'ol/extent'
+  import VirtualList from '../VirtualList.svelte'
 
   let hasGrade: number
 
@@ -43,7 +42,8 @@
     .filter(
       (p) =>
         !$visibleOnly ||
-        p.latlng && containsCoordinate($extent, fromLonLat([p.latlng[1], p.latlng[0]]))
+        (p.latlng &&
+          containsCoordinate($extent, fromLonLat([p.latlng[1], p.latlng[0]])))
     )
     .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -92,7 +92,7 @@
     (showing {filteredMountains.length} of {totalMountains} mountains)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <BetterList items={sorted} let:item bind:scrollPos={$scrollPos}>
+    <VirtualList items={sorted} let:item bind:scrollPos={$scrollPos}>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
@@ -102,7 +102,7 @@
         on:click={(e) => viewMountain(item)}>
         <MountainCard mountain={item} />
       </div>
-    </BetterList>
+    </VirtualList>
   </div>
 </div>
 

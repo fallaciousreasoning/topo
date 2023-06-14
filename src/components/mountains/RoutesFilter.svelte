@@ -21,8 +21,7 @@
   import { containsCoordinate } from 'ol/extent'
   import Grade from './Grade.svelte'
   import { parseGrade } from '../../utils/grade'
-  import { onMount } from 'svelte'
-    import BetterList from '../BetterList.svelte'
+  import VirtualList from '../VirtualList.svelte'
 
   const viewMountain = (mountain: Mountain, route: Route) => {
     fragment.update((value) => ({
@@ -123,7 +122,7 @@
     (showing {filteredRoutes.length} of {routes.length} routes)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <BetterList items={sorted} let:item bind:scrollPos={$scrollPos}>
+    <VirtualList items={sorted} let:item bind:scrollPos={$scrollPos}>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
@@ -150,7 +149,7 @@
           </div>
         </Card>
       </div>
-    </BetterList>
+    </VirtualList>
   </div>
 </div>
 
