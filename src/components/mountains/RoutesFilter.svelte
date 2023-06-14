@@ -24,6 +24,7 @@
   import Grade from './Grade.svelte'
   import { parseGrade } from '../../utils/grade'
   import VirtualList from '../VirtualList.svelte'
+    import { repeatString } from '../../utils/array'
 
   const viewMountain = (mountain: Mountain, route: Route) => {
     fragment.update((value) => ({
@@ -177,6 +178,7 @@
                 ({item[1].length})
               </span>
             {/if}
+            {repeatString('★', item[1].quality)}
           </div>
           <div slot="pretitle">
             {item[0].name}
