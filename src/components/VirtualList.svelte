@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte'
-  import VirtualList from './VirtualList.svelte'
 
   export let items: any[]
   export let height = '100%'
@@ -9,7 +8,9 @@
   let initialScrollPos = scrollPos
 
   // Number of additional elements out of view. Helps when scrolling fast.
-  export let pad = 1
+  // Note: This is currently broken - when the padded item doesn't have it's height
+  // calculated (i.e. it is rendered at the end).
+  export let pad = 0
 
   let heightMap = new WeakMap<
     any,
@@ -85,6 +86,7 @@
       }
 
       const info = heightMap.get(items[i])
+      info.offset = y
       if (y <= top) {
         start = i
       }
