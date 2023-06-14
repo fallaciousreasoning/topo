@@ -8,9 +8,11 @@
 
 <Section page="mountains">
   <Route path="mountains/:id/:route?" let:params>
-    <MountainInfo
-      id={decodeURIComponent(params.id)}
-      route={decodeURIComponent(params.route)} />
+    {#if params.id}
+      <MountainInfo
+        id={decodeURIComponent(params.id)}
+        route={decodeURIComponent(params.route)} />
+    {/if}
   </Route>
   <Route path="mountains" exact>
     <MountainsFilter />

@@ -19,7 +19,12 @@
     }
   >()
   let heights = []
-  window['heights'] = heights
+  $: {
+    if (mounted && items) {
+      heights.length = 0
+      onScroll()
+    }
+  }
 
   let viewport: HTMLElement
   let contents: HTMLElement

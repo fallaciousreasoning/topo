@@ -51,7 +51,6 @@
 </script>
 
 <div class="flex flex-col page w-full">
-  <h1 class="font-bold">Mountains</h1>
   <input
     class="w-full border-black border-solid border p-2 rounded"
     type="text"
