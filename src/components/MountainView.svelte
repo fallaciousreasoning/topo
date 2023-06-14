@@ -1,5 +1,4 @@
 <script lang="ts">
-  import mountains from '../stores/mountains'
   import MountainInfo from './mountains/MountainInfo.svelte'
   import MountainsFilter from './mountains/MountainsFilter.svelte'
   import Route from './Route.svelte'

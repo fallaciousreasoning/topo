@@ -55,6 +55,9 @@
           containsCoordinate($extent, fromLonLat([m.latlng[1], m.latlng[0]])))
     )
     .filter(([, r]) => {
+      // If we aren't filtering by anything, include everything.
+      if (!$alpine && !$rock && !$ice && !$mixed) return true
+
       const grade = parseGrade(r.grade)
       return (
         (grade.alpine && $alpine) ||
