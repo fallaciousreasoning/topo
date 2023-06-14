@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte'
+  import VirtualList from './VirtualList.svelte'
 
   export let items: any[]
   export let height = '100%'
 
   export let scrollPos: number = 0
+  let initialScrollPos = scrollPos
 
   // Number of additional elements out of view. Helps when scrolling fast.
   export let pad = 1
@@ -100,6 +102,10 @@
   onMount(() => {
     mounted = true
     onScroll()
+
+    if (initialScrollPos !== 0) {
+      setTimeout(() => (viewport.scrollTop = initialScrollPos))
+    }
   })
 </script>
 

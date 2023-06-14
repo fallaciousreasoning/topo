@@ -13,13 +13,9 @@
     visibleOnly,
     scrollPos,
   } from '../../stores/mountainFilters'
-  import { getOlContext } from '../../ol/Map.svelte'
-  import onMountTick from '../../utils/onMountTick'
   import { fromLonLat } from 'ol/proj'
   import { extent } from '../../stores/map'
     import { containsCoordinate } from 'ol/extent'
-    import { onMount } from 'svelte'
-    import BettererList from '../BettererList.svelte'
     import BetterList from '../BetterList.svelte'
 
   let hasGrade: number
@@ -96,7 +92,7 @@
     (showing {filteredMountains.length} of {totalMountains} mountains)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <BetterList items={sorted} let:item>
+    <BetterList items={sorted} let:item bind:scrollPos={$scrollPos}>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
