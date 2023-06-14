@@ -24,7 +24,8 @@
   import Grade from './Grade.svelte'
   import { parseGrade } from '../../utils/grade'
   import VirtualList from '../VirtualList.svelte'
-    import { repeatString } from '../../utils/array'
+  import { repeatString } from '../../utils/array'
+  import RouteAttribution from './RouteAttribution.svelte'
 
   const viewMountain = (mountain: Mountain, route: Route) => {
     fragment.update((value) => ({
@@ -71,7 +72,7 @@
       )
     })
     // Filter stars
-    .filter(([,r]) => {
+    .filter(([, r]) => {
       if ($minStars !== 'any' && r.quality < $minStars) return false
       if ($maxStars !== 'any' && r.quality > $maxStars) return false
       return true
@@ -121,7 +122,7 @@
         <label>
           Min:
           <select bind:value={$minStars}>
-            <option value='any'>Any</option>
+            <option value="any">Any</option>
             <option value={1}>1</option>
             <option value={2}>2</option>
             <option value={3}>3</option>
@@ -130,7 +131,7 @@
         <label>
           Max:
           <select bind:value={$maxStars}>
-            <option value='any'>Any</option>
+            <option value="any">Any</option>
             <option>0</option>
             <option>1</option>
             <option>2</option>
@@ -185,7 +186,7 @@
           </div>
           <div>
             {item[1].description}
-            <div class="italic text-gray-600">{item[1].ascent}</div>
+            <RouteAttribution route={item[1]} />
           </div>
         </Card>
       </div>
