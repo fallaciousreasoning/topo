@@ -8,13 +8,7 @@
 	export let itemHeight = undefined;
 
 	export let scrollPos: number = 0;
-
-	// Handle changes to the scroll binding.
-	$: {
-		if (viewport && scrollPos != viewport?.scrollTop) {
-			setTimeout(() => scrollTo(scrollPos))
-		}
-	}
+	let initialScrollPos: number = scrollPos;
 
 	let lastItems = [];
 
@@ -148,6 +142,7 @@
 	}
 
 	export async function scrollTo(y: number) {
+		console.log("Scroll to", y)
 		let last = -1
 		const dir = viewport.scrollTop < y ? 1 : -1
 		while (((viewport.scrollTop < y && dir < 0) || (viewport.scrollTop > y && dir > 0))
@@ -156,7 +151,7 @@
 
 			const scrollBy = height_map[start] || average_height || height
 
-			console.log(dir, scrollBy, viewport.scrollTop, y)
+			// console.log(dir, scrollBy, viewport.scrollTop, y)
 			
 			last = viewport.scrollTop
 			viewport.scrollBy({ top: dir * scrollBy })
@@ -176,6 +171,10 @@
 	onMount(() => {
 		rows = contents.getElementsByTagName('svelte-virtual-list-row');
 		mounted = true;
+
+		tick().then(() => {
+			scrollTo(initialScrollPos)
+		})
 	});
 </script>
 

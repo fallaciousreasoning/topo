@@ -19,6 +19,8 @@
   import { extent } from '../../stores/map'
     import { containsCoordinate } from 'ol/extent'
     import { onMount } from 'svelte'
+    import BettererList from '../BettererList.svelte'
+    import BetterList from '../BetterList.svelte'
 
   let hasGrade: number
 
@@ -94,7 +96,7 @@
     (showing {filteredMountains.length} of {totalMountains} mountains)
   </div>
   <div class="flex flex-col gap-2 -mx-4 -mb-4 min-h-0 flex-1">
-    <VirtualList items={sorted} let:item bind:scrollPos={$scrollPos}>
+    <BetterList items={sorted} let:item>
       <div
         class="cursor-pointer px-4 py-1"
         on:keyup={(e) => {
@@ -104,7 +106,7 @@
         on:click={(e) => viewMountain(item)}>
         <MountainCard mountain={item} />
       </div>
-    </VirtualList>
+    </BetterList>
   </div>
 </div>
 

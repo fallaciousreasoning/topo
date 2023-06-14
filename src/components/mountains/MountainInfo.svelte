@@ -8,7 +8,6 @@
 
   $: mountain = $mountains[id] || ({} as Mountain)
   $: places = mountain.places ?? []
-  $: console.log(id, route)
 </script>
 
 <PlaceInfo {mountain} scrollToRoute={route} />
