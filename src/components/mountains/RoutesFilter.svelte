@@ -14,6 +14,8 @@
     ice,
     mixed,
     scrollPos,
+    minStars,
+    maxStars,
   } from '../../stores/mountainFilters'
   import Card from '../Card.svelte'
   import { fromLonLat } from 'ol/proj'
@@ -54,6 +56,7 @@
         (m.latlng &&
           containsCoordinate($extent, fromLonLat([m.latlng[1], m.latlng[0]])))
     )
+    // Filter grade
     .filter(([, r]) => {
       // If we aren't filtering by anything, include everything.
       if (!$alpine && !$rock && !$ice && !$mixed) return true
@@ -65,6 +68,12 @@
         (grade.ice && $ice) ||
         (grade.mixed && $mixed)
       )
+    })
+    // Filter stars
+    .filter(([,r]) => {
+      if ($minStars !== 'any' && r.quality < $minStars) return false
+      if ($maxStars !== 'any' && r.quality > $maxStars) return false
+      return true
     })
 
   let sorted: Route[] = []
@@ -105,6 +114,30 @@
         <input type="checkbox" bind:checked={$mixed} />
       </label>
     </div>
+    <details>
+      <summary> Stars </summary>
+      <div class="flex flex-col">
+        <label>
+          Min:
+          <select bind:value={$minStars}>
+            <option value='any'>Any</option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+          </select>
+        </label>
+        <label>
+          Max:
+          <select bind:value={$maxStars}>
+            <option value='any'>Any</option>
+            <option>0</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+          </select>
+        </label>
+      </div>
+    </details>
     <SortyBy
       options={[
         { name: 'name', getter: ([m, r]) => r.name },

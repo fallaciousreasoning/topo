@@ -12,3 +12,6 @@ export const alpine = writable(false)
 export const rock = writable(false)
 export const ice = writable(false)
 export const mixed = writable(false)
+
+export const minStars = writable<'any' | 1 | 2 | 3>('any');
+export const maxStars = writable<'any' | 0 | 1 | 2 | 3>('any');
