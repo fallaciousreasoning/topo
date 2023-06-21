@@ -124,7 +124,7 @@
   <l-contents
     bind:this={contents}
     style:height="{averageHeight * items.length}px">
-    {#each visible as row}
+    {#each visible as row (row.index)}
       <l-row
         data-row={row.index}
         style:top="{heightMap.get(row.data)?.offset ?? averageHeight * row.index}px">
