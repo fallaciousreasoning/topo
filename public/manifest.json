@@ -1,11 +1,25 @@
 {
     "name": "NZ Topo",
     "short_name": "NZ Topo",
-    "icons": [{
-        "src": "/favicon.png",
-        "sizes": "512x512",
-        "type": "image/png"
-    }],
+    "icons": [
+        {
+            "src": "/maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/monochrome.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "monochrome maskable"
+        },
+        {
+            "src": "/favicon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
     "scope": ".",
     "start_url": "/index.html",
     "display": "standalone",
