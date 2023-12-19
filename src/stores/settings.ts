@@ -45,6 +45,7 @@ const createStore = () => {
 
     // Load settings from disk.
     loadSettings().then(settings => {
+        settings = {...defaultValue, ...settings }
         if (settings)
             set(settings);
         resolve(settings)

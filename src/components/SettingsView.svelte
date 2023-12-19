@@ -21,10 +21,12 @@
   })
 
   onMount(() => {
+    if (!$settings.layers) $settings.layers = {}
+
     for (const layer of layerDefinitions) {
       if (!$settings.layers[layer.name]) {
         $settings.layers[layer.name] = {
-          cache: false,
+          cache: true,
         }
       }
     }
