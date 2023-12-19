@@ -11,6 +11,7 @@
   export let visible: boolean = true
   export let opacity = 1
   export let prerender: (e: RenderEvent) => void = undefined
+  export let minZoom: number | undefined = undefined
 
   const { addLayer, removeLayer } = getOlContext()
   const layer = new TileLayer({
@@ -18,6 +19,7 @@
     ['title' as any]: title,
     ['type' as any]: type,
     ['visible' as any]: visible,
+    minZoom,
     opacity,
     source: typeof source === 'string' ? new XYZ({ url: source }) : source,
   })

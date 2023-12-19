@@ -109,7 +109,7 @@
               <label>
                 <input
                   type="checkbox"
-                  checked={$fragment.featureLayers.includes(layer.get('id'))}
+                  checked={$fragment.featureLayers.includes(layer.get('id')) || layer.getVisible()}
                   on:change={(e) =>
                     setLayerVisible(layer, e.target['checked'])} />
                 {layer.get('title')}

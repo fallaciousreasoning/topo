@@ -7,7 +7,7 @@ export interface BaseLayerDefinition {
     name: string;
     description: string;
     defaultVisible?: boolean;
-    defaultCache?: boolean;
+    minZoom?: number;
 }
 
 export type TileLayerDefinition = BaseLayerDefinition & {
@@ -62,6 +62,7 @@ export const layerDefinitions: TileLayerDefinition[] = [
         type: 'overlay',
         defaultVisible: true,
         prerender: e => e.context.canvas.getContext('2d').globalCompositeOperation = 'multiply',
+        minZoom: 10,
         url: 'https://tiles-cdn.koordinates.com/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50765/EPSG:3857/{z}/{x}/{y}.png'
     }
 ]

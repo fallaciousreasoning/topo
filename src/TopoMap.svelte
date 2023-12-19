@@ -49,6 +49,7 @@
           title={definition.name}
           prerender={definition.prerender}
           type={"overlay"}
+          minZoom={definition.minZoom}
           visible={definition.defaultVisible}
           source={cachingSource(definition)} />
       {/each}
