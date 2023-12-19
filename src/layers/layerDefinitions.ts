@@ -4,10 +4,10 @@ import { pickRandom } from "../utils/random";
 import RenderEvent from "ol/render/Event";
 
 export interface BaseLayerDefinition {
-    id: string;
     name: string;
     description: string;
     defaultVisible?: boolean;
+    defaultCache?: boolean;
 }
 
 export type TileLayerDefinition = BaseLayerDefinition & {
@@ -25,7 +25,6 @@ export type LayerDefinition = BaseLayerDefinition
 
 export const linzTopo: TileLayerDefinition =
 {
-    id: 'linz-topo',
     name: "LINZ Topo",
     description: "The LINZ topographic map",
     type: "base",
@@ -38,21 +37,18 @@ export const linzTopo: TileLayerDefinition =
 export const layerDefinitions: TileLayerDefinition[] = [
     linzTopo,
     {
-        id: 'osm',
         name: "Open Street Maps",
         description: "Street maps provided by openstreetmaps",
         type: 'base',
         url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
     },
     {
-        id: 'open-topo-maps',
         name: "Open Topo Maps",
         description: "Topographic maps based on publicly available data",
         type: 'base',
         url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png'
     },
     {
-        id: 'linz-arial',
         name: 'LINZ Aerial Imagery',
         description: "High resolution imagery of New Zealand, provided by LINZ",
         type: 'base',
@@ -61,7 +57,6 @@ export const layerDefinitions: TileLayerDefinition[] = [
         }
     },
     {
-        id: 'hillshade',
         name: "Hillshade",
         description: "Terrain relief overlay",
         type: 'overlay',

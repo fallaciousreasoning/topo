@@ -58,6 +58,8 @@
   const toggleAllFeatures = (visible: boolean) => {
     if (!visible) $fragment.featureLayers = []
     else $fragment.featureLayers = featureLayers.map((l) => l.get('id'))
+
+    for (const feature of featureLayers) feature.setVisible(visible)
   }
 </script>
 

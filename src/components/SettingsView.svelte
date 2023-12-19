@@ -36,7 +36,7 @@
   <div>
     <h4 class="mt-2 font-semibold text-base">Layers</h4>
     <div class="flex flex-col gap-2 my-1">
-      {#each layerDefinitions.filter((l) => l.type === 'base') as layer}
+      {#each layerDefinitions as layer}
         <Card>
           <h5 class="font-semibold">{layer.name}</h5>
           <div class="text-gray-500 italic">{layer.description}</div>
