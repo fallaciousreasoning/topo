@@ -1,13 +1,10 @@
-import { create } from 'ol/transform';
-import { get, readable, writable } from 'svelte/store';
 import localForage from 'localforage';
-import { debounce } from '../utils/debounce';
-import BaseLayer from 'ol/layer/Base';
-import { applyUpdate } from '../utils/assign';
+import { get, writable } from 'svelte/store';
 import { layerDefinitions, linzTopo } from '../layers/layerDefinitions';
+import { applyUpdate } from '../utils/assign';
 import { resolvable } from '../utils/promise';
 
-interface BaseLayerSettings {
+interface LayerSettings {
     cache: boolean;
 }
 
@@ -18,26 +15,26 @@ interface Store {
         background: 'light' | 'dark' | 'auto';
     }
 
-    baseLayers: {
-        [key: string]: BaseLayerSettings;
+    layers: {
+        [key: string]: LayerSettings;
     }
 }
 
 const settingsKey = "settings";
 
-const defaultBaseLayerSettings: BaseLayerSettings = {
+const defaultLayerSettings: LayerSettings = {
     cache: false
 };
 
 const defaultValue: Store = {
-    baseLayers: layerDefinitions.reduce((prev, next) => ({ ...prev, [next.name]: defaultBaseLayerSettings }), {}),
+    layers: layerDefinitions.reduce((prev, next) => ({ ...prev, [next.name]: defaultLayerSettings }), {}),
     theme: {
         primaryThemeColor: 'purple',
         seconaryThemeColor: 'orange',
         background: 'auto'
     }
 };
-defaultValue.baseLayers[linzTopo.name].cache = true;
+defaultValue.layers[linzTopo.name].cache = true;
 
 const loadSettings = () => localForage.getItem<Store>(settingsKey);
 const saveSettings = (settings: Store) => localForage.setItem(settingsKey, settings);
@@ -57,10 +54,10 @@ const createStore = () => {
         return update(oldStore => applyUpdate(key, oldStore, newSettings));
     }
 
-    const baseLayerUpdater = (id: string, layer: Partial<BaseLayerSettings>) => {
+    const layerUpdater = (id: string, layer: Partial<LayerSettings>) => {
         return update(oldStore => {
-            const wholeLayer: BaseLayerSettings = { ...defaultBaseLayerSettings, ...oldStore.baseLayers[id], ...layer };
-            return applyUpdate("baseLayers", oldStore, { [id]: wholeLayer })
+            const wholeLayer: LayerSettings = { ...defaultLayerSettings, ...oldStore.layers[id], ...layer };
+            return applyUpdate("layers", oldStore, { [id]: wholeLayer })
         });
     }
 
@@ -71,8 +68,8 @@ const createStore = () => {
     return {
         subscribe,
         updateTheme: updaterFor('theme'),
-        updateBaseLayers: updaterFor('baseLayers'),
-        updateBaseLayer: baseLayerUpdater
+        updateLayers: updaterFor('layers'),
+        updateLayer: layerUpdater
     }
 }
 

@@ -22,8 +22,8 @@
 
   onMount(() => {
     for (const layer of layerDefinitions) {
-      if (!$settings.baseLayers[layer.name]) {
-        $settings.baseLayers[layer.name] = {
+      if (!$settings.layers[layer.name]) {
+        $settings.layers[layer.name] = {
           cache: false,
         }
       }
@@ -42,9 +42,9 @@
           <div class="text-gray-500 italic">{layer.description}</div>
           <Checkbox
             label="Cache Viewed Tiles"
-            checked={$settings.baseLayers[layer.name].cache}
+            checked={$settings.layers[layer.name].cache}
             on:change={(e) =>
-              settings.updateBaseLayer(layer.name, {
+              settings.updateLayer(layer.name, {
                 cache: e.target['checked'],
               })} />
           <div>

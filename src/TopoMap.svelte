@@ -21,6 +21,7 @@
   import cachingSource from './sources/cachingSource'
   import fragment from './stores/fragment'
   import { nzBounds } from './utils/bounds'
+  import { XYZ } from 'ol/source'
 </script>
 
 <div id="topo-map">
@@ -31,17 +32,25 @@
       maxZoom={18}
       minZoom={4}
       extent={nzBounds}
-      initialView={nzBounds}
-    />
+      initialView={nzBounds} />
     <MapPositioner />
     <LayerGroup title="Base Layers">
-      {#each layerDefinitions as definition}
+      {#each layerDefinitions.filter((l) => l.type === 'base') as definition}
         <TileLayer
           title={definition.name}
           type="base"
           visible={false}
-          source={cachingSource(definition)}
-        />
+          source={cachingSource(definition)} />
+      {/each}
+    </LayerGroup>
+    <LayerGroup title="Overlays">
+      {#each layerDefinitions.filter((l) => l.type === 'overlay') as definition}
+        <TileLayer
+          title={definition.name}
+          prerender={definition.prerender}
+          type={"overlay"}
+          visible={definition.defaultVisible}
+          source={cachingSource(definition)} />
       {/each}
     </LayerGroup>
     <LayerGroup title="Features">
@@ -54,8 +63,7 @@
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat]
           $fragment.label = { lat, lng, text: e.detail.result.name }
-        }}
-      />
+        }} />
       <MapZoom />
       <MapLocator />
       <MapMeasure />

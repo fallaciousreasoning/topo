@@ -11,7 +11,7 @@ type CacheOptions = Omit<Options, "url"> & {
 
 const getShouldCache = async (layer: { name: string }) => {
     const store = await getCurrentSettings();
-    return store.baseLayers[layer.name].cache;
+    return store.layers[layer.name].cache;
 }
 
 export const getCacheId = (props: { name }, tile: TileCoord) => `${props.name}/${tile[2]}/${tile[0]}/${tile[1]}`;
