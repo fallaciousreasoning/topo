@@ -1,6 +1,6 @@
 <script lang="ts">
   import fragment from '../../stores/fragment'
-  import mountains, { Mountain, Route } from '../../stores/mountains'
+  import mountains, { type Mountain, type Route } from '../../stores/mountains'
   import { allRoutes } from '../../utils/routes'
   import SortyBy from '../SortyBy.svelte'
   import {

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Route } from "../../stores/mountains"
+    import { type Route } from "../../stores/mountains"
     export let route: Route;
 </script>
 

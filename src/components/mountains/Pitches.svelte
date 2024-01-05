@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pitch } from '../../stores/mountains'
+  import type { Pitch } from '../../stores/mountains'
   import TopoText from '../TopoText.svelte'
 
   export let pitches: Pitch[];

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Mountain } from '../../stores/mountains'
+  import { type Mountain } from '../../stores/mountains'
   import { allRoutes, getPicture } from '../../utils/routes'
   import Card from '../Card.svelte'
 

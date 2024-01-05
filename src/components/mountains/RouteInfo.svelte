@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Route } from '../../stores/mountains'
+  import { type Route } from '../../stores/mountains'
   import { repeatString } from '../../utils/array'
   import TopoText from '../TopoText.svelte'
   import Pitches from './Pitches.svelte'

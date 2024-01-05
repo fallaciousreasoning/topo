@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Route } from '../../stores/mountains'
+  import { type Route } from '../../stores/mountains'
   import {
-    Level,
+    type Level,
     guessContext,
     levelCalculator,
     parseGrade,
