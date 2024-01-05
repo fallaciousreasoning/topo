@@ -39,8 +39,8 @@
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
     "localforage": "1.10.0",
-    "ol": "7.3.0",
-    "proj4": "2.8.1",
+    "ol": "8.2.0",
+    "proj4": "2.9.2",
     "svelte-frappe-charts": "1.10.0",
     "uuid": "9.0.0"
   }
