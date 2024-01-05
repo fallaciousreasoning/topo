@@ -35,7 +35,7 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
-    "dexie": "3.2.3",
+    "dexie": "3.2.4",
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
     "localforage": "1.10.0",
