@@ -1,3 +1,5 @@
+// import initSearch, {search} from 'nz-search'
+
 const osmUrl = 'https://nominatim.openstreetmap.org/search'
 const nzPlacesUrl = "https://nz-places.now.sh/api/search";
 
@@ -21,13 +23,20 @@ const searchOsm = async (query: string): Promise<GeocodeResult[]> => {
 }
 
 const searchNzPlaces = async (query: string): Promise<GeocodeResult[]> => {
-    const url = `${nzPlacesUrl}?query=${encodeURIComponent(query)}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
+    const api = await import('nz-search').then(async search => {
+        await search.default();
+        return search
+    })
+
+    const results = api.search(query)
+    return results
+    // const url = `${nzPlacesUrl}?query=${encodeURIComponent(query)}`;
+    // const response = await fetch(url);
+    // const data = await response.json();
+    // return data;
 }
 
-export default async (query: string, sources=[searchNzPlaces,searchOsm]): Promise<GeocodeResult[]> => {
+export default async (query: string, sources=[searchNzPlaces]): Promise<GeocodeResult[]> => {
     const results = await Promise.all(sources.map(s => s(query)));
     return results.reduce((prev, next) => [...prev, ...next], [])
 }

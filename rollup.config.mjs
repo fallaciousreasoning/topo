@@ -6,6 +6,7 @@ import css from 'rollup-plugin-css-only';
 import livereload from 'rollup-plugin-livereload';
 import svelte from 'rollup-plugin-svelte';
 import terser from '@rollup/plugin-terser';
+import wasm from '@rollup/plugin-wasm';
 import sveltePreprocess from 'svelte-preprocess';
 import tailwindcss from 'tailwindcss';
 import { spawn } from 'child_process'
@@ -37,9 +38,9 @@ export default {
 	input: 'src/main.ts',
 	output: {
 		sourcemap: true,
-		format: 'iife',
+		format: 'es',
 		name: 'app',
-		file: 'public/build/bundle.js'
+		dir: 'public/build'
 	},
 	context: 'window',
 	plugins: [
@@ -57,6 +58,8 @@ export default {
 				}
 			}),
 		}),
+
+		wasm(),
 
 		css({ output: "extra.css" }),
 
