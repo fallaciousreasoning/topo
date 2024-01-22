@@ -10,6 +10,19 @@ export interface GeocodeResult {
     type: string;
 }
 
+let initPromise: Promise<typeof import('nz-search')>;
+function getSearch() {
+    if (!initPromise) {
+        initPromise = (async () => {
+            const [places, searchApi] = await Promise.all([(await fetch('data/places.json')).arrayBuffer(), import('nz-search')])
+            await searchApi.default()
+            searchApi.load_data(new Uint8Array(places))
+            return searchApi
+        })()
+    }
+    return initPromise
+}
+
 const searchOsm = async (query: string): Promise<GeocodeResult[]> => {
     // Hackily include the country because the nominatim API is terrible.
     query = query + ", NZ";
@@ -23,17 +36,10 @@ const searchOsm = async (query: string): Promise<GeocodeResult[]> => {
 }
 
 const searchNzPlaces = async (query: string): Promise<GeocodeResult[]> => {
-    const api = await import('nz-search').then(async search => {
-        await search.default();
-        return search
-    })
+    const api = await getSearch()
 
-    const results = api.search(query)
+    const results = api.search(query, 100)
     return results
-    // const url = `${nzPlacesUrl}?query=${encodeURIComponent(query)}`;
-    // const response = await fetch(url);
-    // const data = await response.json();
-    // return data;
 }
 
 export default async (query: string, sources=[searchNzPlaces]): Promise<GeocodeResult[]> => {

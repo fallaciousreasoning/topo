@@ -42,7 +42,7 @@
     } catch {}
     searching = false;
     debouncedQuery = query;
-  }, 500);
+  }, 0);
 
   $: searching = debouncedQuery !== query;
   $: {
