@@ -42,6 +42,11 @@ const searchNzPlaces = async (query: string): Promise<GeocodeResult[]> => {
     return results
 }
 
+export const findPlace = async (lat: number, lon: number) => {
+    const search = await getSearch()
+    return search.closest_place(lat, lon, 100)
+}
+
 export default async (query: string, sources=[searchNzPlaces]): Promise<GeocodeResult[]> => {
     const results = await Promise.all(sources.map(s => s(query)));
     return results.reduce((prev, next) => [...prev, ...next], [])
