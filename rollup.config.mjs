@@ -6,12 +6,35 @@ import css from 'rollup-plugin-css-only';
 import livereload from 'rollup-plugin-livereload';
 import svelte from 'rollup-plugin-svelte';
 import terser from '@rollup/plugin-terser';
-import wasm from '@rollup/plugin-wasm';
 import sveltePreprocess from 'svelte-preprocess';
 import tailwindcss from 'tailwindcss';
 import { spawn } from 'child_process'
+import fs from 'fs/promises'
+import path from 'path'
 
 const production = !process.env.ROLLUP_WATCH;
+
+const wasmFiles = [
+	'node_modules/nz-search/nz_search_bg.wasm'
+]
+
+function copyBlobsPlugin() {
+	return {
+		name: 'copy-wasm-blobs',
+		async buildEnd() {
+			for (const wasmBlob of wasmFiles) {
+				const data = await fs.readFile(path.resolve(wasmBlob))
+				await this.emitFile({
+					type: 'asset',
+					source: data,
+					fileName: path.basename(wasmBlob)
+
+				})
+				this.addWatchFile(wasmBlob)
+			}
+		}
+	}
+}
 
 function serve() {
 	let server;
@@ -59,7 +82,7 @@ export default {
 			}),
 		}),
 
-		wasm(),
+		copyBlobsPlugin(),
 
 		css({ output: "extra.css" }),
 
