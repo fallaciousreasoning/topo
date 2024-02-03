@@ -39,7 +39,7 @@ export default {
         const response = await fetch(url);
         const data = await response.json() as any[];
         for (const hut of data) {
-            hut.place = 'hut'
+            hut.type = 'hut'
         }
         return data as Place[]
     },

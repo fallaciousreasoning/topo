@@ -25,9 +25,9 @@ const downloadFirstRunAssets = async () => {
     '/build/tailwind.css',
     '/build/main.js',
     '/data/huts.json',
-    '/data/places.json',
     '/icons/marker.svg',
-    '/icons/location-indicator.svg'
+    '/icons/location-indicator.svg',
+    'https://search.topos.nz/data/min_excluded_places.json'
   ]);
 };
 

@@ -90,7 +90,7 @@
             class="opacity-95 hover:bg-background-hover px-2 py-1"
             on:click={() => selectResult(result)}
           >
-            {result.name}
+            {result.name} ({result.type})
           </div>
         {/each}
       </div>

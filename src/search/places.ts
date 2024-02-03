@@ -2,7 +2,7 @@ import { getLayerData } from '../layers/data';
 import huts from '../layers/huts'
 import mountains from '../layers/mountains';
 
-const placesUrl = '/data/places.json'
+const placesUrl = 'https://search.topos.nz/data/min_excluded_places.json'
 
 export interface Place {
     name: string,
