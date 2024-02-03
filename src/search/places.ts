@@ -22,8 +22,8 @@ export const getPlaces = () => {
             huts.getData,
             () => mountains.getData()
                 .then(r => Object.entries(r)
-                    .filter(([,m]) => m.latlng?.length && m.name)
-                    .map(([url, m]) => ({ name: m.name, lat: m.latlng[0], lon: m.latlng[1], type: 'peak', href: url }))),
+                    .filter(([, m]) => m.latlng?.length && m.name)
+                    .map(([url, m]) => ({ name: m.name, lat: m.latlng![0], lon: m.latlng![1], type: 'peak', href: url }))),
             () => fetch(placesUrl).then(r => r.json() as Promise<Place[]>),
         ])
     }

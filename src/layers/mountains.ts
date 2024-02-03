@@ -45,7 +45,7 @@ export default {
         const data = await this.getData();
         const points = Object.values(data).filter(a => a.latlng);
         return points.map(mountain => {
-            const coords = fromLonLat([mountain.latlng[1], mountain.latlng[0]]);
+            const coords = fromLonLat([mountain.latlng![1], mountain.latlng![0]]);
             const feature = new Feature(new Point(coords));
             feature.setId(mountain.link)
             return feature;
@@ -59,7 +59,7 @@ export default {
 
         fragment.update(value => ({
             ...value,
-            page: `mountains/${encodeURIComponent(originalFeature.getId())}`
+            page: `mountains/${encodeURIComponent(originalFeature.getId()!)}`
         }))
 
     }

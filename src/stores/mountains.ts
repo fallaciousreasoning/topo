@@ -1,7 +1,16 @@
 import { writable } from "svelte/store";
-import type MountainsJson from '../../public/data/mountains.json'
 
-export type Mountain = typeof MountainsJson[keyof typeof MountainsJson] & { routes: Route[] };
+export type Mountain = {
+    link: string;
+    name: string,
+    altitude: string,
+    description: string | null,
+    latlng?: [number, number],
+    routes: Route[],
+    places: Mountain[],
+    image: string | null,
+    images: string[]
+}
 export type Mountains = {
     [href: string]: Mountain
 }
