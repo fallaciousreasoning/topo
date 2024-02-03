@@ -1,3 +1,4 @@
+import { getLayerData } from '../layers/data';
 import huts from '../layers/huts'
 import mountains from '../layers/mountains';
 
@@ -19,8 +20,8 @@ const makePlacesPromise = async (sources: (() => Promise<Place[]>)[]) => {
 export const getPlaces = () => {
     if (!placesPromise) {
         placesPromise = makePlacesPromise([
-            huts.getData,
-            () => mountains.getData()
+            () => getLayerData(huts),
+            () => getLayerData(mountains)
                 .then(r => Object.entries(r)
                     .filter(([, m]) => m.latlng?.length && m.name)
                     .map(([url, m]) => ({ name: m.name, lat: m.latlng![0], lon: m.latlng![1], type: 'peak', href: url }))),

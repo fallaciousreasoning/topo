@@ -5,6 +5,7 @@ import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 
 import fragment from '../stores/fragment';
 import mountains, { type Mountains } from '../stores/mountains';
+import { getLayerData } from './data';
 
 const styleCache = {};
 
@@ -42,7 +43,7 @@ export default {
         return result
     },
     async getFeatures() {
-        const data = await this.getData();
+        const data = await getLayerData(this);
         const points = Object.values(data).filter(a => a.latlng);
         return points.map(mountain => {
             const coords = fromLonLat([mountain.latlng![1], mountain.latlng![0]]);

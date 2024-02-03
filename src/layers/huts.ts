@@ -4,6 +4,7 @@ import { fromLonLat } from 'ol/proj';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 import type { Place } from '../search/places';
 import fragment from '../stores/fragment';
+import { getLayerData } from './data';
 
 const styleCache = {};
 export default {
@@ -43,7 +44,7 @@ export default {
         return data as Place[]
     },
     async getFeatures() {
-        const data = await this.getData()
+        const data = await getLayerData(this)
         return data.map(hut => {
             const coords = fromLonLat([hut.lon, hut.lat]);
             const feature = new Feature(new Point(coords));
