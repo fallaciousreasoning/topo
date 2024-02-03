@@ -1,10 +1,10 @@
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
-import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
+import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 
 import fragment from '../stores/fragment';
-import mountains, { Mountain, Mountains } from '../stores/mountains';
+import mountains, { type Mountains } from '../stores/mountains';
 
 const styleCache = {};
 
@@ -34,13 +34,16 @@ export default {
         }
         return styleCache[size];
     },
-    getFeatures: async () => {
+    getData: async () => {
         const url = "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json"
         const response = await fetch(url);
         const result = await response.json() as Mountains;
         mountains.set(result);
-
-        const points = Object.values(result).filter(a => a.latlng);
+        return result
+    },
+    async getFeatures() {
+        const data = await this.getData();
+        const points = Object.values(data).filter(a => a.latlng);
         return points.map(mountain => {
             const coords = fromLonLat([mountain.latlng[1], mountain.latlng[0]]);
             const feature = new Feature(new Point(coords));
