@@ -1,53 +1,45 @@
-// import initSearch, {search} from 'nz-search'
+import { getPlaces, type Place } from './places';
 
-const osmUrl = 'https://nominatim.openstreetmap.org/search'
-const nzPlacesUrl = "https://nz-places.now.sh/api/search";
+const getMatch = (queryParts: string[], place: Place) => {
+    const lowerName = place.name.toLowerCase();
+    let rank = 0
+    let lastMatchIndex: number | undefined = undefined
 
-export interface GeocodeResult {
-    lat: number;
-    lon: number;
-    name: string;
-    type: string;
-}
+    for (const part of queryParts) {
+        const matchIndex = lowerName.indexOf(part)
+        if (matchIndex === -1) return 0
 
-let initPromise: Promise<typeof import('nz-search')>;
-function getSearch() {
-    if (!initPromise) {
-        initPromise = (async () => {
-            const [places, searchApi] = await Promise.all([(await fetch('data/places.json')).arrayBuffer(), import('nz-search')])
-            await searchApi.default()
-            searchApi.load_data(new Uint8Array(places))
-            return searchApi
-        })()
+        // If this is the first part, rank it higher if its at the start than if its somewhere else.
+        if (lastMatchIndex === undefined) {
+            rank += (matchIndex === 0
+                ? 1
+                : 1 / matchIndex)
+        } else {
+            const numerator = matchIndex <= lastMatchIndex ? 0.5 : 1
+            rank += numerator / Math.abs(matchIndex - lastMatchIndex)
+        }
     }
-    return initPromise
+    return rank
 }
 
-const searchOsm = async (query: string): Promise<GeocodeResult[]> => {
-    // Hackily include the country because the nominatim API is terrible.
-    query = query + ", NZ";
-    const results: GeocodeResult[] = await fetch(`${osmUrl}?q=${encodeURIComponent(query)}&format=jsonv2`)
-        .then(r => r.json());
+const searchNzPlaces = async (query: string, maxResults = 100): Promise<Place[]> => {
+    const lowerQuery = query.toLowerCase()
+    const lowerQueryParts = lowerQuery.split(' ').filter(p => p)
 
-    for (const result of results) {
-        result['name'] = result['display_name'];
+    const places = await getPlaces()
+
+    const results: Place[] = []
+    for (const place of places) {
+        const match = getMatch(lowerQueryParts, place)
+        if (match === 0) continue
+
+        results.push(place)
+        if (results.length >= maxResults) break
     }
-    return results;
-}
-
-const searchNzPlaces = async (query: string): Promise<GeocodeResult[]> => {
-    const api = await getSearch()
-
-    const results = api.search(query, 100)
     return results
 }
 
-export const findPlace = async (lat: number, lon: number) => {
-    const search = await getSearch()
-    return search.closest_place(lat, lon, 0.1)
-}
-
-export default async (query: string, sources=[searchNzPlaces]): Promise<GeocodeResult[]> => {
+export default async (query: string, sources = [searchNzPlaces]): Promise<Place[]> => {
     const results = await Promise.all(sources.map(s => s(query)));
     return results.reduce((prev, next) => [...prev, ...next], [])
 }

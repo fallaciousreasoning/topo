@@ -2,7 +2,7 @@
   import { toLonLat } from 'ol/proj'
   import { getOlContext } from '../ol/Map.svelte'
   import fragment from '../stores/fragment'
-  import { findPlace } from '../search/geocode'
+  import { findPlace } from '../search/nearest'
   import round from '../utils/round'
 
   const { map } = getOlContext()
