@@ -4,10 +4,11 @@
   import { Style } from 'ol/style'
   import type { Coordinate } from 'ol/coordinate'
   import Point from 'ol/geom/Point'
+    import type { VectorLayerContext } from './VectorLayer.svelte'
 
   export let style: Style
   export let position: Coordinate
-  const { addFeature, removeFeature } = getContext('vector-layer')
+  const { addFeature, removeFeature } = getContext<VectorLayerContext>('vector-layer')
 
   const feature = new Feature({
     geometry: new Point(position),

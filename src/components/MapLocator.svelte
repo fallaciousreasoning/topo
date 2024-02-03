@@ -7,6 +7,7 @@
   import { getOlContext } from '../ol/Map.svelte'
   import VectorLayer from '../ol/VectorLayer.svelte'
   import MapControl from './MapControl.svelte'
+    import LineToCenter from '../ol/LineToCenter.svelte'
 
   const { map } = getOlContext()
 
@@ -62,5 +63,6 @@
         }),
       })}
     />
+    <LineToCenter start={position}/>
   {/if}
 </VectorLayer>

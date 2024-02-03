@@ -1,3 +1,9 @@
+<script lang="ts" context="module">
+  export interface VectorLayerContext {
+    addFeature: (feature: Feature) => void,
+    removeFeature: (feature: Feature) => void,
+  }
+</script>
 <script lang="ts">
   import { getOlContext } from './Map.svelte'
   import { createEventDispatcher, onMount, setContext } from 'svelte'
@@ -8,10 +14,10 @@
   import onMountTick from '../utils/onMountTick'
   import fragment from '../stores/fragment'
 
-  export let id: string = undefined
-  export let source = new VectorSource({ features: [] })
-  export let style: StyleLike = undefined
-  export let title: string = undefined
+  export let id: string | undefined = undefined
+  export let source = new VectorSource<Feature>({ features: [] })
+  export let style: StyleLike | undefined = undefined
+  export let title: string | undefined = undefined
   export let visible: boolean = true
 
   const dispatch = createEventDispatcher()
@@ -51,7 +57,7 @@
     }
   })
 
-  setContext('vector-layer', {
+  setContext<VectorLayerContext>('vector-layer', {
     addFeature: (feature: Feature) => source.addFeature(feature),
     removeFeature: (feature: Feature) => source.removeFeature(feature),
   })
