@@ -1,10 +1,10 @@
 <script lang="ts">
-  import geocode from '../search/geocode'
-  import { createEventDispatcher, tick } from 'svelte'
+  import { createEventDispatcher } from 'svelte'
   import { getOlContext } from '../ol/Map.svelte'
-  import MapControl from './MapControl.svelte'
-  import grow from '../transitions/grow'
+  import geocode from '../search/geocode'
   import type { Place } from '../search/places'
+  import grow from '../transitions/grow'
+  import MapControl from './MapControl.svelte'
 
   const dispatcher = createEventDispatcher()
   const { map } = getOlContext()

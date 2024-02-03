@@ -1,8 +1,8 @@
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
-import GeoJSON from 'ol/format/GeoJSON';
-import { Style, Circle, Stroke, Fill, Text } from 'ol/style';
+import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
+import type { Place } from '../search/places';
 import fragment from '../stores/fragment';
 
 const styleCache = {};
@@ -33,10 +33,17 @@ export default {
         }
         return styleCache[size];
     },
-    getFeatures: async () => {
+    getData: async () => {
         const url = "/data/huts.json"
         const response = await fetch(url);
         const data = await response.json() as any[];
+        for (const hut of data) {
+            hut.place = 'hut'
+        }
+        return data as Place[]
+    },
+    async getFeatures() {
+        const data = await this.getData()
         return data.map(hut => {
             const coords = fromLonLat([hut.lon, hut.lat]);
             const feature = new Feature(new Point(coords));
