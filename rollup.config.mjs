@@ -14,28 +14,6 @@ import path from 'path'
 
 const production = !process.env.ROLLUP_WATCH;
 
-const wasmFiles = [
-	'node_modules/nz-search/nz_search_bg.wasm'
-]
-
-function copyBlobsPlugin() {
-	return {
-		name: 'copy-wasm-blobs',
-		async buildEnd() {
-			for (const wasmBlob of wasmFiles) {
-				const data = await fs.readFile(path.resolve(wasmBlob))
-				await this.emitFile({
-					type: 'asset',
-					source: data,
-					fileName: path.basename(wasmBlob)
-
-				})
-				this.addWatchFile(wasmBlob)
-			}
-		}
-	}
-}
-
 function serve() {
 	let server;
 
@@ -81,8 +59,6 @@ export default {
 				}
 			}),
 		}),
-
-		copyBlobsPlugin(),
 
 		css({ output: "extra.css" }),
 

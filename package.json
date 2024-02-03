@@ -39,7 +39,6 @@
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
     "localforage": "1.10.0",
-    "nz-search": "file:../nz-search/public/pkg",
     "ol": "8.2.0",
     "proj4": "2.9.2",
     "svelte-frappe-charts": "1.10.0",
