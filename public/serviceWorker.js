@@ -25,6 +25,7 @@ const downloadFirstRunAssets = async () => {
     '/build/tailwind.css',
     '/build/main.js',
     '/data/huts.json',
+    '/data/places.json',
     '/icons/marker.svg',
     '/icons/location-indicator.svg'
   ]);
@@ -105,9 +106,6 @@ const maybeConserve = (normal, conservative) => {
 const rules = {    
   // First party scripts should be fetched from the network, if possible. 
   [self.registration.scope]: networkThenCache,
-
-  // Cache doc huts.
-  "https://api.doc.govt.nz/v2/huts?coordinates=wgs84": cacheThenNetwork,
 
   // Fetch latest mountain data, if we have a network connection.
   "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json": networkThenCache,
