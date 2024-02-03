@@ -1,7 +1,6 @@
-import BaseLayer from "ol/layer/Base";
-import { TileCoord } from "ol/tilecoord";
-import { pickRandom } from "../utils/random";
 import RenderEvent from "ol/render/Event";
+import { type TileCoord } from "ol/tilecoord";
+import { pickRandom } from "../utils/random";
 
 export interface BaseLayerDefinition {
     name: string;
@@ -61,7 +60,7 @@ export const layerDefinitions: TileLayerDefinition[] = [
         description: "Terrain relief overlay",
         type: 'overlay',
         defaultVisible: true,
-        prerender: e => e.context.canvas.getContext('2d').globalCompositeOperation = 'multiply',
+        prerender: e => e.context!.canvas.getContext('2d')!.globalCompositeOperation = 'multiply',
         minZoom: 10,
         url: 'https://tiles-cdn.koordinates.com/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50765/EPSG:3857/{z}/{x}/{y}.png'
     }

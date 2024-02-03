@@ -9,6 +9,8 @@ import terser from '@rollup/plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import tailwindcss from 'tailwindcss';
 import { spawn } from 'child_process'
+import fs from 'fs/promises'
+import path from 'path'
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -37,9 +39,9 @@ export default {
 	input: 'src/main.ts',
 	output: {
 		sourcemap: true,
-		format: 'iife',
+		format: 'es',
 		name: 'app',
-		file: 'public/build/bundle.js'
+		dir: 'public/build'
 	},
 	context: 'window',
 	plugins: [

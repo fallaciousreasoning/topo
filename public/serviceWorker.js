@@ -23,10 +23,11 @@ const downloadFirstRunAssets = async () => {
     '/global.css',
     '/build/extra.css',
     '/build/tailwind.css',
-    '/build/bundle.js',
+    '/build/main.js',
     '/data/huts.json',
     '/icons/marker.svg',
-    '/icons/location-indicator.svg'
+    '/icons/location-indicator.svg',
+    'https://search.topos.nz/data/min_excluded_places.json'
   ]);
 };
 
@@ -105,9 +106,6 @@ const maybeConserve = (normal, conservative) => {
 const rules = {    
   // First party scripts should be fetched from the network, if possible. 
   [self.registration.scope]: networkThenCache,
-
-  // Cache doc huts.
-  "https://api.doc.govt.nz/v2/huts?coordinates=wgs84": cacheThenNetwork,
 
   // Fetch latest mountain data, if we have a network connection.
   "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json": networkThenCache,

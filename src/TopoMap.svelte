@@ -22,6 +22,7 @@
   import fragment from './stores/fragment'
   import { nzBounds } from './utils/bounds'
   import { XYZ } from 'ol/source'
+  import MapPin from './components/MapPin.svelte'
 </script>
 
 <div id="topo-map">
@@ -32,7 +33,8 @@
       maxZoom={18}
       minZoom={4}
       extent={nzBounds}
-      initialView={nzBounds} />
+      initialView={nzBounds}
+    />
     <MapPositioner />
     <LayerGroup title="Base Layers">
       {#each layerDefinitions.filter((l) => l.type === 'base') as definition}
@@ -40,7 +42,8 @@
           title={definition.name}
           type="base"
           visible={false}
-          source={cachingSource(definition)} />
+          source={cachingSource(definition)}
+        />
       {/each}
     </LayerGroup>
     <LayerGroup title="Overlays">
@@ -48,10 +51,11 @@
         <TileLayer
           title={definition.name}
           prerender={definition.prerender}
-          type={"overlay"}
+          type={'overlay'}
           minZoom={definition.minZoom}
           visible={definition.defaultVisible}
-          source={cachingSource(definition)} />
+          source={cachingSource(definition)}
+        />
       {/each}
     </LayerGroup>
     <LayerGroup title="Features">
@@ -64,7 +68,8 @@
         on:change={(e) => {
           const [lng, lat] = [e.detail.result.lon, e.detail.result.lat]
           $fragment.label = { lat, lng, text: e.detail.result.name }
-        }} />
+        }}
+      />
       <MapZoom />
       <MapLocator />
       <MapMeasure />
@@ -73,6 +78,7 @@
       <MapRotate />
     </Controls>
     <MapLabel />
+    <MapPin />
   </Map>
 </div>
 
