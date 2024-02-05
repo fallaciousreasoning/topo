@@ -2,11 +2,10 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "scripts": {
-    "watch:tailwind": "cross-env ROLLUP_WATCH=1 postcss src/tailwind.pcss -o public/build/tailwind.css -w",
     "build:tailwind": "postcss src/tailwind.pcss -o public/build/tailwind.css",
     "build": "npm run build:tailwind && vite build",
-    "dev": "vite",
-    "start": "sirv public",
+    "dev": "vite --port 8080",
+    "start": "sirv dist",
     "validate": "svelte-check"
   },
   "devDependencies": {
@@ -15,7 +14,6 @@
     "@types/human-date": "1.4.0",
     "autoprefixer": "10.4.13",
     "concurrently": "7.6.0",
-    "cross-env": "7.0.3",
     "postcss": "8.4.21",
     "postcss-cli": "10.1.0",
     "svelte": "4.2.8",
