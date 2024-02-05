@@ -11,7 +11,7 @@ const coordToMap = (min: number, max: number, coord: string) => {
     return fromMin < min ? baseFrom(max) : fromMin
 }
 
-export const convertNZMGReferenceToLatLng = (reference: string) => {
+export const convertNZMGReferenceToLatLng = (reference: string): [number, number] | undefined => {
     const match = referenceRegex.exec(reference);
     if (!match) return;
 

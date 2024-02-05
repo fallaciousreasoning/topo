@@ -1,3 +1,4 @@
+import { convertNZMGReferenceToLatLng } from '../utils/mapReference';
 import { getPlaces, type Place } from './places';
 
 const getMatch = (queryParts: string[], place: Place) => {
@@ -39,7 +40,18 @@ const searchNzPlaces = async (query: string, maxResults = 100): Promise<Place[]>
     return results
 }
 
-export default async (query: string, sources = [searchNzPlaces]): Promise<Place[]> => {
+const searchMapReferences = async (query: string): Promise<Place[]> => {
+    const ref = convertNZMGReferenceToLatLng(query)!
+    console.log(ref)
+    return [ref].filter(r => r).map(([lat, lon]) => ({
+        name: query,
+        lat,
+        lon,
+        type: 'map-ref'
+    }))
+}
+
+export default async (query: string, sources = [searchNzPlaces, searchMapReferences]): Promise<Place[]> => {
     const results = await Promise.all(sources.map(s => s(query)));
     return results.reduce((prev, next) => [...prev, ...next], [])
 }
