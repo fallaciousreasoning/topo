@@ -56,7 +56,7 @@ export const layerDefinitions: TileLayerDefinition[] = [
         }
     },
     {
-        name: "Hillshade",
+        name: "Hill shade",
         description: "Terrain relief overlay",
         type: 'overlay',
         defaultVisible: true,

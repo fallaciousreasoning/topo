@@ -7,7 +7,19 @@
 
   const { map } = getOlContext()
 
-  map.on('click', async (e) => {
+  const LONG_PRESS_THRESHOLD = 500;
+
+  let mouseDownAt: number;
+  map.getTargetElement().addEventListener('mousedown', e => {
+    mouseDownAt = Date.now();
+  });
+
+  map.on('singleclick', async (e) => {
+    const pressDuration = Date.now() - mouseDownAt
+    if (pressDuration < LONG_PRESS_THRESHOLD) {
+      return
+    }
+
     const [lng, lat] = toLonLat(e.coordinate)
     const closestPoint = await findPlace(lat, lng)
     $fragment.label = {
