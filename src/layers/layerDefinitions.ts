@@ -60,8 +60,7 @@ export const layerDefinitions: TileLayerDefinition[] = [
         description: "Terrain relief overlay",
         type: 'overlay',
         defaultVisible: true,
-        prerender: e => e.context!.canvas.getContext('2d')!.globalCompositeOperation = 'multiply',
         minZoom: 10,
-        url: 'https://tiles-cdn.koordinates.com/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50765/EPSG:3857/{z}/{x}/{y}.png'
-    }
+        url: 'https://basemaps.linz.govt.nz/v1/tiles/geographx-nz-dem-2012-8m/WebMercatorQuad/{z}/{x}/{y}.webp?api=c01hvn7wv0004d4njsf6rwk1t7p',
+    },
 ]
