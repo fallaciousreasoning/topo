@@ -33,6 +33,7 @@ export const linzTopo: TileLayerDefinition =
     },
 };
 
+const LINZ_BASEMAPS = 'd01fbtg0ar3v159zx4e0ajt0n09'
 export const layerDefinitions: TileLayerDefinition[] = [
     linzTopo,
     {
@@ -52,16 +53,15 @@ export const layerDefinitions: TileLayerDefinition[] = [
         description: "High resolution imagery of New Zealand, provided by LINZ",
         type: 'base',
         url: ([z,x,y]: TileCoord) => {
-            return `https://basemaps.linz.govt.nz/v1/tiles/aerial/EPSG:3857/${z}/${x}/${y}.webp?api=d01fbtg0ar3v159zx4e0ajt0n09`;
+            return `https://basemaps.linz.govt.nz/v1/tiles/aerial/EPSG:3857/${z}/${x}/${y}.webp?api=${LINZ_BASEMAPS}`;
         }
     },
     {
-        name: "Hillshade",
+        name: "Hill shade",
         description: "Terrain relief overlay",
         type: 'overlay',
         defaultVisible: true,
-        prerender: e => e.context!.canvas.getContext('2d')!.globalCompositeOperation = 'multiply',
         minZoom: 10,
-        url: 'https://tiles-cdn.koordinates.com/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50765/EPSG:3857/{z}/{x}/{y}.png'
-    }
+        url: `https://basemaps.linz.govt.nz/v1/tiles/geographx-nz-dem-2012-8m/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS}`,
+    },
 ]
