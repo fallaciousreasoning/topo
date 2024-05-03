@@ -3,7 +3,6 @@ import { Extent, getTopLeft, getBottomRight, getTopRight } from 'ol/extent';
 import { toLonLat } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { TileCoord } from 'ol/tilecoord';
-import * as localforage from 'localforage'
 import { getCacheId, getTileCacher } from '../sources/cachingSource';
 import { linzTopo } from '../layers/layerDefinitions';
 const ESTIMATED_TILE_SIZE = 40 * 1024; // Estimate each tile at 40kb.
@@ -86,14 +85,8 @@ export class TileDownloader {
             while (!result.done) {
                 const tile = result.value;
                 const url = urlFunc([tile.z, tile.x, tile.y]);
-                const cacheId = getCacheId(linzTopo, [tile.z, tile.x, tile.y]);
+                getCacheId(linzTopo, [tile.z, tile.x, tile.y]);
                 await cacher([tile.z, tile.x, tile.y], url);
-                // Only download tiles we haven't seen.
-                if (!await localforage.getItem(cacheId)) {
-                    const response = await fetch(url);
-                    const blob = await response.blob();
-                    await localforage.setItem(cacheId, blob);
-                }
 
                 downloadedTiles += 1;
                 onProgress(downloadedTiles / totalTiles);
@@ -101,7 +94,7 @@ export class TileDownloader {
             }
         }
 
-        const workers = [];
+        const workers: Promise<void>[] = [];
         for (let i = 0; i < this.numWorkers; ++i)
             workers.push(worker());
 
