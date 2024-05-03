@@ -4,8 +4,8 @@
   "scripts": {
     "watch:tailwind": "cross-env ROLLUP_WATCH=1 postcss src/tailwind.pcss -o public/build/tailwind.css -w",
     "build:tailwind": "postcss src/tailwind.pcss -o public/build/tailwind.css",
-    "build": "npm run build:tailwind && rollup -c",
-    "dev": "concurrently \"rollup -c -w\" \"npm run watch:tailwind\"",
+    "build": "npm run build:tailwind && vite build",
+    "dev": "vite",
     "start": "sirv public",
     "validate": "svelte-check"
   },
