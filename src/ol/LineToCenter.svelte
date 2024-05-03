@@ -3,19 +3,13 @@
   import { type Coordinate } from 'ol/coordinate'
   import { LineString, Point } from 'ol/geom'
   import { getDistance } from 'ol/sphere'
-  import { Stroke, Style, Text } from 'ol/style'
+  import { Fill, Icon, Image, Stroke, Style, Text } from 'ol/style'
   import { getContext } from 'svelte'
   import { getOlContext } from './Map.svelte'
   import type { VectorLayerContext } from './VectorLayer.svelte'
+    import { toLonLat } from 'ol/proj'
   export let start: Coordinate
   export let style = new Style({
-    text: new Text({
-      text: 'Foo',
-      stroke: new Stroke({ color: 'black' }),
-      offsetY: -4,
-      textBaseline: 'bottom',
-      placement: 'line',
-    }),
     stroke: new Stroke({
       color: 'black',
       width: 4,
@@ -33,25 +27,38 @@
 
   $: feature.setStyle(function (feature: Feature<LineString>) {
     const coordinates = feature.getGeometry()?.getCoordinates()!
-    const end = coordinates.at(-1)!
-
-    const distance = Math.round(getDistance(coordinates[0]!, end))
+    const last = toLonLat(coordinates.at(-1)!)
+    const first = toLonLat(coordinates.at(0)!)
+    const distance = Math.round(getDistance(first, last))
 
     return [
       new Style({
-        geometry: new Point(end),
+        geometry: new Point(coordinates.at(-1)!),
         text: new Text({
-          text: `${distance}`,
-          scale: 2,
+          justify: 'center',
+          backgroundFill: new Fill({ color: 'white'}),
+          backgroundStroke: new Stroke({ color: 'gray',  }),
+          textAlign: 'center',
+          padding: [8, 4, 8, 8],
+          text: `${distance}m`,
+          font: '20px sans-serif',
+          scale: 1,
           stroke: new Stroke({ color: 'black' }),
           
           placement: 'line',
-          offsetY: -10,
+          offsetY: -48,
         }),
+        image: new Icon({
+          anchor: [0.5, 0.5],
+          opacity: 0.9,
+          scale: 0.08,
+          color: '#000',
+          src: '/icons/location-indicator.svg'
+        })
       }),
       style,
     ]
-  })
+  } as any)
 
   addFeature(feature)
 

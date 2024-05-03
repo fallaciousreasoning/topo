@@ -8,11 +8,12 @@
   import VectorLayer from '../ol/VectorLayer.svelte'
   import MapControl from './MapControl.svelte'
     import LineToCenter from '../ol/LineToCenter.svelte'
+    import { fromLonLat } from 'ol/proj'
 
   const { map } = getOlContext()
 
   let tracking = false
-  let position: Coordinate
+  let position: Coordinate = fromLonLat([172.77204, -43.57658])
 
   let geolocation = new Geolocation({
     projection: map.getView().getProjection(),
