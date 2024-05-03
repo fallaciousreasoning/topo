@@ -10,7 +10,9 @@ type TableTypes = {
 }
 
 export class Db extends Dexie {
+    // @ts-expect-error
     tracks: Table<Track, string>;
+    // @ts-expect-error
     tiles: Table<Tile, string>;
 
     constructor() {
