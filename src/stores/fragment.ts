@@ -29,7 +29,7 @@ const DPS = 5;
 
 const parseHash = (): Store => {
     const params = new URLSearchParams(window.location.hash.substring(1));
-    const getNum = (key: string) => parseFloat(params.get(key));
+    const getNum = (key: string) => parseFloat(params.get(key) || '0');
 
     return {
         position: {
@@ -39,11 +39,11 @@ const parseHash = (): Store => {
             rotation: getNum('rotation')
         },
         featureLayers: (params.get('layers') ?? '').split(',').filter(x => x),
-        baseLayer: parseInt(params.get('baseLayer')) || 0,
+        baseLayer: parseInt(params.get('baseLayer') ?? '0') || 0,
         label: {
             lat: getNum('lla'),
             lng: getNum('llo'),
-            text: params.get('lab')
+            text: params.get('lab') ?? ''
         },
         page: params.get('page') as Pages
     }
