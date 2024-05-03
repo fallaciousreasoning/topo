@@ -9,6 +9,7 @@
       "target": "ES2022",
       "resolveJsonModule": true,
       "importsNotUsedAsValues": "remove",
-      "preserveValueImports": false
+      "preserveValueImports": false,
+      "verbatimModuleSyntax": false
   }
 }
