@@ -1,11 +1,10 @@
-import { Map, GeolocateControl } from 'react-map-gl/maplibre';
+import { Map, GeolocateControl, NavigationControl } from 'react-map-gl/maplibre';
 import * as React from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import LinzAerial from './layers/LinzAerial';
 import LinzVector from './layers/LinzTopoVector';
 import Hillshade from './layers/Hillshade';
 import Contours from './layers/Contours';
-import { Layer, Source } from 'react-map-gl';
 
 const aoraki = {
     latitude: -43.59557,
@@ -24,12 +23,14 @@ export default function TopoMap() {
         scrollZoom
         boxZoom={false}
         doubleClickZoom
-        dragPan
+        pitchWithRotate={false}
         dragRotate
         initialViewState={aoraki}
+        mapStyle='./style.json'
         style={mapStyle}>
         <GeolocateControl />
-        <LinzAerial />
+        <NavigationControl />
+        {/* <LinzAerial /> */}
         <LinzVector />
         <Hillshade />
         <Contours />
