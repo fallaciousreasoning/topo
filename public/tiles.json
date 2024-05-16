@@ -1,0 +1,7 @@
+{
+    "tiles": [
+        "https://basemaps.linz.govt.nz/v1/tiles/topographic/WebMercatorQuad/{z}/{x}/{y}.pbf?api=c01hvn7wv0004d4njsf6rwk1t7p"
+    ],
+    "tilejson": "3.0.0",
+    "maxzoom": 15
+}

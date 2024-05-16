@@ -1,15 +1,21 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-
-  "include": ["src/**/*"],
-  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules/*",
+    "__sapper__/*",
+    "public/*"
+  ],
   "compilerOptions": {
-      "sourceMap": true,
-      "noImplicitAny": false,
-      "target": "ES2022",
-      "resolveJsonModule": true,
-      "importsNotUsedAsValues": "remove",
-      "preserveValueImports": false,
-      "verbatimModuleSyntax": false
+    "jsx": "react",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "target": "ES2022",
+    "resolveJsonModule": true,
+    "importsNotUsedAsValues": "remove",
+    "preserveValueImports": false,
+    "verbatimModuleSyntax": false
   }
 }
