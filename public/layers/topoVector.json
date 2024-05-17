@@ -6,7 +6,11 @@
         "LINZ Basemaps": {
             "attribution": "© 2022 Toitū Te Whenua - CC BY 4.0",
             "type": "vector",
-            "url": "/tiles.json"
+            "tiles": [
+                "https://basemaps.linz.govt.nz/v1/tiles/topographic/WebMercatorQuad/{z}/{x}/{y}.pbf?api=c01hvn7wv0004d4njsf6rwk1t7p"
+            ],
+            "minzoom": 0,
+            "maxzoom": 15
         },
         "LINZ-Texture-Relief": {
             "tiles": [

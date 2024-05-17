@@ -26,7 +26,7 @@ export default function TopoMap() {
         pitchWithRotate={false}
         dragRotate
         initialViewState={aoraki}
-        mapStyle='./style.json'
+        mapStyle='./layers/topoVector.json'
         style={mapStyle}>
         <GeolocateControl />
         <NavigationControl />
