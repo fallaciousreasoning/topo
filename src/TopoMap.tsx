@@ -8,6 +8,7 @@ import { overlays } from './layers/layerDefinition';
 import topoRaster from './layers/topoRaster';
 import osm from './layers/osm';
 import openTopo from './layers/openTopo';
+import LayersControl from './controls/LayersControl';
 
 const aoraki = {
     latitude: -43.59557,
@@ -33,9 +34,10 @@ export default function TopoMap() {
         style={mapStyle}>
         <GeolocateControl />
         <NavigationControl />
+        <LayersControl />
         {/* <LinzAerial /> */}
         {/* <LinzVector /> */}
-        {}
+        { }
         {overlays.map(o => o.source)}
     </Map>
 }
