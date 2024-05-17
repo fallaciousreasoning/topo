@@ -87,8 +87,6 @@ const parseUrl = () => {
         result[key] = defaultRouteParams[key]
     }
 
-    console.log(result)
-
     return result
 }
 
