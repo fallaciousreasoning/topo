@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import linzVector from "../layers/linzVector"
 import round from "../utils/round"
+import React from "react"
 
 const localStorageKey = 'map-view-info'
 
@@ -21,6 +22,16 @@ const defaultRouteParams: RouteParams = {
     basemap: linzVector.id,
     overlays: []
 }
+
+interface RouterContext {
+    params: RouteParams,
+    update: (update: Partial<RouteParams>) => void
+}
+
+const RouterContext = React.createContext<RouterContext>({
+    params: defaultRouteParams,
+    update: () => { }
+})
 
 const floatParser = (from: string) => {
     const r = parseFloat(from)
@@ -76,6 +87,8 @@ const parseUrl = () => {
         result[key] = defaultRouteParams[key]
     }
 
+    console.log(result)
+
     return result
 }
 
@@ -96,14 +109,15 @@ const persistParams = (params: RouteParams) => {
     localStorage.setItem(localStorageKey, JSON.stringify(params))
 }
 
-// TODO: This almost certainly needs to live in a context.
-export const useRoute = (): [RouteParams, (update: Partial<RouteParams>) => void] => {
+export const Context = (props: React.PropsWithChildren) => {
     const [params, setParams] = useState(defaultRouteParams)
     const update = (partial: Partial<RouteParams>) => {
-        window.location.hash = toHash({
+        const update = {
             ...params,
             ...partial
-        })
+        }
+        localStorage.setItem(localStorageKey, JSON.stringify(update))
+        window.location.hash = toHash(update)
     }
     useEffect(() => {
         const reparse = () => {
@@ -120,6 +134,20 @@ export const useRoute = (): [RouteParams, (update: Partial<RouteParams>) => void
             window.removeEventListener('hashchange', reparse)
         }
     }, [])
+    return <RouterContext.Provider value={{
+        params,
+        update
+    }}>
+        {props.children}
+    </RouterContext.Provider>
+}
 
-    return [params, update]
+export const useParams = () => {
+    const { params } = useContext(RouterContext)
+    return params
+}
+
+export const useRouteUpdater = () => {
+    const { update } = useContext(RouterContext)
+    return update
 }

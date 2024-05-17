@@ -1,11 +1,11 @@
 import * as React from 'react'
 import Control from './Control'
 import { baseLayers, overlays } from '../layers/layerDefinition'
-import linzAerial from '../layers/linzAerial'
-import { useRoute } from '../routing/router'
+import { useParams, useRouteUpdater } from '../routing/router'
 
 export default function LayersControl() {
-    const [routeParams, updateParams] = useRoute()
+    const routeParams = useParams()
+    const updateParams = useRouteUpdater()
 
     const [open, setOpen] = React.useState(false)
     const toggleOverlay = (overlayId: string, checked: boolean) => {
@@ -29,7 +29,7 @@ export default function LayersControl() {
                 <div>
                     <h4 className='text-foreground font-bold'>Base Maps</h4>
                     <ul>
-                        {baseLayers.map(m => <li>
+                        {baseLayers.map(m => <li key={m.id}>
                             <label className='flex items-center gap-1'>
                                 <input type="radio" value={m.id} checked={routeParams.basemap === m.id} onChange={e => updateParams({ basemap: m.id })} />
                                 {m.name}
@@ -43,7 +43,7 @@ export default function LayersControl() {
                         Overlays
                     </h4>
                     <ul>
-                        {overlays.map(m => <li>
+                        {overlays.map(m => <li key={m.id}>
                             <label className='flex items-center gap-1'>
                                 <input type="checkbox" checked={routeParams.overlays.includes(m.id)} onChange={e => toggleOverlay(m.id, e.target.checked)} />
                                 {m.name}
