@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import linzVector from "../layers/linzVector"
+import round from "../utils/round"
 
 const localStorageKey = 'map-view-info'
 
@@ -41,6 +42,16 @@ const parsers: { [P in keyof RouteParams]: (fromParams: string) => RouteParams[P
     overlays: stringArrayParser
 }
 
+const toTruncated = (value: number) => round(value, 5).toString()
+const serializers: { [P in keyof RouteParams]: (from: RouteParams[P]) => string | null } = {
+    lat: toTruncated,
+    lon: toTruncated,
+    rotation: toTruncated,
+    zoom: toTruncated,
+    basemap: r => r,
+    overlays: r => r.join(',')
+}
+
 const parseUrl = () => {
     const hash = location.hash
     const parsed = new URLSearchParams(hash)
@@ -68,12 +79,32 @@ const parseUrl = () => {
     return result
 }
 
+const toHash = (routeParams: RouteParams) => {
+    const searchParams = new URLSearchParams()
+
+    for (const key in routeParams) {
+        const serialized = serializers[key](routeParams[key])
+        if (!serialized) continue
+
+        searchParams.set(key, serialized)
+    }
+
+    return searchParams.toString().replaceAll('%2C', ',')
+}
+
 const persistParams = (params: RouteParams) => {
     localStorage.setItem(localStorageKey, JSON.stringify(params))
 }
 
-export const useRoute = (): RouteParams => {
+// TODO: This almost certainly needs to live in a context.
+export const useRoute = (): [RouteParams, (update: Partial<RouteParams>) => void] => {
     const [params, setParams] = useState(defaultRouteParams)
+    const update = (partial: Partial<RouteParams>) => {
+        window.location.hash = toHash({
+            ...params,
+            ...partial
+        })
+    }
     useEffect(() => {
         const reparse = () => {
             const params = parseUrl()
@@ -90,5 +121,5 @@ export const useRoute = (): RouteParams => {
         }
     }, [])
 
-    return params
+    return [params, update]
 }

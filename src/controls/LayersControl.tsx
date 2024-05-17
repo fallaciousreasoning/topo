@@ -5,10 +5,20 @@ import linzAerial from '../layers/linzAerial'
 import { useRoute } from '../routing/router'
 
 export default function LayersControl() {
-    const routeParams = useRoute()
+    const [routeParams, updateParams] = useRoute()
 
     const [open, setOpen] = React.useState(false)
-    const [basemap, setBasemap] = React.useState(linzAerial.id)
+    const toggleOverlay = (overlayId: string, checked: boolean) => {
+        if (checked) {
+            updateParams({
+                overlays: [...routeParams.overlays, overlayId]
+            })
+        } else {
+            updateParams({
+                overlays: routeParams.overlays.filter(r => r !== overlayId)
+            })
+        }
+    }
 
     return <Control position='top-right'>
         <button className='relative' type='button' onClick={() => setOpen(o => !o)}>
@@ -21,7 +31,7 @@ export default function LayersControl() {
                     <ul>
                         {baseLayers.map(m => <li>
                             <label className='flex items-center gap-1'>
-                                <input type="radio" value={m.id} checked={routeParams.basemap === m.id} onChange={e => setBasemap(e.target.value)} />
+                                <input type="radio" value={m.id} checked={routeParams.basemap === m.id} onChange={e => updateParams({ basemap: m.id })} />
                                 {m.name}
                             </label>
                         </li>)}
@@ -35,7 +45,7 @@ export default function LayersControl() {
                     <ul>
                         {overlays.map(m => <li>
                             <label className='flex items-center gap-1'>
-                                <input type="checkbox" checked={routeParams.overlays.includes(m.id)} />
+                                <input type="checkbox" checked={routeParams.overlays.includes(m.id)} onChange={e => toggleOverlay(m.id, e.target.checked)} />
                                 {m.name}
                             </label>
                         </li>)}
