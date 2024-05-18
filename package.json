@@ -28,8 +28,8 @@
     "vite": "5.2.11"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
-    "babel-plugin-react-compiler": "^0.0.0-experimental-c23de8d-20240515",
+    "@vitejs/plugin-react": "4.2.1",
+    "babel-plugin-react-compiler": "0.0.0-experimental-c23de8d-20240515",
     "dexie": "3.2.4",
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
