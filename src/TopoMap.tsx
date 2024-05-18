@@ -1,6 +1,6 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, NavigationControl, ViewStateChangeEvent } from 'react-map-gl/maplibre';
+import { GeolocateControl, Map, MapRef, NavigationControl, ViewStateChangeEvent } from 'react-map-gl/maplibre';
 import LayersControl from './controls/LayersControl';
 import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
@@ -26,8 +26,25 @@ export default function TopoMap() {
         })
     }
 
+    const mapRef = React.useRef<MapRef>()
+    React.useEffect(() => {
+        if (routeParams.lat && routeParams.lon)
+        mapRef.current?.setCenter([routeParams.lon, routeParams.lat])
+    }, [routeParams.lat, routeParams.lon])
+
+    React.useEffect(() => {
+        if (routeParams.zoom)
+        mapRef.current?.setZoom(routeParams.zoom)
+    }, [routeParams.zoom])
+
+    React.useEffect(() => {
+        if (routeParams.rotation)
+        mapRef.current?.setBearing(routeParams.rotation)
+    }, [routeParams.rotation])
+
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
     return <Map
+        ref={mapRef as any}
         scrollZoom
         boxZoom={false}
         doubleClickZoom
