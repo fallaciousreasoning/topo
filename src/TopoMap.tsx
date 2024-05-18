@@ -6,12 +6,6 @@ import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
 import { useParams, useRouteUpdater } from './routing/router';
 
-const aoraki = {
-    latitude: -43.59557,
-    longitude: 170.1422,
-    zoom: 14
-}
-
 const mapStyle = {
     width: '100vw',
     height: '100vh',
@@ -50,9 +44,6 @@ export default function TopoMap() {
         <GeolocateControl />
         <NavigationControl />
         <LayersControl />
-        {/* <LinzAerial /> */}
-        {/* <LinzVector /> */}
-        { }
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => o.source)}
     </Map>
 }

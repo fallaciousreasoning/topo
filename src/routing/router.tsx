@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react"
 import linzVector from "../layers/linzVector"
 import round from "../utils/round"
-import React from "react"
+import * as React from "react"
 
 const localStorageKey = 'map-view-info'
 
@@ -108,7 +108,7 @@ const persistParams = (params: RouteParams) => {
 }
 
 export const Context = (props: React.PropsWithChildren) => {
-    const [params, setParams] = useState(defaultRouteParams)
+    const [params, setParams] = useState(parseUrl())
     const update = (partial: Partial<RouteParams>) => {
         const update = {
             ...params,
@@ -124,8 +124,6 @@ export const Context = (props: React.PropsWithChildren) => {
             setParams(params)
             persistParams(params)
         }
-
-        reparse()
 
         window.addEventListener('hashchange', reparse)
         return () => {
