@@ -1,6 +1,6 @@
-import { getLayerData } from '../layers/data';
-import huts from '../layers/huts'
-import mountains from '../layers/mountains';
+import { getLayerData } from '../../svelte-src/layers/data';
+import huts from '../../svelte-src/layers/huts'
+import mountains from '../../svelte-src/layers/mountains';
 
 const placesUrl = 'https://search.topos.nz/data/min_excluded_places.json'
 

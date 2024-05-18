@@ -14,6 +14,7 @@
     "@tsconfig/svelte": "5.0.2",
     "@types/human-date": "1.4.0",
     "@types/maplibre-gl": "1.14.0",
+    "@types/node": "^20.12.12",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.13",

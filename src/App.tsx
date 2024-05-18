@@ -3,10 +3,12 @@ import { createRoot } from 'react-dom/client'
 import TopoMap from './TopoMap'
 import { Context } from './routing/router'
 import './tailwind.pcss'
+import SearchSection from './sections/SearchSection'
 
 function App() {
     return <Context>
         <TopoMap />
+        <SearchSection />
     </Context>
 }
 

@@ -11,7 +11,8 @@ interface RouteParams {
     zoom: number,
     rotation: number,
     basemap: string,
-    overlays: string[]
+    overlays: string[],
+    page: string | null,
 }
 
 const defaultRouteParams: RouteParams = {
@@ -20,7 +21,8 @@ const defaultRouteParams: RouteParams = {
     zoom: 14,
     rotation: 0,
     basemap: linzVector.id,
-    overlays: []
+    overlays: [],
+    page: null
 }
 
 interface RouterContext {
@@ -50,7 +52,8 @@ const parsers: { [P in keyof RouteParams]: (fromParams: string) => RouteParams[P
     zoom: floatParser,
     rotation: floatParser,
     basemap: stringParser,
-    overlays: stringArrayParser
+    overlays: stringArrayParser,
+    page: stringParser,
 }
 
 const toTruncated = (value: number) => round(value, 5).toString()
@@ -60,7 +63,8 @@ const serializers: { [P in keyof RouteParams]: (from: RouteParams[P]) => string 
     rotation: toTruncated,
     zoom: toTruncated,
     basemap: r => r,
-    overlays: r => r.join(',')
+    overlays: r => r.join(','),
+    page: p => p
 }
 
 const parseUrl = () => {

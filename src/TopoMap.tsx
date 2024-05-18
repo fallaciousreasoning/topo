@@ -5,6 +5,7 @@ import LayersControl from './controls/LayersControl';
 import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
 import { useParams, useRouteUpdater } from './routing/router';
+import SearchControl from './controls/SearchControl';
 
 const mapStyle = {
     width: '100vw',
@@ -44,6 +45,7 @@ export default function TopoMap() {
         <GeolocateControl />
         <NavigationControl />
         <LayersControl />
+        <SearchControl />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => o.source)}
     </Map>
 }

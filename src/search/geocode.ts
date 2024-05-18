@@ -1,4 +1,4 @@
-import { convertNZMGReferenceToLatLng } from '../utils/mapReference';
+import { convertNZMGReferenceToLatLng } from '../../svelte-src/utils/mapReference';
 import { getPlaces, type Place } from './places';
 
 const getMatch = (queryParts: string[], place: Place) => {
