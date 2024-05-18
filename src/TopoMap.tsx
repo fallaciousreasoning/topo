@@ -1,11 +1,12 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, MapRef, NavigationControl, ViewStateChangeEvent } from 'react-map-gl/maplibre';
+import { GeolocateControl, Map, MapRef, NavigationControl, ViewStateChangeEvent, Style } from 'react-map-gl/maplibre';
 import LayersControl from './controls/LayersControl';
 import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
 import { useParams, useRouteUpdater } from './routing/router';
 import SearchControl from './controls/SearchControl';
+import MapLabel from './components/MapLabel';
 
 const style = {
     width: '100vw',
@@ -44,7 +45,7 @@ export default function TopoMap() {
 
 
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
-    const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap])
+    const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap]) as Style
 
     return <Map
         ref={mapRef as any}
@@ -66,6 +67,7 @@ export default function TopoMap() {
         <NavigationControl />
         <LayersControl />
         <SearchControl />
+        <MapLabel />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => o.source)}
     </Map>
 }

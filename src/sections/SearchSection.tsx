@@ -12,8 +12,9 @@ export default function SearchSection() {
     const [selectedIndex, setSelectedIndex] = React.useState<number>()
 
     const selectResult = (r: Place) => updateRoute({
-        lat: r.lat,
-        lon: r.lon
+        lla: r.lat,
+        llo: r.lon,
+        lab: r.name
     })
 
     React.useEffect(() => {

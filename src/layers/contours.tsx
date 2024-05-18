@@ -4,7 +4,7 @@ import contours from 'maplibre-contour'
 import maplibre from 'maplibre-gl'
 
 export const elevationEncoding = 'mapbox'
-export const maxContourZoom = 12
+export const maxContourZoom = 11
 
 export const demSource = new contours.DemSource({
     encoding: elevationEncoding,
