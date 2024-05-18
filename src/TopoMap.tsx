@@ -7,7 +7,7 @@ import linzVector from './layers/linzVector';
 import { useParams, useRouteUpdater } from './routing/router';
 import SearchControl from './controls/SearchControl';
 
-const mapStyle = {
+const style = {
     width: '100vw',
     height: '100vh',
     background: '#d0e6f4'
@@ -29,20 +29,23 @@ export default function TopoMap() {
     const mapRef = React.useRef<MapRef>()
     React.useEffect(() => {
         if (routeParams.lat && routeParams.lon)
-        mapRef.current?.setCenter([routeParams.lon, routeParams.lat])
+            mapRef.current?.setCenter([routeParams.lon, routeParams.lat])
     }, [routeParams.lat, routeParams.lon])
 
     React.useEffect(() => {
         if (routeParams.zoom)
-        mapRef.current?.setZoom(routeParams.zoom)
+            mapRef.current?.setZoom(routeParams.zoom)
     }, [routeParams.zoom])
 
     React.useEffect(() => {
         if (routeParams.rotation)
-        mapRef.current?.setBearing(routeParams.rotation)
+            mapRef.current?.setBearing(routeParams.rotation)
     }, [routeParams.rotation])
 
+
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
+    const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap])
+
     return <Map
         ref={mapRef as any}
         scrollZoom
@@ -57,8 +60,8 @@ export default function TopoMap() {
             bearing: routeParams.rotation
         }}
         onMoveEnd={updatePosition}
-        mapStyle={getMapStyle(basemap)}
-        style={mapStyle}>
+        mapStyle={mapStyle}
+        style={style}>
         <GeolocateControl />
         <NavigationControl />
         <LayersControl />
