@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "4.2.1",
-    "babel-plugin-react-compiler": "0.0.0-experimental-c23de8d-20240515",
     "dexie": "3.2.4",
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
@@ -38,8 +37,8 @@
     "maplibre-gl": "4.3.0",
     "ol": "9.1.0",
     "proj4": "2.9.2",
-    "react": "19.0.0-beta-26f2496093-20240514",
-    "react-dom": "19.0.0-beta-26f2496093-20240514",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-map-gl": "7.1.7",
     "svelte-frappe-charts": "1.10.0",
     "uuid": "9.0.0"
