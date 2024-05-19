@@ -63,6 +63,6 @@ export default function TopoMap() {
         <MapLabel />
         <PositionSyncer />
         <LongPressLookup />
-        {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source/> : o.source)}
+        {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
     </Map>
 }
