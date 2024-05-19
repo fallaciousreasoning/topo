@@ -8,7 +8,6 @@ import SearchSection from './sections/SearchSection'
 function App() {
     return <Context>
         <TopoMap />
-        <SearchSection />
     </Context>
 }
 

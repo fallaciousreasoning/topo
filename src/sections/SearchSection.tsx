@@ -5,6 +5,7 @@ import { usePromise } from '../hooks/usePromise';
 import { useRouteUpdater } from '../routing/router';
 import { Place } from '../search/places';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import { useMap } from 'react-map-gl';
 
 export default function SearchSection() {
     const updateRoute = useRouteUpdater()
@@ -12,13 +13,21 @@ export default function SearchSection() {
     const [query, setQuery] = React.useState('')
     const { result = [] } = usePromise(() => geocode(query), [query])
     const [selectedIndex, setSelectedIndex] = React.useState<number>()
+    const map = useMap()
 
-    const selectResult = (r: Place) => updateRoute({
-        lla: r.lat,
-        llo: r.lon,
-        lab: r.name,
-        page: isMobile ? null : 'search'
-    })
+    const selectResult = (r: Place) => {
+        updateRoute({
+            lla: r.lat,
+            llo: r.lon,
+            lab: r.name,
+            page: isMobile ? null : 'search'
+        })
+
+        map.current?.flyTo({
+            animate: true,
+            center: [r.lon, r.lat]
+        })
+    }
 
     React.useEffect(() => {
         setSelectedIndex(undefined)

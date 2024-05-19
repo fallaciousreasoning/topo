@@ -8,6 +8,7 @@ import { useParams, useRouteUpdater } from './routing/router';
 import SearchControl from './controls/SearchControl';
 import MapLabel from './components/MapLabel';
 import LongPressLookup from './controls/LongPressLookup';
+import SearchSection from './sections/SearchSection';
 
 const style = {
     width: '100vw',
@@ -64,6 +65,7 @@ export default function TopoMap() {
         onMoveEnd={updatePosition}
         mapStyle={mapStyle}
         style={style}>
+        <SearchSection />
         <GeolocateControl />
         <NavigationControl />
         <LayersControl />
