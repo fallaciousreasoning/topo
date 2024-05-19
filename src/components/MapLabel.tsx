@@ -1,4 +1,4 @@
-import { Marker, Popup, useMap } from "react-map-gl/maplibre"
+import { Popup, useMap } from "react-map-gl/maplibre"
 import { useParams, useRouteUpdater } from "../routing/router"
 import React, { useEffect } from "react"
 
@@ -7,7 +7,7 @@ export default function () {
     const updateRoute = useRouteUpdater()
     const map = useMap()
 
-    const show = params.lat && params.lon && params.lab
+    const show = params.lla && params.llo && params.lab
     useEffect(() => {
         if (!show) return
 

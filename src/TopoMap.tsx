@@ -7,6 +7,7 @@ import linzVector from './layers/linzVector';
 import { useParams, useRouteUpdater } from './routing/router';
 import SearchControl from './controls/SearchControl';
 import MapLabel from './components/MapLabel';
+import LongPressLookup from './controls/LongPressLookup';
 
 const style = {
     width: '100vw',
@@ -68,6 +69,7 @@ export default function TopoMap() {
         <LayersControl />
         <SearchControl />
         <MapLabel />
+        <LongPressLookup />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => o.source)}
     </Map>
 }

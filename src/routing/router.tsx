@@ -164,5 +164,11 @@ export const useParams = () => {
 
 export const useRouteUpdater = () => {
     const { update } = useContext(RouterContext)
-    return update
+    const updateRef = React.useRef(update)
+    useEffect(() => {
+        updateRef.current = update
+    }, [update])
+
+    const updater = React.useCallback((u: Partial<RouteParams>) => updateRef?.current(u), [])
+    return updater
 }
