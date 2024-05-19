@@ -1,13 +1,14 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, MapRef, NavigationControl, ViewStateChangeEvent, Style } from 'react-map-gl/maplibre';
+import { GeolocateControl, Map, MapRef, NavigationControl, Style } from 'react-map-gl/maplibre';
+import MapLabel from './components/MapLabel';
 import LayersControl from './controls/LayersControl';
+import LongPressLookup from './controls/LongPressLookup';
+import PositionSyncer from './controls/PositionSyncer';
+import SearchControl from './controls/SearchControl';
 import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
-import { useParams, useRouteUpdater } from './routing/router';
-import SearchControl from './controls/SearchControl';
-import MapLabel from './components/MapLabel';
-import LongPressLookup from './controls/LongPressLookup';
+import { useParams } from './routing/router';
 import SearchSection from './sections/SearchSection';
 
 const style = {
@@ -18,16 +19,6 @@ const style = {
 
 export default function TopoMap() {
     const routeParams = useParams()
-    const routeUpdater = useRouteUpdater()
-
-    const updatePosition = (e: ViewStateChangeEvent) => {
-        routeUpdater({
-            lat: e.viewState.latitude,
-            lon: e.viewState.longitude,
-            zoom: e.viewState.zoom,
-            rotation: e.viewState.bearing
-        })
-    }
 
     const mapRef = React.useRef<MapRef>()
     React.useEffect(() => {
@@ -62,7 +53,6 @@ export default function TopoMap() {
             zoom: routeParams.zoom,
             bearing: routeParams.rotation
         }}
-        onMoveEnd={updatePosition}
         mapStyle={mapStyle}
         style={style}>
         <SearchSection />
@@ -71,6 +61,7 @@ export default function TopoMap() {
         <LayersControl />
         <SearchControl />
         <MapLabel />
+        <PositionSyncer />
         <LongPressLookup />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => o.source)}
     </Map>
