@@ -7,6 +7,7 @@ import hillshade from "./hillshade";
 import contours from "./contours";
 import openTopo from "./openTopo";
 import osm from "./osm";
+import huts from "./huts";
 
 export type BaseLayerDefinition = {
     id: string,
@@ -17,7 +18,7 @@ export type BaseLayerDefinition = {
 export interface OverlayDefinition {
     id: string,
     name: string,
-    source: React.JSX.Element
+    source: React.JSX.Element | (() => React.JSX.Element)
 }
 
 export const extraData: Pick<MapStyle, 'glyphs' | 'sprite' | 'version'> = {
@@ -36,7 +37,8 @@ export const baseLayers: BaseLayerDefinition[] = [
 
 export const overlays: OverlayDefinition[] = [
     hillshade,
-    contours
+    contours,
+    huts
 ]
 
 export const getMapStyle = (definition: BaseLayerDefinition) => ({
