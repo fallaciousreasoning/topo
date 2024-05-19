@@ -34,7 +34,7 @@ export default function SearchSection() {
     }, [query])
 
     return <Section page='search' closable exact title='Search'>
-        <input type='search' autoFocus className='w-full p-2 sticky top-2 border-gray-300 border rounded outline-none' value={query} onKeyDown={(e) => {
+        <input type='search' placeholder='Search...' autoFocus className='w-full p-2 sticky top-2 border-gray-300 border rounded outline-none' value={query} onKeyDown={(e) => {
             if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) return
             e.preventDefault()
 
@@ -46,7 +46,7 @@ export default function SearchSection() {
                 setSelectedIndex(i => i === undefined ? 0 : (i + 1) % result.length)
             }
         }} onChange={e => setQuery(e.target.value)} />
-        {result.map((r, i) => <div key={i} className={`w-full px-2 py-1 hover:bg-gray-300 cursor-pointer ${i === selectedIndex && 'bg-gray-200'}`} onClick={() => selectResult(r)}>
+        {result.map((r, i) => <div key={i} className={`w-full px-2 text-md py-0.5 hover:bg-gray-300 cursor-pointer ${i === selectedIndex && 'bg-gray-200'}`} onClick={() => selectResult(r)}>
             {r.name} ({r.type})
         </div>)}
     </Section>
