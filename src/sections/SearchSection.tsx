@@ -6,6 +6,7 @@ import { useRouteUpdater } from '../routing/router';
 import { Place } from '../search/places';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { useMap } from 'react-map-gl';
+import Input from '../components/Input';
 
 export default function SearchSection() {
     const updateRoute = useRouteUpdater()
@@ -34,7 +35,7 @@ export default function SearchSection() {
     }, [query])
 
     return <Section page='search' closable exact title='Search'>
-        <input type='search' placeholder='Search...' autoFocus className='w-full p-2 sticky top-2 border-gray-300 border rounded outline-none' value={query} onKeyDown={(e) => {
+        <Input type='search' placeholder='Search...' autoFocus value={query} onKeyDown={(e) => {
             if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) return
             e.preventDefault()
 

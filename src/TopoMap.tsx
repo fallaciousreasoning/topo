@@ -10,6 +10,7 @@ import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
 import { useParams } from './routing/router';
 import SearchSection from './sections/SearchSection';
+import MountainsSection from './sections/MountainsSection';
 
 const style = {
     width: '100vw',
@@ -56,6 +57,8 @@ export default function TopoMap() {
         mapStyle={mapStyle}
         style={style}>
         <SearchSection />
+        <MountainsSection />
+
         <GeolocateControl />
         <NavigationControl />
         <LayersControl />

@@ -4,23 +4,23 @@ import React from "react"
 import { useClusterHandlers } from "../hooks/useClusterHandlers"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { useRouteUpdater } from "../routing/router"
+import { Mountain } from "../../svelte-src/stores/mountains"
 
-const fetchData = async () => {
-    const response = await fetch('https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json').then(r => r.json()) as any[]
-    return response
+export const fetchMountains = (): Promise<{ [id: string]: Mountain }> => {
+    return fetch('https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json').then(r => r.json())
 }
 
 const getFeatures = async () => {
-    const data = await fetchData()
+    const data = await fetchMountains()
     const points = Object.values(data).filter(r => r.latlng)
     const geojson: GeoJSON.GeoJSON = {
         type: 'FeatureCollection',
-        features: points.map(mountain => {
+        features: points.filter(m => m.latlng).map(mountain => {
             return {
                 type: 'Feature',
                 geometry: {
                     type: 'Point',
-                    coordinates: [mountain.latlng[1], mountain.latlng[0]]
+                    coordinates: [mountain.latlng![1], mountain.latlng![0]]
                 },
                 properties: {
                     name: mountain.name,
