@@ -22,7 +22,7 @@ const parseMatch = (currentPage: string | null, path: string, exact: boolean) =>
         const pagePart = pageParts[i]
 
         if (pathPart.startsWith(':')) {
-            params[pathPart.replace(/(^:)|(\?$)/gi, '')] = pagePart
+            params[pathPart.replace(/(^:)|(\?$)/gi, '')] = decodeURIComponent(pagePart)
 
             // We can't have empty path parts, unless the user has said they can be
             // empty.
@@ -42,7 +42,9 @@ export default function Route({ path = '', exact = false, children }: Props) {
 
     if (!match) return null
 
-    return typeof children === 'function'
+    const result = typeof children === 'function'
         ? children(match)
         : children
+
+    return result
 }

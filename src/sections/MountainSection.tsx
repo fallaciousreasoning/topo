@@ -53,7 +53,7 @@ function MountainInfo({ id, route }: { id: string, route: string | undefined }) 
 }
 
 export default function MountainSection() {
-    return <Section page="/mountains/:id/:route?" title="Mountain" closable exact={false}>
+    return <Section page="mountains/:id/:route?" title="Mountain" closable exact={false}>
         {({ id, route }) => <MountainInfo key={id} id={id} route={route} />}
     </Section>
 }

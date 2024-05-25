@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useMap } from 'react-map-gl'
+import { useMap } from 'react-map-gl/maplibre'
 import { findPlace } from '../search/nearest';
 import { useRouteUpdater } from '../routing/router';
 import round from '../utils/round';

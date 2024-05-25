@@ -16,7 +16,7 @@ export default function Section(props: Props) {
     const updateRoute = useRouteUpdater()
 
     return <Route path={props.page} exact={props.exact}>
-        <div onKeyDown={e => {
+        {routeParams => <div onKeyDown={e => {
             if (!escapeCloses) return
 
             if (e.key === 'Escape') {
@@ -27,7 +27,9 @@ export default function Section(props: Props) {
                 {props.closable && <button onClick={e => updateRoute({ page: null })}>☰</button>}
                 {props.title}
             </h2>
-            {typeof props.children === "function" ? (props.children as any)(props) : props}
-        </div>
+            {typeof props.children === "function"
+                ? props.children(routeParams)
+                : props.children}
+        </div>}
     </Route>
 }

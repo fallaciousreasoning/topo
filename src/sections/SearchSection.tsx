@@ -5,7 +5,7 @@ import { usePromise } from '../hooks/usePromise';
 import { useRouteUpdater } from '../routing/router';
 import { Place } from '../search/places';
 import { useIsMobile } from '../hooks/useMediaQuery';
-import { useMap } from 'react-map-gl';
+import { useMap } from 'react-map-gl/maplibre';
 import Input from '../components/Input';
 
 export default function SearchSection() {
