@@ -1,12 +1,59 @@
 import React from "react";
-import { useParams } from "../routing/router";
 import Section from "./Section";
-import { Mountain, Route } from "../../svelte-src/stores/mountains";
-import { getMountains } from "../layers/mountains";
+import { Mountain, MountainPitch, MountainRoute, getMountains } from "../layers/mountains";
 import { usePromise } from "../hooks/usePromise";
+import TopoText from "../components/TopoText";
+import { repeatString } from "../utils/array";
 
-function RouteInfo({ route, scrollTo }: { route: Route, scrollTo?: boolean }) {
-    return <div></div>
+const joinBits = (bits: (string | number | boolean | null | undefined)[]) => bits
+    .filter(b => b)
+    .join(' ')
+
+function Pitches({ pitches }: { pitches: MountainPitch[] }) {
+    const isOnly = pitches.length === 1
+    const className = !isOnly ? 'list-decimal ml-8' : ''
+    return <ol className={className}>
+        {pitches.map((p, i) => <li key={i}>
+            {!isOnly && joinBits([
+                p.ewbank,
+                p.alpine ?? p.mtcook,
+                p.commitment,
+                p.aid,
+                p.ice,
+                p.mixed,
+                p.length && `(${p.length})`,
+                p.bolts && `${p.bolts} bolts`,
+                ' '
+            ])}<TopoText text={p.description} />
+        </li>)}
+    </ol>
+}
+function RouteInfo({ route, scrollTo }: { route: MountainRoute, scrollTo?: boolean }) {
+    return <div>
+        <div className="font-bold">
+            {joinBits([
+                route.name,
+                route.grade && `(${route.grade})`,
+                route.bolts && `${route.bolts} bolts`,
+                route.natural_pro && 'trad',
+                repeatString('★', route.quality)
+            ])}
+        </div>
+        {route.image && <a target="_blank" rel="noopener noreferrer" href={route.image}>
+            <img
+                className="h-64 w-full object-cover object-scale"
+                alt={route.name}
+                src={route.image} />
+        </a>}
+        <div>
+            <TopoText text={route.description ?? ''} />
+        </div>
+
+        <Pitches pitches={route.pitches} />
+        {route.ascent && <span className="italic">
+            F.A. {route.ascent}
+        </span>}
+    </div>
 }
 
 function PlaceInfo({ mountain, scrollToRoute }: { mountain: Mountain, scrollToRoute?: string }) {
@@ -17,18 +64,24 @@ function PlaceInfo({ mountain, scrollToRoute }: { mountain: Mountain, scrollToRo
         {mountain.image && <a target="_blank" href={mountain.image} rel="noopener noreferrer">
             <img className="h-64 w-full object-cover object-top" alt={mountain.name} src={mountain.image} />
         </a>}
+        {mountain.access && <>
+            <span className="font-bold">Access</span>
+            <p>
+                <TopoText text={mountain.access} />
+            </p>
+        </>}
         {mountain.description && <>
             <span className="font-bold">Description</span>
             <p>
-                {mountain.description}
+                <TopoText text={mountain.description} />
             </p>
         </>}
-        {mountain.routes.length && <>
+        {!!mountain.routes.length && <>
             <span className="font-bold">Routes</span>
-            {mountain.routes.map(r => <>
-                <hr />
+            {mountain.routes.map(r => <React.Fragment key={r.link}>
+                <hr className="my-1" />
                 <RouteInfo route={r} key={r.link} scrollTo={r.name === scrollToRoute} />
-            </>)}
+            </React.Fragment>)}
         </>}
     </div>
 }
@@ -43,7 +96,7 @@ function MountainInfo({ id, route }: { id: string, route: string | undefined }) 
     return <>
         <PlaceInfo mountain={mountain} scrollToRoute={route} />
         {mountain.places.map(p => <React.Fragment key={p.link}>
-            <hr />
+            <hr className="my-3" />
             <PlaceInfo mountain={p} scrollToRoute={route} />
         </React.Fragment>)}
         <div>
@@ -53,7 +106,7 @@ function MountainInfo({ id, route }: { id: string, route: string | undefined }) 
 }
 
 export default function MountainSection() {
-    return <Section page="mountains/:id/:route?" title="Mountain" closable exact={false}>
+    return <Section page="mountain/:id/:route?" title="Mountain" closable exact={false}>
         {({ id, route }) => <MountainInfo key={id} id={id} route={route} />}
     </Section>
 }

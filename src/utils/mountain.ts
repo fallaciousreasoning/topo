@@ -1,7 +1,7 @@
-import { Mountain, Route } from "../../svelte-src/stores/mountains";
+import { Mountain, MountainRoute } from "../layers/mountains";
 
 export const allRoutes = (mountain: Mountain) => {
-    const routes: { [key: string]: Route } = {}
+    const routes: { [key: string]: MountainRoute } = {}
     for (const place of [mountain, ...mountain.places]) {
         for (const route of place.routes) {
             routes[route.name] = route

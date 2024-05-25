@@ -4,7 +4,51 @@ import React from "react"
 import { useClusterHandlers } from "../hooks/useClusterHandlers"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { useRouteUpdater } from "../routing/router"
-import { Mountain } from "../../svelte-src/stores/mountains"
+
+export interface MountainPitch {
+    alpine?: string,
+    commitment?: string,
+    mtcook?: string,
+    aid?: string,
+    ice?: string,
+    mixed?: string,
+    length?: string,
+    bolts?: string,
+    trad: false,
+    ewbank?: string,
+    description?: string
+}
+export interface MountainRoute {
+    link: string
+    name: string,
+    grade?: string,
+    topo_ref?: string,
+    image: string,
+    images: { src: string, width: number, height: number }[],
+    length?: string,
+    pitches: MountainPitch[],
+    quality: number,
+    bolts: number,
+    natural_pro: boolean,
+    description?: string,
+    ascent?: string
+}
+export interface Mountain {
+    name: string;
+    link: string;
+    latlng?: [number, number],
+    altitude: string,
+    access?: string,
+    description?: string,
+    routes: MountainRoute[],
+    places: Mountain[],
+    image: string,
+    images: {
+        src: string,
+        width: number,
+        height: number
+    }[]
+}
 
 const fetchMountains = (): Promise<{ [id: string]: Mountain }> => {
     return fetch('https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json').then(r => r.json())
@@ -56,12 +100,8 @@ export default {
             const name = mountainFeature.properties?.name
             if (!name) return
 
-            const point = mountainFeature.geometry as GeoJSON.Point
-
             updateRoute({
-                lla: point.coordinates[1],
-                llo: point.coordinates[0],
-                lab: name
+                page: `mountain/${encodeURIComponent(mountainFeature.properties.id)}`
             })
 
             // TODO: Open sidebar, when we support that sort of thing

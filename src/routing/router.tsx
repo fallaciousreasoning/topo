@@ -5,7 +5,7 @@ import * as React from "react"
 
 const localStorageKey = 'map-view-info'
 
-interface RouteParams {
+export interface RouteParams {
     lat: number,
     lon: number,
     zoom: number,
