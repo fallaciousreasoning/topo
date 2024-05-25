@@ -4,9 +4,10 @@ import { useParams } from './router';
 interface Props {
     path: string,
     exact: boolean
+    children: React.ReactNode | ((props: any) => React.ReactNode)
 }
 
-const parseMatch = (currentPage: string, path: string, exact: boolean) => {
+const parseMatch = (currentPage: string | null, path: string, exact: boolean) => {
     if (!currentPage)
         return currentPage === path;
 
@@ -35,13 +36,13 @@ const parseMatch = (currentPage: string, path: string, exact: boolean) => {
     return params
 }
 
-export default function Route({ path = '', exact = false, children }: Props & React.PropsWithChildren) {
+export default function Route({ path = '', exact = false, children }: Props) {
     const { page } = useParams()
     const match = parseMatch(page, path, exact)
 
     if (!match) return null
 
     return typeof children === 'function'
-        ? (children as any)(match)
+        ? children(match)
         : children
 }

@@ -7,10 +7,11 @@ interface Props {
     title: string
     closable: boolean
     exact: boolean
-    escapeCloses?: boolean
+    escapeCloses?: boolean,
+    children: React.ReactNode | ((props: any) => React.ReactNode)
 }
 
-export default function Section(props: Props & React.PropsWithChildren) {
+export default function Section(props: Props) {
     const escapeCloses = props.escapeCloses ?? true
     const updateRoute = useRouteUpdater()
 
@@ -26,7 +27,7 @@ export default function Section(props: Props & React.PropsWithChildren) {
                 {props.closable && <button onClick={e => updateRoute({ page: null })}>☰</button>}
                 {props.title}
             </h2>
-            {props.children}
+            {typeof props.children === "function" ? (props.children as any)(props) : props}
         </div>
     </Route>
 }

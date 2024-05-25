@@ -6,12 +6,21 @@ import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { useRouteUpdater } from "../routing/router"
 import { Mountain } from "../../svelte-src/stores/mountains"
 
-export const fetchMountains = (): Promise<{ [id: string]: Mountain }> => {
+const fetchMountains = (): Promise<{ [id: string]: Mountain }> => {
     return fetch('https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json').then(r => r.json())
 }
 
+let mountainsPromise: Promise<{ [id: string]: Mountain }>
+export const getMountains = () => {
+    if (!mountainsPromise) {
+        mountainsPromise = fetchMountains()
+            .catch(() => ({}))
+    }
+    return mountainsPromise
+}
+
 const getFeatures = async () => {
-    const data = await fetchMountains()
+    const data = await getMountains()
     const points = Object.values(data).filter(r => r.latlng)
     const geojson: GeoJSON.GeoJSON = {
         type: 'FeatureCollection',

@@ -11,6 +11,7 @@ import linzVector from './layers/linzVector';
 import { useParams } from './routing/router';
 import SearchSection from './sections/SearchSection';
 import MountainsSection from './sections/MountainsSection';
+import MountainSection from './sections/MountainSection';
 
 const style = {
     width: '100vw',
@@ -58,6 +59,7 @@ export default function TopoMap() {
         style={style}>
         <SearchSection />
         <MountainsSection />
+        <MountainSection />
 
         <GeolocateControl />
         <NavigationControl />
