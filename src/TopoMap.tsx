@@ -1,6 +1,6 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, MapRef, NavigationControl, Style } from 'react-map-gl/maplibre';
+import { GeolocateControl, Layer, Map, MapRef, NavigationControl, Source, Style } from 'react-map-gl/maplibre';
 import MapLabel from './components/MapLabel';
 import LayersControl from './controls/LayersControl';
 import LongPressLookup from './controls/LongPressLookup';
@@ -12,6 +12,7 @@ import { useParams } from './routing/router';
 import SearchSection from './sections/SearchSection';
 import MountainsSection from './sections/MountainsSection';
 import MountainSection from './sections/MountainSection';
+import { demSource, elevationEncoding } from './layers/contours';
 
 const style = {
     width: '100vw',
@@ -53,7 +54,12 @@ export default function TopoMap() {
             latitude: routeParams.lat,
             longitude: routeParams.lon,
             zoom: routeParams.zoom,
-            bearing: routeParams.rotation
+            bearing: routeParams.rotation,
+            pitch: 60
+        }}
+        terrain={{
+            source: 'dem',
+            exaggeration: 1.6
         }}
         mapStyle={mapStyle}
         style={style}>
@@ -69,5 +75,11 @@ export default function TopoMap() {
         <PositionSyncer />
         <LongPressLookup />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
+        {/* <Source id="jay-dem" type='raster' tiles={[
+            "http://localhost:8081/ele/{z}/{x}/{y}.png"
+        ]} minzoom={9} maxzoom={14}>
+            <Layer id="jay-dem" type='raster'/>
+        </Source> */}
+        <Source id="dem" type='raster-dem' encoding={elevationEncoding} tiles={[demSource.sharedDemProtocolUrl]} />
     </Map>
 }
