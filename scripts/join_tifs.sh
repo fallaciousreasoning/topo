@@ -48,8 +48,8 @@ else
 fi
 
 if [ ! -f $MBTILES_NAME ]; then
-    gdal_translate -co ZOOM_LEVEL_STRATEGY=auto -of MBTiles $RGB_NAME $MBTILES_NAME
-    gdaladdo ele.mbtiles 2 4 8 16 32
+    gdal_translate -co ZOOM_LEVEL_STRATEGY=LOWER -of MBTiles $RGB_NAME $MBTILES_NAME
+    gdaladdo $MBTILES_NAME 2 4 8 16 32 64 128
 else
     echo "Not making MBTiles. $MBTILES_NAME already exists"
 fi
