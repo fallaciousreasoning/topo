@@ -57,10 +57,6 @@ export default function TopoMap() {
             bearing: routeParams.rotation,
             pitch: 60
         }}
-        terrain={{
-            source: 'dem',
-            exaggeration: 1.6
-        }}
         mapStyle={mapStyle}
         style={style}>
         <SearchSection />
