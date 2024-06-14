@@ -16,13 +16,14 @@ def get_tile_format(cursor: sqlite3.Cursor):
     return cursor.fetchone()[0]
 
 
-def process(db_name: str, process_row: Callable[[str, Coord, bytes], None]):
+def process(db_name: str, process_row: Callable[[str, Coord, bytes], None], limit=None):
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
 
     tile_format = get_tile_format(cursor)
     
-    cursor.execute('SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles')
+    limit = '' if limit is None else f' LIMIT {limit}'
+    cursor.execute(f'SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles ORDER BY zoom_level' + limit)
     for z, x, y, data in cursor:
         process_row(tile_format, Coord(x, y, z), data)
 

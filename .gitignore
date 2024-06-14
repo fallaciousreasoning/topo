@@ -4,3 +4,4 @@
 .DS_Store
 .vercel
 /out
+__pycache__
