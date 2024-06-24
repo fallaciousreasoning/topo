@@ -42,7 +42,7 @@ def strip_contours(path, coord):
             result = mapbox_vector_tile.encode(formatted)
             out_f.write(result)
 
-        subprocess.run(['gzip', '--keep', '--force', out_path])
+        # subprocess.run(['gzip', '--keep', '--force', out_path])
 
 
 if __name__ == '__main__':
