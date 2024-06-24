@@ -26,16 +26,25 @@ def strip_contours(path, coord):
     out_path = os.path.join(folder, f'{coord.y}.pbf')
     with open(path, 'rb') as f:
         tile = mapbox_vector_tile.decode(f.read())
-        if 'contours' in tile:
-            del tile['contours']
 
-        
+        # Life would be too easy if this format round tripped - dict is
+        # converted to a list with a name property for the key.
+        formatted = []
+        for key, value in tile.items():
+            # In future we probably want to be a bit more surgical - it'd be
+            # nice to keep peaks
+            if key == 'contours': continue
+
+            value.update({'name': key})
+            formatted.append(value)
+
         with open(out_path, 'wb') as out_f:
-            # Obviously life would be too easy if the vector tiles could round trip....
-            result = mapbox_vector_tile.encode(tile)
+            result = mapbox_vector_tile.encode(formatted)
             out_f.write(result)
+
+        subprocess.run(['gzip', '--keep', '--force', out_path])
 
 
 if __name__ == '__main__':
     # strip_contours('./out/topo/13/8026/2991.pbf')
-    process('/home/jay/Downloads/topographic.mbtiles', parse_tile, 1)
+    process('/home/jay/Downloads/topographic.mbtiles', parse_tile)
