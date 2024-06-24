@@ -8,9 +8,10 @@ export const maxContourZoom = 11
 
 export const demSource = new contours.DemSource({
     encoding: elevationEncoding,
-    // url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=U1fSkPeJnFmPcMub3C4o',
+    url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=U1fSkPeJnFmPcMub3C4o',
     // url: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
-    url: 'http://localhost:8081/ele/{z}/{x}/{y}.png',
+    // url: 'http://localhost:8081/ele/{z}/{x}/{y}.png',
+    // url: 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
     maxzoom: maxContourZoom,
     worker: true,
     cacheSize: 512,

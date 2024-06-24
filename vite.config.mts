@@ -6,5 +6,10 @@ export default defineConfig({
         react({
 
         }),
-    ]
+    ],
+    server: {
+        watch: {
+            ignored: ['**/out/**']
+        }
+    }
 });

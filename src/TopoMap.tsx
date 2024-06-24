@@ -13,6 +13,7 @@ import SearchSection from './sections/SearchSection';
 import MountainsSection from './sections/MountainsSection';
 import MountainSection from './sections/MountainSection';
 import { demSource, elevationEncoding } from './layers/contours';
+import './caches/cachingProtocol'
 
 const style = {
     width: '100vw',
@@ -42,7 +43,7 @@ export default function TopoMap() {
 
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
     const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap]) as Style
-
+    console.log(mapStyle)
     return <Map
         ref={mapRef as any}
         scrollZoom

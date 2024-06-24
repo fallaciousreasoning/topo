@@ -1,5 +1,5 @@
 import React from "react";
-import { MapStyle } from "react-map-gl";
+import { MapStyle } from "react-map-gl/maplibre";
 import linzVector from "./linzVector";
 import topoRaster from "./topoRaster";
 import linzAerial from "./linzAerial";
@@ -43,7 +43,21 @@ export const overlays: OverlayDefinition[] = [
     mountains
 ]
 
-export const getMapStyle = (definition: BaseLayerDefinition) => ({
-    ...extraData,
-    ...definition,
-}) as MapStyle
+export const getMapStyle = (definition: BaseLayerDefinition) => {
+    const cachableSources = Object.entries(definition.sources)
+        .reduce((prev, [source, value]) => {
+            const cachableSource = 'tiles' in value ? {
+                ...value,
+                tiles: value.tiles!.map(t => t.replace('https://', 'maybe-cache://') + `#${definition.id}`)
+            } : value
+            return {
+                ...prev,
+                [source]: cachableSource
+            }
+        }, {})
+    return {
+        ...extraData,
+        ...definition,
+        sources: cachableSources
+    } as MapStyle
+}

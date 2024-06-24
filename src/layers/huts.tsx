@@ -1,6 +1,5 @@
 import React from "react";
-import { Layer } from "react-map-gl";
-import { Source } from "react-map-gl/maplibre";
+import { Source, Layer } from "react-map-gl/maplibre";
 import { useClusterHandlers } from "../hooks/useClusterHandlers";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { usePromise } from "../hooks/usePromise";
