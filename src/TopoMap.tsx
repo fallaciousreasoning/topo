@@ -49,19 +49,19 @@ export default function TopoMap() {
         scrollZoom
         boxZoom={false}
         doubleClickZoom
-        pitchWithRotate={false}
+        pitchWithRotate={true}
         dragRotate
+        touchPitch
         initialViewState={{
             latitude: routeParams.lat,
             longitude: routeParams.lon,
             zoom: routeParams.zoom,
             bearing: routeParams.rotation,
-            // pitch: 60
         }}
-        // terrain={{
-        //     source: 'contours',
-        //     exaggeration: 1.5,
-        // }}
+        terrain={{
+            source: 'dem',
+            exaggeration: 1.5,
+        }}
         mapStyle={mapStyle}
         style={style}>
         <SearchSection />
