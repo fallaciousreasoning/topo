@@ -4,6 +4,7 @@ import contours from 'maplibre-contour'
 import maplibre from 'maplibre-gl'
 
 export const elevationEncoding = 'mapbox'
+export const elevationScheme = 'tms'
 export const maxContourZoom = 11
 
 export const demSource = new contours.DemSource({
@@ -37,7 +38,7 @@ export const contourTiles = demSource.contourProtocolUrl({
 export default {
     id: 'contour-source',
     name: 'Contours',
-    source: <Source key='contour-source' id='contour-source' type='vector' tiles={[contourTiles]} maxzoom={maxContourZoom} scheme="tms">
+    source: <Source key='contour-source' id='contour-source' type='vector' tiles={[contourTiles]} maxzoom={maxContourZoom} scheme={elevationScheme}>
         <Layer id="contour-lines" type='line' source='contour-source' source-layer='contours' paint={{
             "line-color": "rgba(205, 128, 31, 0.5)",
             // level = highest index in thresholds array the elevation is a multiple of

@@ -43,7 +43,7 @@ export default function TopoMap() {
 
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
     const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap]) as Style
-    console.log(mapStyle)
+
     return <Map
         ref={mapRef as any}
         scrollZoom
@@ -56,8 +56,12 @@ export default function TopoMap() {
             longitude: routeParams.lon,
             zoom: routeParams.zoom,
             bearing: routeParams.rotation,
-            pitch: 60
+            // pitch: 60
         }}
+        // terrain={{
+        //     source: 'contours',
+        //     exaggeration: 1.5,
+        // }}
         mapStyle={mapStyle}
         style={style}>
         <SearchSection />

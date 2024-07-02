@@ -15,7 +15,11 @@ addProtocol('maybe-cache', async (params, abortController) => {
         return { data: await new Response(data).arrayBuffer() }
     }
 
-    const buffer = await fetch('https://' + url).then(r => r.arrayBuffer())
-    await cacher.saveTile(layer, url, new Blob([buffer]))
-    return { data: buffer }
+    try {
+        const buffer = await fetch('https://' + url).then(r => r.arrayBuffer())
+        await cacher.saveTile(layer, url, new Blob([buffer]))
+        return { data: buffer }
+    } catch (err) {
+        return { data: null }
+    }
 })
