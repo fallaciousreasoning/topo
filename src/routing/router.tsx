@@ -68,7 +68,7 @@ const parsers: { [P in keyof RouteParams]: (fromParams: string) => RouteParams[P
     lab: stringParser,
 }
 
-const toTruncated = (value: number | null) => value !== null ? round(value, 5).toString() : null
+const toTruncated = (value: number | null) => value !== null ? round(value, 7).toString() : null
 const serializers: { [P in keyof RouteParams]: (from: RouteParams[P]) => string | null } = {
     lat: toTruncated,
     lon: toTruncated,
@@ -84,7 +84,7 @@ const serializers: { [P in keyof RouteParams]: (from: RouteParams[P]) => string 
 
 const parseUrl = (includeStorage = true) => {
     const hash = location.hash
-    const parsed = new URLSearchParams(hash)
+    const parsed = new URLSearchParams(hash.substring(1))
     const fromLocalStorage = includeStorage
         && JSON.parse(localStorage.getItem(localStorageKey)!)
 
@@ -120,7 +120,9 @@ const toHash = (routeParams: RouteParams) => {
         searchParams.set(key, serialized)
     }
 
-    return searchParams.toString().replaceAll('%2C', ',')
+    return '#' + searchParams.toString()
+        // breaks, with url serialization
+        // .replaceAll('%2C', ',')
 }
 
 const persistParams = (params: RouteParams) => {
@@ -134,14 +136,14 @@ export const Context = (props: React.PropsWithChildren) => {
             ...params,
             ...partial
         }
-        localStorage.setItem(localStorageKey, JSON.stringify(update))
 
         const hashed = toHash(update)
+        if (hashed == location.hash) return
         window.location.hash = hashed
     }
     useEffect(() => {
         const reparse = () => {
-            const params = parseUrl(false)
+            const params = parseUrl(true)
             setParams(params)
             persistParams(params)
         }
