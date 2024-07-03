@@ -137,6 +137,8 @@ export const Context = (props: React.PropsWithChildren) => {
             ...partial
         }
 
+        persistParams(update)
+
         const hashed = toHash(update)
         if (hashed == location.hash) return
         window.location.hash = hashed

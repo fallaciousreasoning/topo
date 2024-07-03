@@ -6,6 +6,8 @@ export default {
     id: 'hillshade',
     name: 'Hillshade',
     source: <Source key='hillshade' id='dem' tileSize={256} tiles={[demSource.sharedDemProtocolUrl]} maxzoom={maxContourZoom} type='raster-dem' encoding={elevationEncoding} scheme={elevationScheme}>
-        <Layer id="hillshade" type='hillshade' source='terrain' />
+        <Layer id="hillshade" type='hillshade' source='terrain' paint={{
+            "hillshade-exaggeration": 0.2
+        }} />
     </Source>
 }

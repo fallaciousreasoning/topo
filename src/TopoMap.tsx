@@ -58,7 +58,6 @@ export default function TopoMap() {
             zoom: routeParams.zoom,
             bearing: routeParams.rotation,
         }}
-        // TODO: Only show this if the pitch is non-zero
         terrain={{
             source: 'dem',
             exaggeration: 1.5,
