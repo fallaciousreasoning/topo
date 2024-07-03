@@ -3,7 +3,6 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 
-import fragment from '../stores/fragment';
 import mountains, { type Mountains } from '../stores/mountains';
 import { getLayerData } from './data';
 

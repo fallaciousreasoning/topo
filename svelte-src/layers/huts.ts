@@ -3,7 +3,6 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 import type { Place } from '../search/places';
-import fragment from '../stores/fragment';
 import { getLayerData } from './data';
 
 const styleCache = {};

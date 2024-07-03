@@ -6,6 +6,7 @@ import maplibre from 'maplibre-gl'
 export const elevationEncoding = 'mapbox'
 export const elevationScheme = 'tms'
 export const maxContourZoom = 11
+export const minContourZoom = 6
 
 export const demSource = new contours.DemSource({
     encoding: elevationEncoding,
@@ -17,6 +18,7 @@ export const demSource = new contours.DemSource({
     worker: true,
     cacheSize: 512,
     timeoutMs: 30000,
+    minzoom: minContourZoom
 })
 
 demSource.setupMaplibre(maplibre)

@@ -82,10 +82,11 @@ const serializers: { [P in keyof RouteParams]: (from: RouteParams[P]) => string 
     lab: p => p
 }
 
-const parseUrl = () => {
+const parseUrl = (includeStorage = true) => {
     const hash = location.hash
     const parsed = new URLSearchParams(hash)
-    const fromLocalStorage = JSON.parse(localStorage.getItem(localStorageKey)!)
+    const fromLocalStorage = includeStorage
+        && JSON.parse(localStorage.getItem(localStorageKey)!)
 
     const result: RouteParams = {} as any
 
@@ -134,12 +135,13 @@ export const Context = (props: React.PropsWithChildren) => {
             ...partial
         }
         localStorage.setItem(localStorageKey, JSON.stringify(update))
-        window.location.hash = toHash(update)
+
+        const hashed = toHash(update)
+        window.location.hash = hashed
     }
     useEffect(() => {
         const reparse = () => {
-            const params = parseUrl()
-
+            const params = parseUrl(false)
             setParams(params)
             persistParams(params)
         }
