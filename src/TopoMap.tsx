@@ -77,11 +77,5 @@ export default function TopoMap() {
         <PositionSyncer />
         <LongPressLookup />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
-        {/* <Source id="jay-dem" type='raster' tiles={[
-            "http://localhost:8081/ele/{z}/{x}/{y}.png"
-        ]} minzoom={9} maxzoom={14}>
-            <Layer id="jay-dem" type='raster'/>
-        </Source> */}
-        <Source id="dem" type='raster-dem' encoding={elevationEncoding} tiles={[demSource.sharedDemProtocolUrl]} />
     </Map>
 }
