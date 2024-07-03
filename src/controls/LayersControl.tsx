@@ -21,11 +21,8 @@ export default function LayersControl() {
     }
 
     return <Control position='top-right'>
-        <button className='relative' type='button' onClick={() => setOpen(o => !o)}>
-            ↔️
-        </button>
-        <div className='relative'>
-            {open && <div className='absolute top-0 bg-white right-0 w-52 z-10 shadow rounded border-gray-300 border p-2'>
+        <div className='relative inline'>
+            {open && <div className='absolute top-0 bg-white right-1 w-52 z-10 shadow rounded border-gray-300 border p-2'>
                 <div>
                     <h4 className='text-foreground font-bold'>Base Maps</h4>
                     <ul>
@@ -53,5 +50,8 @@ export default function LayersControl() {
                 </div>
             </div>}
         </div>
+        <button className='relative' type='button' onClick={() => setOpen(o => !o)}>
+            ↔️
+        </button>
     </Control>
 }
