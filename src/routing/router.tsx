@@ -145,7 +145,7 @@ export const Context = (props: React.PropsWithChildren) => {
     }
     useEffect(() => {
         const reparse = () => {
-            const params = parseUrl(true)
+            const params = parseUrl(false)
             setParams(params)
             persistParams(params)
         }
