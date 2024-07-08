@@ -10,6 +10,7 @@ export interface RouteParams {
     lon: number,
     zoom: number,
     rotation: number,
+    pitch: number,
     basemap: string,
     overlays: string[],
     page: string | null,
@@ -25,6 +26,7 @@ const defaultRouteParams: RouteParams = {
     lon: 170.1422,
     zoom: 14,
     rotation: 0,
+    pitch: 0,
     basemap: linzVector.id,
     overlays: [],
     page: null,
@@ -59,6 +61,7 @@ const parsers: { [P in keyof RouteParams]: (fromParams: string) => RouteParams[P
     lon: floatParser,
     zoom: floatParser,
     rotation: floatParser,
+    pitch: floatParser,
     basemap: stringParser,
     overlays: stringArrayParser,
     page: stringParser,
@@ -68,17 +71,18 @@ const parsers: { [P in keyof RouteParams]: (fromParams: string) => RouteParams[P
     lab: stringParser,
 }
 
-const toTruncated = (value: number | null) => value !== null ? round(value, 7).toString() : null
+const toTruncated = (dps=6) => (value: number | null) => value !== null ? round(value, dps).toString() : null
 const serializers: { [P in keyof RouteParams]: (from: RouteParams[P]) => string | null } = {
-    lat: toTruncated,
-    lon: toTruncated,
-    rotation: toTruncated,
-    zoom: toTruncated,
+    lat: toTruncated(),
+    lon: toTruncated(),
+    rotation: toTruncated(),
+    pitch: toTruncated(4),
+    zoom: toTruncated(1),
     basemap: r => r,
     overlays: r => r.join(','),
     page: p => p,
-    lla: toTruncated,
-    llo: toTruncated,
+    lla: toTruncated(),
+    llo: toTruncated(),
     lab: p => p
 }
 
