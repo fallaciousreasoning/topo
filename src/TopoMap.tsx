@@ -14,6 +14,7 @@ import { useParams } from './routing/router';
 import MountainSection from './sections/MountainSection';
 import MountainsSection from './sections/MountainsSection';
 import SearchSection from './sections/SearchSection';
+import Terrain from './layers/terrain';
 
 const style = {
     width: '100vw',
@@ -67,6 +68,7 @@ export default function TopoMap() {
         <MapLabel />
         <PositionSyncer />
         <LongPressLookup />
+        <Terrain />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
     </Map>
 }
