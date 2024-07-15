@@ -6,8 +6,8 @@ const placesUrl = 'https://search.topos.nz/data/min_excluded_places.json'
 
 export interface Place {
     name: string,
-    lat: number,
-    lon: number,
+    lat: string,
+    lon: string,
     type: string
 }
 

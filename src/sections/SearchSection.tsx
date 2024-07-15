@@ -7,6 +7,8 @@ import { Place } from '../search/places';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { useMap } from 'react-map-gl/maplibre';
 import Input from '../components/Input';
+import { getElevation } from '../layers/contours';
+import round from '../utils/round';
 
 export default function SearchSection() {
     const updateRoute = useRouteUpdater()
@@ -16,11 +18,12 @@ export default function SearchSection() {
     const [selectedIndex, setSelectedIndex] = React.useState<number>()
     const map = useMap()
 
-    const selectResult = (r: Place) => {
+    const selectResult = async (r: Place) => {
+        const elevationPromise = getElevation([parseFloat(r.lat), parseFloat(r.lon)]).then(e => ` (${round(e, 0)}m)`).catch(() => '')
         updateRoute({
             lla: r.lat,
             llo: r.lon,
-            lab: r.name,
+            lab: r.name + await elevationPromise,
             page: isMobile ? null : 'search'
         })
 
