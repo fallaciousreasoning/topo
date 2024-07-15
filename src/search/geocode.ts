@@ -42,7 +42,6 @@ const searchNzPlaces = async (query: string, maxResults = 100): Promise<Place[]>
 
 const searchMapReferences = async (query: string): Promise<Place[]> => {
     const ref = convertNZMGReferenceToLatLng(query)!
-    console.log(ref)
     return [ref].filter(r => r).map(([lat, lon]) => ({
         name: query,
         lat,

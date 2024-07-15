@@ -3,8 +3,11 @@ import { useMap } from 'react-map-gl/maplibre'
 import { findPlace } from '../search/nearest';
 import { useRouteUpdater } from '../routing/router';
 import round from '../utils/round';
+import { demSource, elevationScheme, getElevation } from '../layers/contours';
 
 const LONG_PRESS_THRESHOLD = 500;
+
+window.demSource = demSource.manager
 
 export default function LongPressLookup() {
     const map = useMap()
@@ -25,11 +28,16 @@ export default function LongPressLookup() {
             const lon = e.lngLat.lng
 
             const closestPoint = await findPlace(lat, lon)
+
+            const elevation = round(await getElevation([lat, lon]), 0)
+
             const update = {
                 lla: closestPoint?.lat ?? lat,
                 llo: closestPoint?.lon ?? lon,
-                lab: closestPoint?.name ?? `Lat/Lon: ${round(lon)}, ${round(lat)}`
+                lab: (closestPoint?.name ?? `Lat/Lon: ${round(lon)}, ${round(lat)}`) + ` (${elevation}m)`
             }
+
+
             updateRoute(update)
             console.log(update)
         })

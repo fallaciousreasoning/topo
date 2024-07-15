@@ -35,7 +35,7 @@
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
     "localforage": "1.10.0",
-    "maplibre-contour": "0.0.7",
+    "maplibre-contour": "github:fallaciousreasoning/maplibre-contour#main",
     "maplibre-gl": "4.5.0",
     "ol": "9.1.0",
     "proj4": "2.9.2",

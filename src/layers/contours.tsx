@@ -3,8 +3,21 @@ import React from "react";
 import contours from 'maplibre-contour'
 import maplibre from 'maplibre-gl'
 
-export const elevationEncoding = 'mapbox'
-export const elevationScheme = 'tms'
+const elevationData =
+  // custom
+  {
+    url: 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
+    scheme: 'tms',
+    encoding: 'mapbox'
+  }
+// amazon
+// {
+//   url: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
+//   scheme: 'xyz',
+//   encoding: 'terrarium'
+// }
+
+export const { encoding: elevationEncoding, scheme: elevationScheme } = elevationData
 export const maxContourZoom = 11
 export const minContourZoom = 6
 
@@ -13,7 +26,7 @@ export const demSource = new contours.DemSource({
     // url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=U1fSkPeJnFmPcMub3C4o',
     // url: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
     // url: 'http://localhost:8081/ele/{z}/{x}/{y}.png',
-    url: 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
+    url: elevationData.url,
     maxzoom: maxContourZoom,
     worker: true,
     cacheSize: 512,
@@ -36,6 +49,9 @@ export const contourTiles = demSource.contourProtocolUrl({
     },
 
 })
+
+const abortController = new AbortController()
+export const getElevation = (latlng: [number, number], controller=abortController): Promise<number> => demSource.manager.getElevation(latlng, elevationScheme, abortController)
 
 export default {
     id: 'contour-source',
