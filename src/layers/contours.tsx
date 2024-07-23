@@ -1,12 +1,12 @@
 import { Layer, Source } from "react-map-gl/maplibre";
 import React from "react";
 import contours from 'maplibre-contour'
-import maplibre from 'maplibre-gl'
+import * as protocols from '../caches/protocols'
 
 const elevationData =
   // custom
   {
-    url: 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
+    url: 'maybe-cache://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
     scheme: 'tms',
     encoding: 'mapbox'
   }
@@ -34,7 +34,7 @@ export const demSource = new contours.DemSource({
     minzoom: minContourZoom
 })
 
-demSource.setupMaplibre(maplibre)
+demSource.setupMaplibre(protocols)
 
 const far = [200, 1000]
 const close = [20, 100]

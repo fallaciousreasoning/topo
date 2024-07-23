@@ -8,7 +8,7 @@ export default {
             id: 'topo50',
             type: 'raster',
             tiles: [
-                `https://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png`
+                `maybe-cache://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png`
             ],
             minzoom: 13,
         },

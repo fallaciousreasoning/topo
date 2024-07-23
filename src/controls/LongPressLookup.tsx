@@ -4,11 +4,11 @@ import { findPlace } from '../search/nearest';
 import { useRouteUpdater } from '../routing/router';
 import round from '../utils/round';
 import { demSource, elevationScheme, getElevation } from '../layers/contours';
-
+import maplibre from 'maplibre-gl'
 const LONG_PRESS_THRESHOLD = 500;
 
 window.demSource = demSource.manager
-
+console.log(maplibre)
 export default function LongPressLookup() {
     const map = useMap()
     const updateRoute = useRouteUpdater()

@@ -1,4 +1,4 @@
-import { addProtocol } from 'maplibre-gl'
+import { addProtocol } from './protocols'
 
 const cacherPromise = import('./indexeddb')
 const failed = { data: null }
@@ -20,6 +20,6 @@ addProtocol('maybe-cache', async (params, abortController) => {
         await cacher.saveTile(layer, url, new Blob([buffer]))
         return { data: buffer }
     } catch (err) {
-        return { data: null }
+        return failed
     }
 })
