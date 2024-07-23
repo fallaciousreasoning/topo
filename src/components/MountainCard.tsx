@@ -9,7 +9,7 @@ export default function MountainCard(props: { mountain: Mountain }) {
     const picture = getPicture(props.mountain)
     const updateRoute = useRouteUpdater()
 
-    return <a className="text-black no-underline"
+    return <a className="text-black no-underline hover:shadow"
         href={`#page=mountain/${encodeURIComponent(props.mountain.link)}`}
         onClick={e => {
             e.preventDefault();
