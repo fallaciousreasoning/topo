@@ -6,6 +6,7 @@ import { useParams, useRouteUpdater } from '../routing/router'
 export default function LayersControl() {
     const routeParams = useParams()
     const updateParams = useRouteUpdater()
+    const menuRef = React.useRef<HTMLDivElement>(null)
 
     const [open, setOpen] = React.useState(false)
     const toggleOverlay = (overlayId: string, checked: boolean) => {
@@ -20,8 +21,21 @@ export default function LayersControl() {
         }
     }
 
+    React.useLayoutEffect(() => {
+        if (!open) return
+
+        const handler = (e: MouseEvent) => {
+            if (!e.composedPath().includes(menuRef.current!))
+                setOpen(false)
+        }
+        document.addEventListener('click',  handler)
+        return () => {
+            document.removeEventListener('click', handler)
+        }
+    }, [open])
+
     return <Control position='top-right'>
-        <div className='relative inline'>
+        <div className='relative inline' ref={menuRef}>
             {open && <div className='absolute top-0 bg-white right-1 w-52 z-10 shadow rounded border-gray-300 border p-2'>
                 <div>
                     <h4 className='text-foreground font-bold'>Base Maps</h4>
@@ -50,7 +64,10 @@ export default function LayersControl() {
                 </div>
             </div>}
         </div>
-        <button className='relative' type='button' onClick={() => setOpen(o => !o)}>
+        <button className='relative' type='button' onClick={(e) => {
+            setOpen(o => !o)
+            e.stopPropagation()
+        }}>
             ↔️
         </button>
     </Control>
