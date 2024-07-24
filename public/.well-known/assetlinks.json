@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "nz.topos.twa",
+        "sha256_cert_fingerprints": ["FF:FD:81:7C:76:20:37:CF:B7:3C:95:3D:FB:43:C7:C0:DA:17:63:70:4B:F6:69:07:9C:7B:E1:88:9D:28:A6:2E"]
+      }
+    }]

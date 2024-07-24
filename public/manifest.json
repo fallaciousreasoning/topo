@@ -1,6 +1,7 @@
 {
     "name": "NZ Topo",
     "short_name": "NZ Topo",
+    "description": "An offline topo maps app for the New Zealand backcountry",
     "icons": [
         {
             "src": "/maskable.png",
@@ -17,7 +18,8 @@
         {
             "src": "/favicon.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         }
     ],
     "scope": ".",
