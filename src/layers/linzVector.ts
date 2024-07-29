@@ -471,12 +471,24 @@ export default {
                 "visibility": "visible"
             },
             "paint": {
-                "fill-color": "rgba(255, 255, 255, 0.44)",
+                "fill-color": {
+                    "stops": [
+
+                        [
+                            8,
+                            "rgba(212, 232, 255, 0.8)"
+                        ],
+                        [
+                            10,
+                            "rgba(232, 252, 255, 0.8)"
+                        ]
+                    ]
+                },
                 "fill-outline-color": {
                     "stops": [
                         [
                             8,
-                            "rgba(255, 255, 255, 0.01)"
+                            "rgba(255, 255, 255, 0.5)"
                         ],
                         [
                             10,
