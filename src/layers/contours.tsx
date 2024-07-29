@@ -37,6 +37,7 @@ export const demSource = new contours.DemSource({
 demSource.setupMaplibre(protocols)
 
 const far = [200, 1000]
+const mid = [100, 500]
 const close = [20, 100]
 export const contourTiles = demSource.contourProtocolUrl({
     multiplier: 1,
@@ -60,7 +61,7 @@ export default {
         <Layer id="contour-lines" type='line' source='contour-source' source-layer='contours' paint={{
             "line-color": "rgba(205, 128, 31, 0.5)",
             // level = highest index in thresholds array the elevation is a multiple of
-            "line-width": ["match", ["get", "level"], 1, 2, 0.5],
+            "line-width": ["match", ["get", "level"], 1, 2, 0.7],
         }} />
         <Layer id="contour-labels" type="symbol" source='contour-source' source-layer='contours' filter={[">", ["get", "level"], 0]}
             layout={{
