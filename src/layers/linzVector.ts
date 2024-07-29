@@ -4036,15 +4036,11 @@ export default {
                     "stops": [
                         [
                             13,
-                            1
-                        ],
-                        [
-                            15,
-                            1.5
+                            3
                         ],
                         [
                             19,
-                            3
+                            5
                         ]
                     ]
                 },
@@ -4080,7 +4076,7 @@ export default {
             "source": "LINZ Basemaps",
             "source-layer": "transportation",
             "type": "line",
-            "minzoom": 13
+            "minzoom": 10
         },
         {
             "filter": [
