@@ -143,8 +143,23 @@ export default {
                 source='mountains'
                 filter={['!', ['has', 'point_count']]}
                 layout={{
-                    "icon-image": 'triangle_pnt_fill'
+                    "icon-image": 'triangle_pnt_fill',
                 }} />
+                <Layer id='mountains-unclustered-point-name'
+                    type='symbol'
+                    source='mountains'
+                    filter={['!', ['has', 'point_count']]}
+                    layout={{
+                        'text-field': '{name}',
+                        'text-size': 12,
+                        "text-font": [
+                            "Open Sans Italic"
+                        ],
+                        "icon-anchor": 'bottom',
+                        "text-anchor": 'center',
+                        "text-offset": [0, 2],
+                        "text-justify": 'right'
+                    }} />
         </Source>
     }
 }
