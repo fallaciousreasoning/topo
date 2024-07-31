@@ -1,9 +1,11 @@
 import { Layer, Source, useMap } from "react-map-gl/maplibre"
 import { usePromise } from "../hooks/usePromise"
-import React from "react"
+import React, { useEffect, useMemo } from "react"
 import { useClusterHandlers } from "../hooks/useClusterHandlers"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { useRouteUpdater } from "../routing/router"
+import Supercluster from "supercluster"
+import { Feature } from "maplibre-gl"
 
 export interface MountainPitch {
     alpine?: string,
@@ -77,7 +79,8 @@ const getFeatures = async () => {
                 },
                 properties: {
                     name: mountain.name,
-                    id: mountain.link
+                    id: mountain.link,
+                    elevation: parseInt(mountain.altitude) || 0
                 }
             }
         }),
@@ -85,11 +88,45 @@ const getFeatures = async () => {
     return geojson
 }
 
+const cluster = new Supercluster({
+    maxZoom: 14,
+    reduce: (accumulator, current) => {
+        console.log(current)
+        if (!accumulator.occurrence || accumulator.occurrence.elevation < current.occurrence.elevation) {
+            accumulator.occurrence = current.occurrence;
+        }
+    }
+});
+
 export default {
     id: 'mountains',
     name: 'Mountains',
     source: () => {
         const { result } = usePromise(getFeatures, [])
+        const map = useMap()
+
+        useEffect(() => {
+            if (!result) return
+            const m = map.current!.getMap()
+            cluster.load(result!.features as any);
+            const updateCluster = () => {
+                const zoom = Math.floor(m.getZoom())
+                const clusters = cluster.getClusters([-180, -85, 180, 85], zoom);
+                (m.getSource('mountains') as any).setData({
+                    type: 'FeatureCollection',
+                    features: clusters
+                })
+            }
+
+            updateCluster()
+            const events = ['move', 'zoom', 'pitch', 'rotate']
+            for (const e of events) m.on(e, updateCluster)
+
+            return () => {
+                for (const e of events) m.on(e, updateCluster)
+            }
+        }, [result])
+
         const updateRoute = useRouteUpdater()
 
         useClusterHandlers('mountains')
@@ -103,63 +140,25 @@ export default {
             updateRoute({
                 page: `mountain/${encodeURIComponent(mountainFeature.properties.id)}`
             })
-
-            // TODO: Open sidebar, when we support that sort of thing
         })
         if (!result) return
 
-        return <Source id='mountains' type="geojson" data={result} cluster clusterMaxZoom={14}>
-            <Layer id="mountains-clusters" type="circle" source="mountains" filter={['has', 'point_count']} paint={{
-                'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
-                'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
-            }} />
-            <Layer id='mountains-cluster-count'
+        return <Source id='mountains' type="geojson" data={{ type: 'FeatureCollection', features: [] }}>
+            <Layer id='mountains-unclustered-point-name'
                 type='symbol'
                 source='mountains'
-                filter={['has', 'point_count']}
                 layout={{
-                    'text-field': '{point_count_abbreviated}',
+                    'text-field': ['concat', ['get', 'name'], ' ', ['get', 'elevation'], 'm ', ['get', 'point_count_abbreviated']],
                     'text-size': 12,
                     "text-font": [
                         "Open Sans Italic"
                     ],
                     'icon-image': 'triangle_pnt_fill',
-                    "icon-anchor": 'right',
-                    "text-anchor": 'left',
+                    "icon-anchor": 'bottom',
+                    "text-anchor": 'center',
+                    "text-offset": [0, 1],
                     "text-justify": 'right'
                 }} />
-            <Layer id='mountains-unclustered-point'
-                type='circle'
-                source='mountains'
-                filter={['!', ['has', 'point_count']]}
-                paint={{
-                    'circle-color': '#11b4da',
-                    'circle-radius': 15,
-                    'circle-stroke-width': 1,
-                    'circle-stroke-color': '#fff',
-                }} />
-            <Layer id='mountains-unclustered-point-icon'
-                type='symbol'
-                source='mountains'
-                filter={['!', ['has', 'point_count']]}
-                layout={{
-                    "icon-image": 'triangle_pnt_fill',
-                }} />
-                <Layer id='mountains-unclustered-point-name'
-                    type='symbol'
-                    source='mountains'
-                    filter={['!', ['has', 'point_count']]}
-                    layout={{
-                        'text-field': '{name}',
-                        'text-size': 12,
-                        "text-font": [
-                            "Open Sans Italic"
-                        ],
-                        "icon-anchor": 'bottom',
-                        "text-anchor": 'center',
-                        "text-offset": [0, 2],
-                        "text-justify": 'right'
-                    }} />
         </Source>
     }
 }
