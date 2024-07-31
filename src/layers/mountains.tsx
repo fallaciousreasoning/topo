@@ -1,11 +1,9 @@
+import React, { useEffect } from "react"
 import { Layer, Source, useMap } from "react-map-gl/maplibre"
-import { usePromise } from "../hooks/usePromise"
-import React, { useEffect, useMemo } from "react"
-import { useClusterHandlers } from "../hooks/useClusterHandlers"
-import { useLayerHandler } from "../hooks/useLayerClickHandler"
-import { useRouteUpdater } from "../routing/router"
 import Supercluster from "supercluster"
-import { Feature } from "maplibre-gl"
+import { useLayerHandler } from "../hooks/useLayerClickHandler"
+import { usePromise } from "../hooks/usePromise"
+import { useRouteUpdater } from "../routing/router"
 
 export interface MountainPitch {
     alpine?: string,
@@ -71,16 +69,18 @@ const getFeatures = async () => {
     const geojson: GeoJSON.GeoJSON = {
         type: 'FeatureCollection',
         features: points.filter(m => m.latlng).map(mountain => {
+            const geometry = {
+                type: 'Point',
+                coordinates: [mountain.latlng![1], mountain.latlng![0]]
+            } as any;
             return {
                 type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [mountain.latlng![1], mountain.latlng![0]]
-                },
+                geometry,
                 properties: {
                     name: mountain.name,
                     id: mountain.link,
-                    elevation: parseInt(mountain.altitude) || 0
+                    elevation: parseInt(mountain.altitude) || 0,
+                    geometry
                 }
             }
         }),
@@ -91,7 +91,6 @@ const getFeatures = async () => {
 const cluster = new Supercluster({
     maxZoom: 14,
     reduce: (accumulator, current) => {
-        console.log(current)
         if (!accumulator.occurrence || accumulator.occurrence.elevation < current.occurrence.elevation) {
             accumulator.occurrence = current.occurrence;
         }
@@ -114,12 +113,18 @@ export default {
                 const clusters = cluster.getClusters([-180, -85, 180, 85], zoom);
                 (m.getSource('mountains') as any).setData({
                     type: 'FeatureCollection',
-                    features: clusters
+                    features: clusters.map(m => {
+                        if (!m.id) return m
+                        return {
+                            ...m,
+                            geometry: m.properties.geometry
+                        }
+                    })
                 })
             }
 
             updateCluster()
-            const events = ['move', 'zoom', 'pitch', 'rotate']
+            const events = ['zoom']
             for (const e of events) m.on(e, updateCluster)
 
             return () => {
@@ -129,8 +134,7 @@ export default {
 
         const updateRoute = useRouteUpdater()
 
-        useClusterHandlers('mountains')
-        useLayerHandler('click', 'mountains-unclustered-point', e => {
+        useLayerHandler('click', 'mountains-point', e => {
             const mountainFeature = e.features?.[0]
             if (!mountainFeature) return
 
@@ -144,11 +148,11 @@ export default {
         if (!result) return
 
         return <Source id='mountains' type="geojson" data={{ type: 'FeatureCollection', features: [] }}>
-            <Layer id='mountains-unclustered-point-name'
+            <Layer id='mountains-point'
                 type='symbol'
                 source='mountains'
                 layout={{
-                    'text-field': ['concat', ['get', 'name'], ' ', ['get', 'elevation'], 'm ', ['get', 'point_count_abbreviated']],
+                    'text-field': ['concat', ['get', 'name'], ' (', ['get', 'elevation'], 'm)'],
                     'text-size': 12,
                     "text-font": [
                         "Open Sans Italic"
@@ -156,7 +160,8 @@ export default {
                     'icon-image': 'triangle_pnt_fill',
                     "icon-anchor": 'bottom',
                     "text-anchor": 'center',
-                    "text-offset": [0, 1],
+                    "text-offset": [0, .5],
+                    "text-max-width": 100,
                     "text-justify": 'right'
                 }} />
         </Source>
