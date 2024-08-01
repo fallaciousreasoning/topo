@@ -37,7 +37,7 @@ export default function TopoMap() {
 
         map.setTerrain(routeParams.pitch === 0 ? null : {
             source: 'dem',
-            exaggeration: 2,
+            exaggeration: 1.5,
         })
     }, [routeParams.pitch])
 
