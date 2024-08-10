@@ -1,7 +1,7 @@
 import { StyleSpecification, TerrainControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, MapRef, NavigationControl } from 'react-map-gl/maplibre';
+import { GeolocateControl, Map, MapRef, NavigationControl, ScaleControl } from 'react-map-gl/maplibre';
 import './caches/cachingProtocol';
 import MapLabel from './components/MapLabel';
 import LayersControl from './controls/LayersControl';
@@ -66,6 +66,7 @@ export default function TopoMap() {
         <LayersControl />
         <SearchControl />
         <MapLabel />
+        <ScaleControl maxWidth={150} position='bottom-left' unit='metric' />
         <PositionSyncer />
         <LongPressLookup />
         <Terrain />
