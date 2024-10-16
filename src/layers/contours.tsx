@@ -5,17 +5,24 @@ import * as protocols from '../caches/protocols'
 
 const elevationData =
   // custom
-  {
-    url: 'maybe-cache://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
-    scheme: 'tms',
-    encoding: 'mapbox'
-  }
+//   {
+//     url: 'maybe-cache://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
+//     scheme: 'tms',
+//     encoding: 'mapbox'
+//   }
 // amazon
 // {
 //   url: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
 //   scheme: 'xyz',
 //   encoding: 'terrarium'
 // }
+
+// linz
+{
+    url: 'https://basemaps.linz.govt.nz/v1/tiles/elevation/WebMercatorQuad/{z}/{x}/{y}.png?api=c01jabmxaqt7s9nd8ak0tw7yjgk&pipeline=terrain-rgb',
+    scheme: 'xyz',
+    encoding: 'mapbox'
+}
 
 export const { encoding: elevationEncoding, scheme: elevationScheme } = elevationData
 export const maxContourZoom = 11
