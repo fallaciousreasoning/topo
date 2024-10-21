@@ -15,7 +15,9 @@ import MountainSection from './sections/MountainSection';
 import MountainsSection from './sections/MountainsSection';
 import SearchSection from './sections/SearchSection';
 import Terrain from './layers/terrain';
-import SettingsSection from './sections/Settings';
+import SettingsSection from './sections/SettingsSection';
+import MenuSection from './sections/MenuSection';
+import MenuControl from './controls/MenuControl';
 
 const style = {
     width: '100vw',
@@ -62,9 +64,11 @@ export default function TopoMap() {
         <SearchSection />
         <MountainsSection />
         <MountainSection />
+        <MenuSection />
         <GeolocateControl />
         <NavigationControl />
         <LayersControl />
+        <MenuControl />
         <SearchControl />
         <MapLabel />
         <ScaleControl maxWidth={150} position='bottom-left' unit='metric' />

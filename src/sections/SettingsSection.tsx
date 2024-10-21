@@ -20,8 +20,7 @@ export default function SettingsSection() {
     const cacheLayers = useSetting('cacheLayers')
     const { result: sizes = {} } = usePromise(() => cacherPromise.then(c => c.default.getLayerSizes()), [])
 
-return <Section page="settings" exact closable title="Settings">
-        <div className="w-full border-t border-foreground mt-1" />
+    return <Section page="settings" exact closable title="Settings">
         <div>
             <h4 className="mt-2 font-semibold text-base">Layers</h4>
             <div className="flex flex-col gap-2 my-1">
