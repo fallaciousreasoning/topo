@@ -4,6 +4,9 @@ import { BaseLayerDefinition } from "./layerDefinition";
 export default {
     id: 'topoVector',
     name: 'Topographic Vector',
+    type: 'base',
+    cacheable: true,
+    description: 'NZ Topo50 Maps',
     sources: {
         "LINZ Basemaps": {
             "attribution": "© 2022 Toitū Te Whenua - CC BY 4.0",

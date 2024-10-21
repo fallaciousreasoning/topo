@@ -3,6 +3,9 @@ import { BaseLayerDefinition } from "./layerDefinition";
 export default {
     id: 'osm',
     name: 'Open Street Maps',
+    description: '',
+    cacheable: true,
+    type: 'base',
     sources: {
         osm: {
             id: 'osm',

@@ -4,6 +4,7 @@ import Supercluster from "supercluster"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { usePromise } from "../hooks/usePromise"
 import { useRouteUpdater } from "../routing/router"
+import { OverlayDefinition } from "./layerDefinition"
 
 export interface MountainPitch {
     alpine?: string,
@@ -100,6 +101,9 @@ const cluster = new Supercluster({
 export default {
     id: 'mountains',
     name: 'Mountains',
+    description: 'Mountains, and route information in NZ',
+    type: 'overlay',
+    cacheable: false,
     source: () => {
         const { result } = usePromise(getFeatures, [])
         const map = useMap()
@@ -166,4 +170,4 @@ export default {
                 }} />
         </Source>
     }
-}
+} as OverlayDefinition

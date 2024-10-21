@@ -3,6 +3,9 @@ import { BaseLayerDefinition } from "./layerDefinition";
 export default {
     id: 'topo-raster',
     name: 'LINZ Topo50',
+    description: 'The classic LINZ topo50 series of maps',
+    type: 'base',
+    cacheable: true,
     sources: {
         topo50: {
             id: 'topo50',

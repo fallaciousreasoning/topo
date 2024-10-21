@@ -3,6 +3,9 @@ import { BaseLayerDefinition } from "./layerDefinition";
 export default {
     id: 'open-topo-maps',
     name: 'Open Topo Maps',
+    description: 'Maps generated from the open topo map data',
+    cacheable: true,
+    type: 'base',
     sources: {
         'open-topo': {
             id: 'open-topo',

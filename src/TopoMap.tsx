@@ -15,6 +15,7 @@ import MountainSection from './sections/MountainSection';
 import MountainsSection from './sections/MountainsSection';
 import SearchSection from './sections/SearchSection';
 import Terrain from './layers/terrain';
+import SettingsSection from './sections/Settings';
 
 const style = {
     width: '100vw',
@@ -69,6 +70,7 @@ export default function TopoMap() {
         <ScaleControl maxWidth={150} position='bottom-left' unit='metric' />
         <PositionSyncer />
         <LongPressLookup />
+        <SettingsSection />
         <Terrain />
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
     </Map>

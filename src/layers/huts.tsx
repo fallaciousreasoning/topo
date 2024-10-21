@@ -5,6 +5,7 @@ import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { usePromise } from "../hooks/usePromise";
 import { useRouteUpdater } from "../routing/router";
 import { Place } from "../search/places";
+import { OverlayDefinition } from "./layerDefinition";
 
 const fetchData = async () => {
     const url = "/data/huts.json"
@@ -22,8 +23,8 @@ const fetchData = async () => {
             geometry: {
                 type: 'Point',
                 coordinates: [
-                    h.lon,
-                    h.lat
+                    parseFloat(h.lon),
+                    parseFloat(h.lat)
                 ]
             },
             properties: {
@@ -39,6 +40,9 @@ const fetchData = async () => {
 export default {
     id: 'huts',
     name: 'Huts',
+    description: 'NZ Backcountry Huts',
+    type: 'overlay',
+    cacheable: false,
     source: () => {
         const { result } = usePromise(fetchData, [])
         const updateRoute = useRouteUpdater()
@@ -101,4 +105,4 @@ export default {
                 }} />
         </Source>
     }
-}
+} as OverlayDefinition

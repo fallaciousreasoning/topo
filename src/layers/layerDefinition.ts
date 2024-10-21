@@ -10,15 +10,20 @@ import osm from "./osm";
 import huts from "./huts";
 import mountains from "./mountains";
 
-export type BaseLayerDefinition = {
+type LayerShared = {
     id: string,
     name: string,
-    version?: number
-} & Pick<MapStyle, 'layers' | 'sources'>
+    description: string,
+    cacheable: boolean
+}
 
-export interface OverlayDefinition {
-    id: string,
-    name: string,
+export type BaseLayerDefinition = {
+    version?: number,
+    type: 'base',
+} & Pick<MapStyle, 'layers' | 'sources'> & LayerShared
+
+export interface OverlayDefinition extends LayerShared {
+    type: 'overlay',
     source: React.ReactNode | (() => React.ReactNode)
 }
 

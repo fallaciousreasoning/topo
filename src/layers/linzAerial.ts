@@ -4,6 +4,9 @@ import { BaseLayerDefinition } from "./layerDefinition";
 export default {
     id: 'linz-aerial',
     name: 'LINZ Aerial',
+    type: 'base',
+    cacheable: true,
+    description: "High resolution aerial imagery of NZ",
     sources: {
         'linz-aerial': {
             type: 'raster',

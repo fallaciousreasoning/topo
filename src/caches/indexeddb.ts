@@ -28,5 +28,18 @@ export default {
             layer,
             data
         }, id)
+    },
+    getLayerSizes: async () => {
+        const result = {}
+        await db.tiles.each(t => {
+            if (!result[t.layer]) result[t.layer] = 0
+            result[t.layer] += t.data.size
+        })
+
+        return result
+    },
+    async clearLayer(layer) {
+        const tiles = (await db.tiles.where({ layer }).toArray()).map(t => t.id)
+        await db.tiles.bulkDelete(tiles)
     }
 } as Cache
