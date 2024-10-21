@@ -21,15 +21,15 @@ export default function SearchSection() {
     const selectResult = async (r: Place) => {
         const elevationPromise = getElevation([parseFloat(r.lat), parseFloat(r.lon)]).then(e => ` (${round(e, 0)}m)`).catch(() => '')
         updateRoute({
-            lla: r.lat,
-            llo: r.lon,
+            lla: parseFloat(r.lat),
+            llo: parseFloat(r.lon),
             lab: r.name + await elevationPromise,
             page: isMobile ? null : 'search'
         })
 
         map.current?.flyTo({
             animate: true,
-            center: [r.lon, r.lat]
+            center: [parseFloat(r.lon), parseFloat(r.lat)]
         })
     }
 
