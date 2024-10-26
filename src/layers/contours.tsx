@@ -26,7 +26,7 @@ const elevationData =
 }
 
 export const { encoding: elevationEncoding, scheme: elevationScheme } = elevationData
-export const maxContourZoom = 11
+export const maxContourZoom = 20
 export const minContourZoom = 6
 
 export const demSource = new contours.DemSource({

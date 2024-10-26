@@ -3828,7 +3828,7 @@ export default {
                 ]
             ],
             "layout": {
-                "visibility": "visible",
+                "visibility": "none",
                 "line-cap": "butt",
                 "line-join": "bevel"
             },

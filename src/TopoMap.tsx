@@ -25,6 +25,11 @@ const style = {
     background: '#d0e6f4'
 }
 
+const terrain = {
+    source: 'dem',
+    exaggeration: 1.5
+}
+
 export default function TopoMap() {
     const routeParams = useParams()
 
@@ -38,11 +43,8 @@ export default function TopoMap() {
         if (!mapRef.current) return
         const map = mapRef.current.getMap();
 
-        map.setTerrain(routeParams.pitch === 0 ? null : {
-            source: 'dem',
-            exaggeration: 1.5,
-        })
-    }, [routeParams.pitch])
+        setTimeout(() => map.setTerrain(routeParams.pitch === 0 ? null : terrain), 200)
+    }, [routeParams.pitch, basemap.id])
 
     return <Map
         ref={mapRef as any}
@@ -53,6 +55,7 @@ export default function TopoMap() {
         dragRotate
         touchPitch
         maxPitch={75}
+        terrain={routeParams.pitch === 0 ? undefined : terrain}
         initialViewState={{
             latitude: routeParams.lat,
             longitude: routeParams.lon,

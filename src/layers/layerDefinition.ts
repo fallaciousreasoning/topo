@@ -9,6 +9,8 @@ import openTopo from "./openTopo";
 import osm from "./osm";
 import huts from "./huts";
 import mountains from "./mountains";
+import ways from "./ways";
+import tracks from "./tracks";
 
 type LayerShared = {
     id: string,
@@ -45,7 +47,8 @@ export const overlays: OverlayDefinition[] = [
     hillshade,
     contours,
     huts,
-    mountains
+    mountains,
+    tracks
 ]
 
 export const getMapStyle = (definition: BaseLayerDefinition) => {
