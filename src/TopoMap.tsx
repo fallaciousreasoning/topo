@@ -20,6 +20,7 @@ import SettingsSection from './sections/SettingsSection';
 import MapLabel from './components/MapLabel';
 import LongPressLookup from './controls/LongPressLookup';
 import { BaseLayerDefinition } from './layers/config';
+import Draw from './draw/Draw';
 
 const sources = baseLayers.flatMap(b => Object.entries(b.sources).map(([key, spec]) => <Source key={key} id={key} spec={spec as any} />))
 const terrain = {
@@ -75,5 +76,6 @@ export default function TopoMap() {
 
         {sources}
         <Layers />
+        <Draw/>
     </Map>
 }
