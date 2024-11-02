@@ -10,19 +10,9 @@ export default {
     description: 'Hillshade tiles for the terrain',
     type: 'overlay',
     cacheable: false,
-    source: <React.Fragment key='hillshade'>
-        <Source id='hillshade' spec={{
-            tileSize: 256,
-            tiles: [demSource.sharedDemProtocolUrl],
-            maxzoom: maxContourZoom,
-            type: 'raster-dem',
-            encoding: elevationEncoding,
-            scheme: elevationScheme
-        }} />
-        <Layer layer={{
-            id: 'hillshade', type: 'hillshade', source: 'terrain', paint: {
-                "hillshade-exaggeration": 0.1,
-            }
-        }} />
-    </React.Fragment>
+    source: <Layer key="hillshade" layer={{
+        id: 'hillshade', type: 'hillshade', source: 'dem', paint: {
+            "hillshade-exaggeration": 0.1,
+        }
+    }} />
 } as OverlayDefinition
