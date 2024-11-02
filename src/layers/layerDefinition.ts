@@ -1,33 +1,15 @@
-import React from "react";
 import { MapStyle } from "react-map-gl/maplibre";
-import linzVector from "./linzVector";
-import topoRaster from "./topoRaster";
-import linzAerial from "./linzAerial";
-import hillshade from "./hillshade";
+import { BaseLayerDefinition, OverlayDefinition } from "./config";
 import contours from "./contours";
+import hillshade from "./hillshade";
+import huts from "./huts";
+import linzAerial from "./linzAerial";
+import linzVector from "./linzVector";
+import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
-import huts from "./huts";
-import mountains from "./mountains";
-import ways from "./ways";
+import topoRaster from "./topoRaster";
 import tracks from "./tracks";
-
-type LayerShared = {
-    id: string,
-    name: string,
-    description: string,
-    cacheable: boolean
-}
-
-export type BaseLayerDefinition = {
-    version?: number,
-    type: 'base',
-} & Pick<MapStyle, 'layers' | 'sources'> & LayerShared
-
-export interface OverlayDefinition extends LayerShared {
-    type: 'overlay',
-    source: React.ReactNode | (() => React.ReactNode)
-}
 
 export const extraData: Pick<MapStyle, 'glyphs' | 'sprite' | 'version'> = {
     version: 8,

@@ -32,9 +32,6 @@ export default function TopoMap() {
         <LayersControl />
         <MenuControl />
         <SearchControl />
-
-        <Terrain />
-
     </JMap>
     // return <Map
     //     ref={mapRef as any}

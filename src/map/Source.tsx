@@ -2,7 +2,7 @@ import { CanvasSourceSpecification, GeoJSONSourceSpecification, SourceSpecificat
 import { useEffect } from "react";
 import { useMap } from "./Map";
 
-export default function Source({ id, spec }: { id: string, spec: SourceSpecification | CanvasSourceSpecification | GeoJSONSourceSpecification }) {
+export default function Source({ id, spec }: { id: string, spec: SourceSpecification | VectorSourceSpecification | CanvasSourceSpecification | GeoJSONSourceSpecification }) {
     const { map } = useMap()
 
     useEffect(() => {

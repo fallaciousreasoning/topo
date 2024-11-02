@@ -1,4 +1,4 @@
-import { BaseLayerDefinition } from "./layerDefinition";
+import { BaseLayerDefinition } from "./config";
 
 export default {
     id: 'topo-raster',

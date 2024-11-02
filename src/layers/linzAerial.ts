@@ -1,5 +1,5 @@
 import { LINZ_BASEMAPS_KEY } from "./config";
-import { BaseLayerDefinition } from "./layerDefinition";
+import { BaseLayerDefinition } from "./config";
 
 export default {
     id: 'linz-aerial',

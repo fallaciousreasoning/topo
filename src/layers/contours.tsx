@@ -1,48 +1,9 @@
-import { Layer, Source } from "react-map-gl/maplibre";
-import React from "react";
-import contours from 'maplibre-contour'
-import * as protocols from '../caches/protocols'
-import { OverlayDefinition } from "./layerDefinition";
+import * as React from "react";
+import type { OverlayDefinition } from "./config";
+import Layer from '../map/Layer'
+import Source from '../map/Source'
+import { demSource, elevationScheme, maxContourZoom } from "./demSource";
 
-const elevationData =
-// custom
-//   {
-//     url: 'maybe-cache://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/{z}/{x}/{y}.png',
-//     scheme: 'tms',
-//     encoding: 'mapbox'
-//   }
-// amazon
-// {
-//   url: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
-//   scheme: 'xyz',
-//   encoding: 'terrarium'
-// }
-
-// linz
-{
-    url: 'maybe-cache://basemaps.linz.govt.nz/v1/tiles/elevation/WebMercatorQuad/{z}/{x}/{y}.png?api=c01jabmxaqt7s9nd8ak0tw7yjgk&pipeline=terrain-rgb#dem',
-    scheme: 'xyz',
-    encoding: 'mapbox'
-} as const
-
-export const { encoding: elevationEncoding, scheme: elevationScheme } = elevationData
-export const maxContourZoom = 20
-export const minContourZoom = 6
-
-export const demSource = new contours.DemSource({
-    encoding: elevationEncoding,
-    // url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=U1fSkPeJnFmPcMub3C4o',
-    // url: 'https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png',
-    // url: 'http://localhost:8081/ele/{z}/{x}/{y}.png',
-    url: elevationData.url,
-    maxzoom: maxContourZoom,
-    worker: true,
-    cacheSize: 512,
-    timeoutMs: 30000,
-    minzoom: minContourZoom
-})
-
-demSource.setupMaplibre(protocols)
 
 const far = [200, 1000]
 const mid = [100, 500]
@@ -76,22 +37,40 @@ export default {
     description: 'Elevation data for the terrain. Used to render contours, hillshade and 3d maps',
     type: 'overlay',
     cacheable: false,
-    source: <Source key='contour-source' id='contour-source' type='vector' tiles={[contourTiles]} maxzoom={maxContourZoom} scheme={elevationScheme}>
-        <Layer id="contour-lines" type='line' source='contour-source' source-layer='contours' paint={{
-            "line-color": "rgba(205, 128, 31, 0.5)",
-            // level = highest index in thresholds array the elevation is a multiple of
-            "line-width": ["match", ["get", "level"], 1, 2, 0.7],
+    source: <React.Fragment key='contour-source'>
+        <Source id='contour-source' spec={{
+            type: 'vector',
+            tiles: [contourTiles],
+            maxzoom: maxContourZoom,
+            scheme: elevationScheme
         }} />
-        <Layer id="contour-labels" type="symbol" source='contour-source' source-layer='contours' filter={[">", ["get", "level"], 0]}
-            layout={{
+        <Layer layer={{
+            id: 'contour-lines',
+            type: 'line',
+            source: 'contour-source',
+            'source-layer': 'contours',
+            paint: {
+                "line-color": "rgba(205, 128, 31, 0.5)",
+                // level = highest index in thresholds array the elevation is a multiple of
+                "line-width": ["match", ["get", "level"], 1, 2, 0.7],
+            }
+        }} />
+        <Layer layer={{
+            id: 'contour-labels',
+            type: 'symbol',
+            source: 'contour-source',
+            'source-layer': 'contours',
+            filter: [">", ["get", "level"], 0],
+            layout: {
                 "symbol-placement": 'line',
                 "text-size": 14,
                 "text-field": ["concat", ["get", "ele"], "m"],
                 "text-font": ["Open Sans Bold"],
-            }}
-            paint={{
+            },
+            paint: {
                 "text-halo-color": "white",
                 "text-halo-width": 1,
-            }} />
-    </Source>
+            }
+        }} />
+    </React.Fragment >
 } as OverlayDefinition

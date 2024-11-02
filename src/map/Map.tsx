@@ -2,10 +2,11 @@ import React, { useContext, useEffect } from "react";
 import { Map, ScaleControl, StyleSpecification, GeolocateControl, NavigationControl } from "maplibre-gl";
 import { useParams } from "../routing/router";
 import linzVector from "../layers/linzVector";
-import { baseLayers, getMapStyle } from "../layers/layerDefinition";
+import { baseLayers, getMapStyle, overlays } from "../layers/layerDefinition";
 import { demSource, elevationEncoding, elevationScheme, maxContourZoom } from "../layers/contours";
 import Source from "./Source";
 import Layer from "./Layer";
+import Terrain from "../layers/terrain";
 
 const style = {
   width: '100vw',
@@ -82,7 +83,10 @@ export default function MapContext(props: React.PropsWithChildren) {
   return <div ref={containerRef} style={style}>
     {map && <Context.Provider value={{ map: map }}>
       {sources}
-      {basemap.layers.map(l => <Layer key={l.id} layer={l}/>)}
+      {basemap.layers.map(l => <Layer key={l.id} layer={l} />)}
+      <Terrain />
+
+      {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
 
       {props.children}
     </Context.Provider>}

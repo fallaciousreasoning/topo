@@ -1,11 +1,7 @@
 import React from "react";
-import { Source, Layer } from "react-map-gl/maplibre";
-import { useClusterHandlers } from "../hooks/useClusterHandlers";
-import { useLayerHandler } from "../hooks/useLayerClickHandler";
+import { Layer, Source } from "react-map-gl/maplibre";
 import { usePromise } from "../hooks/usePromise";
-import { useRouteUpdater } from "../routing/router";
-import { Place } from "../search/places";
-import { OverlayDefinition } from "./layerDefinition";
+import { OverlayDefinition } from "./config";
 
 const fetchData = async () => {
     const url = "https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.json"

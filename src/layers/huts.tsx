@@ -5,7 +5,7 @@ import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { usePromise } from "../hooks/usePromise";
 import { useRouteUpdater } from "../routing/router";
 import { Place } from "../search/places";
-import { OverlayDefinition } from "./layerDefinition";
+import { OverlayDefinition } from "./config";
 
 const fetchData = async () => {
     const url = "/data/huts.json"

@@ -4,7 +4,7 @@ import Supercluster from "supercluster"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { usePromise } from "../hooks/usePromise"
 import { useRouteUpdater } from "../routing/router"
-import { OverlayDefinition } from "./layerDefinition"
+import { OverlayDefinition } from "./config"
 
 export interface MountainPitch {
     alpine?: string,
