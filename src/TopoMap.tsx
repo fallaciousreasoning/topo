@@ -27,7 +27,7 @@ const style = {
 
 const terrain = {
     source: 'dem',
-    exaggeration: 1.5
+    exaggeration: 1
 }
 
 export default function TopoMap() {
