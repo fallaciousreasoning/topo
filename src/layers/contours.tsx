@@ -23,7 +23,7 @@ const elevationData =
     url: 'maybe-cache://basemaps.linz.govt.nz/v1/tiles/elevation/WebMercatorQuad/{z}/{x}/{y}.png?api=c01jabmxaqt7s9nd8ak0tw7yjgk&pipeline=terrain-rgb#dem',
     scheme: 'xyz',
     encoding: 'mapbox'
-}
+} as const
 
 export const { encoding: elevationEncoding, scheme: elevationScheme } = elevationData
 export const maxContourZoom = 20

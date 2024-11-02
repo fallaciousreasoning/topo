@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react"
-import linzVector from "../layers/linzVector"
 import round from "../utils/round"
 import * as React from "react"
+import { linzVectorId } from "../layers/config"
 
 const localStorageKey = 'map-view-info'
 
@@ -27,7 +27,7 @@ const defaultRouteParams: RouteParams = {
     zoom: 14,
     rotation: 0,
     pitch: 0,
-    basemap: linzVector.id,
+    basemap: linzVectorId,
     overlays: [],
     page: null,
     lla: null,

@@ -19,69 +19,48 @@ import SettingsSection from './sections/SettingsSection';
 import MenuSection from './sections/MenuSection';
 import MenuControl from './controls/MenuControl';
 import JMap from './map/Map'
-
-const style = {
-    width: '100vw',
-    height: '100vh',
-    background: '#d0e6f4'
-}
-
-const terrain = {
-    source: 'dem',
-    exaggeration: 1
-}
+import TopoVectorSource from './sources/LinzVector';
 
 export default function TopoMap() {
-    const routeParams = useParams()
-
-    const mapRef = React.useRef<MapRef>()
-
-    const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
-    const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap]) as StyleSpecification
-
-    // Note: Setting this directly has no effect.
-    React.useEffect(() => {
-        if (!mapRef.current) return
-        const map = mapRef.current.getMap();
-
-        setTimeout(() => map.setTerrain(routeParams.pitch === 0 ? null : terrain), 200)
-    }, [routeParams.pitch, basemap.id])
-
     return <JMap>
-        <PositionSyncer />
         <SearchSection />
         <MountainsSection />
         <MountainSection />
+        <SettingsSection />
+
+        <PositionSyncer />
         <MenuSection />
         <LayersControl />
-
-    </JMap>
-    return <Map
-        ref={mapRef as any}
-    // scrollZoom
-    // boxZoom={false}
-    // doubleClickZoom
-    // pitchWithRotate={true}
-    // dragRotate
-    // touchPitch
-    // maxPitch={75}
-    // terrain={routeParams.pitch === 0 ? undefined : terrain}
-    // initialViewState={{
-    //     latitude: routeParams.lat,
-    //     longitude: routeParams.lon,
-    //     zoom: routeParams.zoom,
-    //     bearing: routeParams.rotation,
-    // }}
-    // mapStyle={mapStyle}
-    // style={style}
-    >
         <MenuControl />
         <SearchControl />
-        <MapLabel />
-        {/* <ScaleControl maxWidth={150} position='bottom-left' unit='metric' /> */}
-        <LongPressLookup />
-        <SettingsSection />
+
         <Terrain />
-        {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
-    </Map>
+
+    </JMap>
+    // return <Map
+    //     ref={mapRef as any}
+    // // scrollZoom
+    // // boxZoom={false}
+    // // doubleClickZoom
+    // // pitchWithRotate={true}
+    // // dragRotate
+    // // touchPitch
+    // // maxPitch={75}
+    // // terrain={routeParams.pitch === 0 ? undefined : terrain}
+    // // initialViewState={{
+    // //     latitude: routeParams.lat,
+    // //     longitude: routeParams.lon,
+    // //     zoom: routeParams.zoom,
+    // //     bearing: routeParams.rotation,
+    // // }}
+    // // mapStyle={mapStyle}
+    // // style={style}
+    // >
+    //     <MapLabel />
+    //     {/* <ScaleControl maxWidth={150} position='bottom-left' unit='metric' /> */}
+    //     <LongPressLookup />
+
+    //     <Terrain />
+    //     {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
+    // </Map>
 }
