@@ -18,6 +18,7 @@ import Terrain from './layers/terrain';
 import SettingsSection from './sections/SettingsSection';
 import MenuSection from './sections/MenuSection';
 import MenuControl from './controls/MenuControl';
+import JMap from './map/Map'
 
 const style = {
     width: '100vw',
@@ -46,36 +47,38 @@ export default function TopoMap() {
         setTimeout(() => map.setTerrain(routeParams.pitch === 0 ? null : terrain), 200)
     }, [routeParams.pitch, basemap.id])
 
-    return <Map
-        ref={mapRef as any}
-        scrollZoom
-        boxZoom={false}
-        doubleClickZoom
-        pitchWithRotate={true}
-        dragRotate
-        touchPitch
-        maxPitch={75}
-        terrain={routeParams.pitch === 0 ? undefined : terrain}
-        initialViewState={{
-            latitude: routeParams.lat,
-            longitude: routeParams.lon,
-            zoom: routeParams.zoom,
-            bearing: routeParams.rotation,
-        }}
-        mapStyle={mapStyle}
-        style={style}>
+    return <JMap>
+        <PositionSyncer />
         <SearchSection />
         <MountainsSection />
         <MountainSection />
         <MenuSection />
-        <GeolocateControl />
-        <NavigationControl />
         <LayersControl />
+
+    </JMap>
+    return <Map
+        ref={mapRef as any}
+    // scrollZoom
+    // boxZoom={false}
+    // doubleClickZoom
+    // pitchWithRotate={true}
+    // dragRotate
+    // touchPitch
+    // maxPitch={75}
+    // terrain={routeParams.pitch === 0 ? undefined : terrain}
+    // initialViewState={{
+    //     latitude: routeParams.lat,
+    //     longitude: routeParams.lon,
+    //     zoom: routeParams.zoom,
+    //     bearing: routeParams.rotation,
+    // }}
+    // mapStyle={mapStyle}
+    // style={style}
+    >
         <MenuControl />
         <SearchControl />
         <MapLabel />
-        <ScaleControl maxWidth={150} position='bottom-left' unit='metric' />
-        <PositionSyncer />
+        {/* <ScaleControl maxWidth={150} position='bottom-left' unit='metric' /> */}
         <LongPressLookup />
         <SettingsSection />
         <Terrain />
