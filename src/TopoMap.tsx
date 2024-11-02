@@ -19,7 +19,6 @@ import SettingsSection from './sections/SettingsSection';
 import MenuSection from './sections/MenuSection';
 import MenuControl from './controls/MenuControl';
 import JMap from './map/Map'
-import TopoVectorSource from './sources/LinzVector';
 
 export default function TopoMap() {
     return <JMap>
