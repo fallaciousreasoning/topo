@@ -30,7 +30,7 @@ function Layers() {
     const routeParams = useParams();
     const { map } = useMap()
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
-
+    const layers = React.useMemo(() => basemap.layers.map(l => <Layer key={l.id} layer={l as any} />), [basemap])
     // Swap to/from 3d mode when the view changes
     React.useEffect(() => {
         const t = routeParams.pitch === 0 ? null : terrain;
@@ -43,7 +43,7 @@ function Layers() {
 
     return <>
         <Terrain />
-        {basemap.layers.map(l => <Layer key={l.id} layer={l as any} />)}
+        {layers}
         {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
     </>
 }
@@ -51,8 +51,6 @@ function Layers() {
 export default function TopoMap() {
 
     return <JMap>
-        {sources}
-
         <SearchSection />
         <MountainsSection />
         <MountainSection />
@@ -67,6 +65,7 @@ export default function TopoMap() {
         <MapLabel />
         <LongPressLookup />
 
+        {sources}
         <Layers />
     </JMap>
     // return <Map
