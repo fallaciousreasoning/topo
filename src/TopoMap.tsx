@@ -9,7 +9,7 @@ import { baseLayers, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
 import Terrain from './layers/terrain';
 import Layer from './map/Layer';
-import JMap, { useMap } from './map/Map';
+import Map, { useMap } from './map/Map';
 import Source from './map/Source';
 import { useParams } from './routing/router';
 import MenuSection from './sections/MenuSection';
@@ -58,8 +58,7 @@ function Layers() {
 }
 
 export default function TopoMap() {
-
-    return <JMap>
+    return <Map>
         <SearchSection />
         <MountainsSection />
         <MountainSection />
@@ -76,31 +75,5 @@ export default function TopoMap() {
 
         {sources}
         <Layers />
-    </JMap>
-    // return <Map
-    //     ref={mapRef as any}
-    // // scrollZoom
-    // // boxZoom={false}
-    // // doubleClickZoom
-    // // pitchWithRotate={true}
-    // // dragRotate
-    // // touchPitch
-    // // maxPitch={75}
-    // // terrain={routeParams.pitch === 0 ? undefined : terrain}
-    // // initialViewState={{
-    // //     latitude: routeParams.lat,
-    // //     longitude: routeParams.lon,
-    // //     zoom: routeParams.zoom,
-    // //     bearing: routeParams.rotation,
-    // // }}
-    // // mapStyle={mapStyle}
-    // // style={style}
-    // >
-    //     <MapLabel />
-    //     {/* <ScaleControl maxWidth={150} position='bottom-left' unit='metric' /> */}
-    //     <LongPressLookup />
-
-    //     <Terrain />
-    //     {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
-    // </Map>
+    </Map>
 }
