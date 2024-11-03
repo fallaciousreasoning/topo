@@ -1,84 +1,79 @@
-import { StyleSpecification, TerrainControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, MapRef, NavigationControl, ScaleControl } from 'react-map-gl/maplibre';
 import './caches/cachingProtocol';
-import MapLabel from './components/MapLabel';
 import LayersControl from './controls/LayersControl';
-import LongPressLookup from './controls/LongPressLookup';
+import MenuControl from './controls/MenuControl';
 import PositionSyncer from './controls/PositionSyncer';
 import SearchControl from './controls/SearchControl';
-import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
+import { baseLayers, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
+import Terrain from './layers/terrain';
+import Layer from './map/Layer';
+import Map, { useMap } from './map/Map';
+import Source from './map/Source';
 import { useParams } from './routing/router';
+import MenuSection from './sections/MenuSection';
 import MountainSection from './sections/MountainSection';
 import MountainsSection from './sections/MountainsSection';
 import SearchSection from './sections/SearchSection';
-import Terrain from './layers/terrain';
 import SettingsSection from './sections/SettingsSection';
-import MenuSection from './sections/MenuSection';
-import MenuControl from './controls/MenuControl';
+import MapLabel from './components/MapLabel';
+import LongPressLookup from './controls/LongPressLookup';
+import { BaseLayerDefinition } from './layers/config';
 
-const style = {
-    width: '100vw',
-    height: '100vh',
-    background: '#d0e6f4'
+const sources = baseLayers.flatMap(b => Object.entries(b.sources).map(([key, spec]) => <Source key={key} id={key} spec={spec as any} />))
+const terrain = {
+    source: 'terrainSource',
+    exaggeration: 1
 }
 
-const terrain = {
-    source: 'dem',
-    exaggeration: 1.5
+let lastbaseMap: BaseLayerDefinition | null
+function Layers() {
+
+    const routeParams = useParams();
+    const { map } = useMap()
+    const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
+    const layers = React.useMemo(() => {
+        // Make sure we sort the base map as the bottom layer (under everything else)
+        const beforeId = map.getLayersOrder()[lastbaseMap?.layers.length ?? 0]
+        lastbaseMap = basemap
+        return basemap.layers.map(l => <Layer key={l.id} layer={l as any} beforeId={beforeId} />)
+    }, [basemap])
+
+    // Swap to/from 3d mode when the view changes
+    React.useEffect(() => {
+        const t = routeParams.pitch === 0 ? null : terrain;
+        if (map?.getTerrain() !== t) {
+            map.on('idle', () => {
+                map?.setTerrain(t)
+            })
+        }
+    }, [routeParams.pitch])
+
+    return <>
+        <Terrain />
+        {layers}
+        {overlays.filter(e => routeParams.overlays.includes(e.id)).map((o) => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
+    </>
 }
 
 export default function TopoMap() {
-    const routeParams = useParams()
-
-    const mapRef = React.useRef<MapRef>()
-
-    const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
-    const mapStyle = React.useMemo(() => getMapStyle(basemap), [basemap]) as StyleSpecification
-
-    // Note: Setting this directly has no effect.
-    React.useEffect(() => {
-        if (!mapRef.current) return
-        const map = mapRef.current.getMap();
-
-        setTimeout(() => map.setTerrain(routeParams.pitch === 0 ? null : terrain), 200)
-    }, [routeParams.pitch, basemap.id])
-
-    return <Map
-        ref={mapRef as any}
-        scrollZoom
-        boxZoom={false}
-        doubleClickZoom
-        pitchWithRotate={true}
-        dragRotate
-        touchPitch
-        maxPitch={75}
-        terrain={routeParams.pitch === 0 ? undefined : terrain}
-        initialViewState={{
-            latitude: routeParams.lat,
-            longitude: routeParams.lon,
-            zoom: routeParams.zoom,
-            bearing: routeParams.rotation,
-        }}
-        mapStyle={mapStyle}
-        style={style}>
+    return <Map>
         <SearchSection />
         <MountainsSection />
         <MountainSection />
+        <SettingsSection />
+
+        <PositionSyncer />
         <MenuSection />
-        <GeolocateControl />
-        <NavigationControl />
         <LayersControl />
         <MenuControl />
         <SearchControl />
+
         <MapLabel />
-        <ScaleControl maxWidth={150} position='bottom-left' unit='metric' />
-        <PositionSyncer />
         <LongPressLookup />
-        <SettingsSection />
-        <Terrain />
-        {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
+
+        {sources}
+        <Layers />
     </Map>
 }

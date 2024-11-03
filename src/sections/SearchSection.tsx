@@ -5,10 +5,10 @@ import { usePromise } from '../hooks/usePromise';
 import { useRouteUpdater } from '../routing/router';
 import { Place } from '../search/places';
 import { useIsMobile } from '../hooks/useMediaQuery';
-import { useMap } from 'react-map-gl/maplibre';
 import Input from '../components/Input';
 import { getElevation } from '../layers/contours';
 import round from '../utils/round';
+import { useMap } from '../map/Map';
 
 export default function SearchSection() {
     const updateRoute = useRouteUpdater()
@@ -16,7 +16,7 @@ export default function SearchSection() {
     const [query, setQuery] = React.useState('')
     const { result = [] } = usePromise(() => geocode(query), [query])
     const [selectedIndex, setSelectedIndex] = React.useState<number>()
-    const map = useMap()
+    const { map } = useMap()
 
     const selectResult = async (r: Place) => {
         const elevationPromise = getElevation([parseFloat(r.lat), parseFloat(r.lon)]).then(e => ` (${round(e, 0)}m)`).catch(() => '')
@@ -27,7 +27,7 @@ export default function SearchSection() {
             page: isMobile ? null : 'search'
         })
 
-        map.current?.flyTo({
+        map.flyTo({
             animate: true,
             center: [parseFloat(r.lon), parseFloat(r.lat)]
         })

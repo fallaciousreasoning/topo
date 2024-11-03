@@ -1,10 +1,12 @@
 import React, { useEffect } from "react"
-import { Layer, Source, useMap } from "react-map-gl/maplibre"
 import Supercluster from "supercluster"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { usePromise } from "../hooks/usePromise"
 import { useRouteUpdater } from "../routing/router"
-import { OverlayDefinition } from "./layerDefinition"
+import { OverlayDefinition } from "./config"
+import Source from "../map/Source"
+import Layer from "../map/Layer"
+import { useMap } from "../map/Map"
 
 export interface MountainPitch {
     alpine?: string,
@@ -106,16 +108,15 @@ export default {
     cacheable: false,
     source: () => {
         const { result } = usePromise(getFeatures, [])
-        const map = useMap()
+        const { map } = useMap()
 
         useEffect(() => {
             if (!result) return
-            const m = map.current!.getMap()
             cluster.load(result!.features as any);
             const updateCluster = () => {
-                const zoom = Math.floor(m.getZoom())
+                const zoom = Math.floor(map.getZoom())
                 const clusters = cluster.getClusters([-180, -85, 180, 85], zoom);
-                (m.getSource('mountains') as any).setData({
+                (map.getSource('mountains') as any)?.setData({
                     type: 'FeatureCollection',
                     features: clusters.map(m => {
                         if (!m.id) return m
@@ -129,10 +130,10 @@ export default {
 
             updateCluster()
             const events = ['zoom']
-            for (const e of events) m.on(e, updateCluster)
+            for (const e of events) map.on(e, updateCluster)
 
             return () => {
-                for (const e of events) m.on(e, updateCluster)
+                for (const e of events) map.on(e, updateCluster)
             }
         }, [result])
 
@@ -151,11 +152,18 @@ export default {
         })
         if (!result) return
 
-        return <Source id='mountains' type="geojson" data={{ type: 'FeatureCollection', features: [] }}>
-            <Layer id='mountains-point'
-                type='symbol'
-                source='mountains'
-                layout={{
+        return <Source id='mountains' spec={{
+            type: "geojson",
+            data: {
+                type: 'FeatureCollection',
+                features: []
+            }
+        }} >
+            <Layer layer={{
+                id: 'mountains-point',
+                type: 'symbol',
+                source: 'mountains',
+                layout: {
                     'text-field': ['concat', ['get', 'name'], ' (', ['get', 'elevation'], 'm)'],
                     'text-size': 12,
                     "text-font": [
@@ -167,7 +175,8 @@ export default {
                     "text-offset": [0, .5],
                     "text-max-width": 100,
                     "text-justify": 'right'
-                }} />
-        </Source>
+                }
+            }} />
+        </ Source>
     }
 } as OverlayDefinition

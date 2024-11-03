@@ -1,25 +1,26 @@
 import * as React from 'react'
-import { useMap } from 'react-map-gl/maplibre'
 import { findPlace } from '../search/nearest';
 import { useRouteUpdater } from '../routing/router';
 import round from '../utils/round';
-import { demSource, elevationScheme, getElevation } from '../layers/contours';
+import { getElevation } from '../layers/contours';
+import { demSource } from '../layers/demSource';
+import { useMap } from '../map/Map';
+import { MapMouseEvent } from 'maplibre-gl';
 const LONG_PRESS_THRESHOLD = 500;
 
 window['demSource'] = demSource.manager
 
 export default function LongPressLookup() {
-    const map = useMap()
+    const { map } = useMap()
     const updateRoute = useRouteUpdater()
 
     React.useEffect(() => {
-        if (!map.current) return
-
         let mouseDownAt: number = 0
-        map.current.on('mousedown', e => {
+        const downHandler = () => {
             mouseDownAt = Date.now()
-        })
-        map.current?.on('click', async e => {
+        }
+
+        const clickHandler = async (e: MapMouseEvent) => {
             const elapsed = Date.now() - mouseDownAt
             if (elapsed < LONG_PRESS_THRESHOLD) return
 
@@ -36,13 +37,16 @@ export default function LongPressLookup() {
                 lab: (closestPoint?.name ?? `Lat/Lon: ${round(lon)}, ${round(lat)}`) + ` (${elevation}m)`
             }
 
-
             updateRoute(update)
-            console.log(update)
-        })
+        }
+
+        map.on('mousedown', downHandler)
+        map.on('click', clickHandler)
 
         return () => {
+            map.off('mousedown', downHandler)
+            map.off('click', clickHandler)
         }
-    }, [map.current])
+    }, [])
     return null
 }

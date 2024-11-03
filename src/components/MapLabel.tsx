@@ -1,6 +1,6 @@
-import { Popup, useMap } from "react-map-gl/maplibre"
+import Popup from "../map/Popup"
 import { useParams, useRouteUpdater } from "../routing/router"
-import React, { useEffect } from "react"
+import React from "react"
 
 export default function () {
     const params = useParams()

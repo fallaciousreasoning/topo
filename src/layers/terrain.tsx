@@ -1,8 +1,14 @@
 import React from "react"
-import { Source } from "react-map-gl/maplibre"
-import { demSource, elevationEncoding, elevationScheme, maxContourZoom } from "./contours"
+import Source from "../map/Source"
+import { demSource, elevationEncoding, elevationScheme, maxContourZoom } from "./demSource"
 
 export default function Terrain() {
-    return <Source key='terrain' id="dem" type="raster-dem" tiles={[demSource.sharedDemProtocolUrl]} encoding={elevationEncoding} scheme={elevationScheme} maxzoom={maxContourZoom}>
+    return <Source id="terrainSource" spec={{
+        type: 'raster-dem',
+        tiles: [demSource.sharedDemProtocolUrl],
+        encoding: elevationEncoding,
+        ['scheme' as any]: elevationScheme,
+        maxzoom: maxContourZoom
+      }}>
     </Source>
 }
