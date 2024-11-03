@@ -17,6 +17,8 @@ import MountainSection from './sections/MountainSection';
 import MountainsSection from './sections/MountainsSection';
 import SearchSection from './sections/SearchSection';
 import SettingsSection from './sections/SettingsSection';
+import MapLabel from './components/MapLabel';
+import LongPressLookup from './controls/LongPressLookup';
 
 const sources = baseLayers.flatMap(b => Object.entries(b.sources).map(([key, spec]) => <Source key={key} id={key} spec={spec as any} />))
 const terrain = {
@@ -61,6 +63,9 @@ export default function TopoMap() {
         <LayersControl />
         <MenuControl />
         <SearchControl />
+
+        <MapLabel />
+        <LongPressLookup />
 
         <Layers />
     </JMap>
