@@ -1,26 +1,22 @@
-import { StyleSpecification, TerrainControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as React from 'react';
-import { GeolocateControl, Map, MapRef, NavigationControl, ScaleControl } from 'react-map-gl/maplibre';
 import './caches/cachingProtocol';
-import MapLabel from './components/MapLabel';
 import LayersControl from './controls/LayersControl';
-import LongPressLookup from './controls/LongPressLookup';
+import MenuControl from './controls/MenuControl';
 import PositionSyncer from './controls/PositionSyncer';
 import SearchControl from './controls/SearchControl';
-import { baseLayers, getMapStyle, overlays } from './layers/layerDefinition';
+import { baseLayers, overlays } from './layers/layerDefinition';
 import linzVector from './layers/linzVector';
+import Terrain from './layers/terrain';
+import Layer from './map/Layer';
+import JMap, { useMap } from './map/Map';
+import Source from './map/Source';
 import { useParams } from './routing/router';
+import MenuSection from './sections/MenuSection';
 import MountainSection from './sections/MountainSection';
 import MountainsSection from './sections/MountainsSection';
 import SearchSection from './sections/SearchSection';
-import Terrain from './layers/terrain';
 import SettingsSection from './sections/SettingsSection';
-import MenuSection from './sections/MenuSection';
-import MenuControl from './controls/MenuControl';
-import JMap, { useMap } from './map/Map'
-import Layer from './map/Layer';
-import Source from './map/Source';
 
 const sources = baseLayers.flatMap(b => Object.entries(b.sources).map(([key, spec]) => <Source key={key} id={key} spec={spec as any} />))
 const terrain = {
