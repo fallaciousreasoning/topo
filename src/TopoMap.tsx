@@ -23,7 +23,7 @@ import { BaseLayerDefinition } from './layers/config';
 
 const sources = baseLayers.flatMap(b => Object.entries(b.sources).map(([key, spec]) => <Source key={key} id={key} spec={spec as any} />))
 const terrain = {
-    source: 'dem',
+    source: 'terrainSource',
     exaggeration: 1
 }
 

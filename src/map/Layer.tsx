@@ -12,10 +12,8 @@ export default function Layer({ layer, beforeId }: { layer: AddLayerObject, befo
             added = true
             map.addLayer(layer, beforeId)
         }
-        if (map.loaded()) addLayer()
+        addLayer()
 
-        // TODO: Idle probably isn't the ideal event for this
-        else map.once('idle', addLayer)
         return () => {
             cancelled = true
             if (!map.getLayer(layer.id)) return

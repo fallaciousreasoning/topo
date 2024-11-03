@@ -16,14 +16,13 @@ export default function Source({ id, spec, children }: React.PropsWithChildren<{
                 ...spec,
                 tiles: spec.tiles!.map(t => t.replace('https://', 'maybe-cache://') + `#${id}`)
             } : spec
-            map.addSource(id, cachableSource)
+            if (!map.getSource(id)) map.addSource(id, cachableSource)
             setLoaded(true)
         }
-        if (map.loaded()) addSource()
-        else map.on('load', addSource)
+        addSource()
 
         return () => {
-            if (map.style && map.style._loaded && map.getSource(id)) {
+            if (map.getSource(id)) {
                 // Parent effects are destroyed before child ones, see
                 // https://github.com/facebook/react/issues/16728
                 // Source can only be removed after all child layers are removed
