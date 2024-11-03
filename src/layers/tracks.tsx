@@ -1,7 +1,8 @@
 import React from "react";
-import { Layer, Source } from "react-map-gl/maplibre";
 import { usePromise } from "../hooks/usePromise";
 import { OverlayDefinition } from "./config";
+import Layer from "../map/Layer";
+import Source from "../map/Source";
 
 const fetchData = async () => {
     const url = "https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.json"
@@ -11,7 +12,7 @@ const fetchData = async () => {
     const data = await response.json()
     return data
 }
-let fetchPromise: Promise<Response>
+let fetchPromise: Promise<GeoJSON.GeoJSON>
 
 const trackShadowColor = 'rgba(231, 231, 231, 0.4)'
 const trackColor = 'rgba(25, 25, 25, 0.8)'
@@ -26,18 +27,20 @@ export default {
         const { result } = usePromise(() => fetchPromise || (fetchPromise = fetchData()), [])
 
         if (!result) return null;
-        return <Source id="tracks" type="geojson" data={result}>
-            <Layer id="foot-track-shadow" type="line"
-                filter={[
+        return <Source id="tracks" spec={{ type: "geojson", data: result }}>
+            <Layer layer={{
+                id: "foot-track-shadow", type: "line",
+                source: 'tracks',
+                filter: [
                     "all",
                     ["==", "track_use", "foot"]
-                ]}
-                layout={{
+                ],
+                layout: {
                     "visibility": "visible",
                     "line-cap": "butt",
                     "line-join": "bevel"
-                }}
-                paint={{
+                },
+                paint: {
                     "line-width": {
                         "stops": [
                             [
@@ -59,19 +62,22 @@ export default {
                         ]
                     } as any,
                     "line-color": trackShadowColor
-                }} />
-            <Layer id="foot-track" type="line"
-                minzoom={8}
-                filter={[
+                }
+            }} />
+            <Layer layer={{
+                id: 'foot-track', type: "line",
+                source: 'tracks',
+                minzoom: 8,
+                filter: [
                     "all",
                     ["==", "track_use", "foot"]
-                ]}
-                layout={{
+                ],
+                layout: {
                     "visibility": "visible",
                     "line-cap": "butt",
                     "line-join": "bevel"
-                }}
-                paint={{
+                },
+                paint: {
                     "line-width": {
                         "stops": [
                             [
@@ -115,19 +121,22 @@ export default {
                             ]
                         ]
                     }
-                } as any} />
-            <Layer id="cycle-track-shadow" type="line"
-                minzoom={8}
-                filter={[
+                } as any
+            }} />
+            <Layer layer={{
+                id: "cycle-track-shadow", type: "line",
+                source: 'tracks',
+                minzoom: 8,
+                filter: [
                     "all",
                     ["==", "track_use", "cycle_only"]
-                ]}
-                layout={{
+                ],
+                layout: {
                     "visibility": "visible",
                     "line-cap": "butt",
                     "line-join": "bevel"
-                }}
-                paint={{
+                },
+                paint: {
                     "line-width": {
                         "stops": [
                             [
@@ -149,19 +158,22 @@ export default {
                         ]
                     } as any,
                     "line-color": trackShadowColor
-                }} />
-            <Layer id="cycle-track" type="line"
-                minzoom={8}
-                filter={[
+                }
+            }} />
+            <Layer layer={{
+                id: "cycle-track", type: "line",
+                source: 'tracks',
+                minzoom: 8,
+                filter: [
                     "all",
                     ["==", "track_use", "cycle_only"]
-                ]}
-                layout={{
+                ],
+                layout: {
                     "visibility": "visible",
                     "line-cap": "butt",
                     "line-join": "bevel"
-                }}
-                paint={{
+                },
+                paint: {
                     "line-width": {
                         "stops": [
                             [
@@ -205,19 +217,22 @@ export default {
                             ]
                         ]
                     }
-                } as any} />
-            <Layer id="vehicle-track-shadow" type="line"
-                minzoom={13}
-                filter={[
+                } as any
+            }} />
+            <Layer layer={{
+                id: "vehicle-track-shadow", type: "line",
+                source: 'tracks',
+                minzoom: 13,
+                filter: [
                     "all",
                     ["==", "track_use", "vehicle"]
-                ]}
-                layout={{
+                ],
+                layout: {
                     "visibility": "visible",
                     "line-cap": "butt",
                     "line-join": "bevel"
-                }}
-                paint={{
+                },
+                paint: {
                     "line-blur": 0.75,
                     "line-width": {
                         "base": 1,
@@ -240,19 +255,22 @@ export default {
                         8
                     ],
                     "line-color": trackShadowColor
-                } as any} />
-            <Layer id="vehicle-track" type="line"
-                minzoom={13}
-                filter={[
+                } as any
+            }} />
+            <Layer layer={{
+                id: "vehicle-track", type: "line",
+                source: 'tracks',
+                minzoom: 13,
+                filter: [
                     "all",
                     ["==", "track_use", "vehicle"]
-                ]}
-                layout={{
+                ],
+                layout: {
                     "visibility": "visible",
                     "line-cap": "butt",
                     "line-join": "bevel"
-                }}
-                paint={{
+                },
+                paint: {
                     "line-width": {
                         "base": 1,
                         "stops": [
@@ -304,7 +322,8 @@ export default {
                             ]
                         ]
                     }
-                } as any} />
+                } as any
+            }} />
         </Source>
     }
 } as OverlayDefinition

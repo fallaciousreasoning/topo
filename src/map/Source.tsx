@@ -2,7 +2,6 @@ import { CanvasSourceSpecification, GeoJSONSourceSpecification, SourceSpecificat
 import { useEffect } from "react";
 import { useMap } from "./Map";
 import React from "react";
-import { load } from "ol/Image";
 
 export default function Source({ id, spec, children }: React.PropsWithChildren<{ id: string, spec: SourceSpecification | VectorSourceSpecification | CanvasSourceSpecification | GeoJSONSourceSpecification }>) {
     const { map } = useMap()

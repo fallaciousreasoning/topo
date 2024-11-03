@@ -1,11 +1,12 @@
 import React from "react";
-import { Source, Layer } from "react-map-gl/maplibre";
 import { useClusterHandlers } from "../hooks/useClusterHandlers";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { usePromise } from "../hooks/usePromise";
 import { useRouteUpdater } from "../routing/router";
 import { Place } from "../search/places";
 import { OverlayDefinition } from "./config";
+import Source from "../map/Source";
+import Layer from "../map/Layer";
 
 const fetchData = async () => {
     const url = "/data/huts.json"
@@ -66,16 +67,24 @@ export default {
         useClusterHandlers('huts')
 
         if (!result) return null
-        return <Source id="huts" type="geojson" data={result} cluster clusterMaxZoom={14}>
-            <Layer id="huts-clusters" type="circle" source="huts" filter={['has', 'point_count']} paint={{
-                'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
-                'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
+        return <Source id="huts" spec={{
+            type: 'geojson',
+            data: result,
+            cluster: true,
+            clusterMaxZoom: 14
+        }}>
+            <Layer layer={{
+                id: "huts-clusters", type: "circle", source: "huts", filter: ['has', 'point_count'], paint: {
+                    'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
+                    'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
+                }
             }} />
-            <Layer id='huts-cluster-count'
-                type='symbol'
-                source='huts'
-                filter={['has', 'point_count']}
-                layout={{
+            <Layer layer={{
+                id: 'huts-cluster-count',
+                type: 'symbol',
+                source: 'huts',
+                filter: ['has', 'point_count'],
+                layout: {
                     'text-field': '{point_count_abbreviated}',
                     'text-size': 12,
                     "text-font": [
@@ -85,24 +94,29 @@ export default {
                     "icon-anchor": 'right',
                     "text-anchor": 'left',
                     "text-justify": 'right'
-                }} />
-            <Layer id='huts-unclustered-point'
-                type='circle'
-                source='huts'
-                filter={['!', ['has', 'point_count']]}
-                paint={{
+                }
+            }} />
+            <Layer layer={{
+                id: 'huts-unclustered-point',
+                type: 'circle',
+                source: 'huts',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
                     'circle-color': '#11b4da',
                     'circle-radius': 15,
                     'circle-stroke-width': 1,
                     'circle-stroke-color': '#fff',
-                }} />
-            <Layer id='huts-unclustered-point-icon'
-                type='symbol'
-                source='huts'
-                filter={['!', ['has', 'point_count']]}
-                layout={{
+                }
+            }} />
+            <Layer layer={{
+                id: 'huts-unclustered-point-icon',
+                type: 'symbol',
+                source: 'huts',
+                filter: ['!', ['has', 'point_count']],
+                layout: {
                     "icon-image": 'building_pnt_hut'
-                }} />
+                }
+            }} />
         </Source>
     }
 } as OverlayDefinition
