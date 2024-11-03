@@ -43,34 +43,35 @@ export default {
             tiles: [contourTiles],
             maxzoom: maxContourZoom,
             scheme: elevationScheme
-        }} />
-        <Layer layer={{
-            id: 'contour-lines',
-            type: 'line',
-            source: 'contour-source',
-            'source-layer': 'contours',
-            paint: {
-                "line-color": "rgba(205, 128, 31, 0.5)",
-                // level = highest index in thresholds array the elevation is a multiple of
-                "line-width": ["match", ["get", "level"], 1, 2, 0.7],
-            }
-        }} />
-        <Layer layer={{
-            id: 'contour-labels',
-            type: 'symbol',
-            source: 'contour-source',
-            'source-layer': 'contours',
-            filter: [">", ["get", "level"], 0],
-            layout: {
-                "symbol-placement": 'line',
-                "text-size": 14,
-                "text-field": ["concat", ["get", "ele"], "m"],
-                "text-font": ["Open Sans Bold"],
-            },
-            paint: {
-                "text-halo-color": "white",
-                "text-halo-width": 1,
-            }
-        }} />
+        }}>
+            <Layer layer={{
+                id: 'contour-lines',
+                type: 'line',
+                source: 'contour-source',
+                'source-layer': 'contours',
+                paint: {
+                    "line-color": "rgba(205, 128, 31, 0.5)",
+                    // level = highest index in thresholds array the elevation is a multiple of
+                    "line-width": ["match", ["get", "level"], 1, 2, 0.7],
+                }
+            }} />
+            <Layer layer={{
+                id: 'contour-labels',
+                type: 'symbol',
+                source: 'contour-source',
+                'source-layer': 'contours',
+                filter: [">", ["get", "level"], 0],
+                layout: {
+                    "symbol-placement": 'line',
+                    "text-size": 14,
+                    "text-field": ["concat", ["get", "ele"], "m"],
+                    "text-font": ["Open Sans Bold"],
+                },
+                paint: {
+                    "text-halo-color": "white",
+                    "text-halo-width": 1,
+                }
+            }} />
+        </Source>
     </React.Fragment >
 } as OverlayDefinition
