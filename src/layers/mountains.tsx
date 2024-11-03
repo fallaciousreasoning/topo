@@ -116,7 +116,7 @@ export default {
             const updateCluster = () => {
                 const zoom = Math.floor(map.getZoom())
                 const clusters = cluster.getClusters([-180, -85, 180, 85], zoom);
-                (map.getSource('mountains') as any).setData({
+                (map.getSource('mountains') as any)?.setData({
                     type: 'FeatureCollection',
                     features: clusters.map(m => {
                         if (!m.id) return m

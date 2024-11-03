@@ -19,18 +19,27 @@ import SearchSection from './sections/SearchSection';
 import SettingsSection from './sections/SettingsSection';
 import MapLabel from './components/MapLabel';
 import LongPressLookup from './controls/LongPressLookup';
+import { BaseLayerDefinition } from './layers/config';
 
 const sources = baseLayers.flatMap(b => Object.entries(b.sources).map(([key, spec]) => <Source key={key} id={key} spec={spec as any} />))
 const terrain = {
     source: 'dem',
     exaggeration: 1
 }
+
+let lastbaseMap: BaseLayerDefinition | null
 function Layers() {
 
     const routeParams = useParams();
     const { map } = useMap()
     const basemap = baseLayers.find(r => r.id === routeParams.basemap) ?? linzVector
-    const layers = React.useMemo(() => basemap.layers.map(l => <Layer key={l.id} layer={l as any} />), [basemap])
+    const layers = React.useMemo(() => {
+        // Make sure we sort the base map as the bottom layer (under everything else)
+        const beforeId = map.getLayersOrder()[lastbaseMap?.layers.length ?? 0]
+        lastbaseMap = basemap
+        return basemap.layers.map(l => <Layer key={l.id} layer={l as any} beforeId={beforeId} />)
+    }, [basemap])
+
     // Swap to/from 3d mode when the view changes
     React.useEffect(() => {
         const t = routeParams.pitch === 0 ? null : terrain;
@@ -44,7 +53,7 @@ function Layers() {
     return <>
         <Terrain />
         {layers}
-        {overlays.filter(e => routeParams.overlays.includes(e.id)).map(o => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
+        {overlays.filter(e => routeParams.overlays.includes(e.id)).map((o) => typeof o.source === 'function' ? <o.source key={o.id} /> : o.source)}
     </>
 }
 

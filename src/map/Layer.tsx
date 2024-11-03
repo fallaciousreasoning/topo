@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useMap } from "./Map"
 import { AddLayerObject } from "maplibre-gl"
 
-export default function Layer({ layer }: { layer: AddLayerObject }) {
+export default function Layer({ layer, beforeId }: { layer: AddLayerObject, beforeId?: string }) {
     const { map } = useMap()
     useEffect(() => {
         let cancelled = false
@@ -10,7 +10,7 @@ export default function Layer({ layer }: { layer: AddLayerObject }) {
         const addLayer = () => {
             if (cancelled) return
             added = true
-            map.addLayer(layer)
+            map.addLayer(layer, beforeId)
         }
         if (map.loaded()) addLayer()
 
