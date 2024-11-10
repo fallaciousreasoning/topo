@@ -6,10 +6,8 @@ export default function Layer({ layer, beforeId }: { layer: AddLayerObject, befo
     const { map } = useMap()
     useEffect(() => {
         let cancelled = false
-        let added = false
         const addLayer = () => {
             if (cancelled) return
-            added = true
             map.addLayer(layer, beforeId)
         }
         addLayer()
