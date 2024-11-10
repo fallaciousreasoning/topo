@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { GeoJSONSource, useMap } from "react-map-gl";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
+import { useMap } from "../map/Map";
 
 // export function useDrag() {
 //     const mapRef = useMap()
@@ -27,11 +27,8 @@ import { useLayerHandler } from "../hooks/useLayerClickHandler";
 // }
 
 export const useMakeLayerDraggable = (layerId: string, updateFeature: (geom?: GeoJSON.Feature<GeoJSON.Point>) => void) => {
-    const mapRef = useMap()
-    const map = mapRef.current!
+    const {map} = useMap()
     const dragging = useRef<GeoJSON.Feature>()
-
-    map.on('mou')
 
     // Offset at initial click from the actual point
     const [offset, setOffset] = useState<[number, number]>()
