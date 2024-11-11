@@ -10,10 +10,13 @@
     "out/*"
   ],
   "compilerOptions": {
+    "lib": [
+      "ESNext"
+    ],
     "jsx": "react",
     "sourceMap": true,
     "noImplicitAny": false,
-    "target": "ES2022",
+    "target": "ES2023",
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,

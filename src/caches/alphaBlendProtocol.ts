@@ -1,3 +1,4 @@
+import { RequestParameters } from 'maplibre-gl'
 import { addProtocol, getData } from './protocols'
 
 const failed = { data: null }
@@ -17,9 +18,23 @@ const canvas = document.createElement('canvas')
 canvas.width = 256
 canvas.height = 256
 const context = canvas.getContext('2d')!
-// context.globalCompositeOperation = 'multiply'
+context.globalCompositeOperation = 'multiply'
+context.globalAlpha = 0.8
 
 window['canvas'] = canvas
+
+const loadImage = async (params: RequestParameters, abortController: AbortController) => {
+    const { data } = await getData(params, abortController)
+    const image = new Image()
+    const { resolve, promise, reject } = Promise.withResolvers<HTMLImageElement>()
+
+    const blob = new Blob([data])
+    image.src = URL.createObjectURL(blob)
+    image.onload = () => resolve(image)
+    image.onerror = reject
+
+    return promise
+}
 
 addProtocol('alpha-blend', async (params, abortController) => {
     const [blend, searchParamsRaw] = params.url.split('://')[1].split('?')
@@ -27,20 +42,27 @@ addProtocol('alpha-blend', async (params, abortController) => {
     const urls = searchParams.getAll('url')
 
     try {
-        const imageBuffers = await Promise.all(urls.map(r => getData({ ...params, url: r }, abortController)))
+        const imageBuffers = await Promise.all(urls.map(r => loadImage({ ...params, url: r }, abortController)))
         context.clearRect(0, 0, canvas.width, canvas.height)
 
+        let alpha = 1
         for (const buffer of imageBuffers) {
-            debugger;
-            const imageData = new ImageData(new Uint8ClampedArray(buffer.data), 256, 256)
-            context.putImageData(imageData, 0, 0)
+            context.globalAlpha = 0.5
+            context.drawImage(buffer, 0, 0)
         }
-        context.fillStyle = 'red'
-        context.fillRect(10, 10, 240, 240)
+        // context.fillStyle = 'red'
+        // context.fillRect(10, 10, 240, 240)
 
-        const image = context.getImageData(0, 0, 256, 256)
+        const blob = new Blob([context.getImageData(0, 0, canvas.width, canvas.height).data])
+        const image = new Image()
+        const {resolve, promise} = Promise.withResolvers()
+        image.src = URL.createObjectURL(blob)
+        image.onload = resolve
+
+        document.body.appendChild(image)
+await promise;
         return {
-            data: new Uint8Array(image.data)
+            data: await blob.arrayBuffer()
         }
     } catch (err) {
         console.log(err)
