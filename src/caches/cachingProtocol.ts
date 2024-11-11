@@ -1,4 +1,4 @@
-import { addProtocol } from './protocols'
+import { addProtocol, getData } from './protocols'
 import { getSetting, addListener as addSettingsListener } from '../utils/settings'
 
 export const cacherPromise = import('./indexeddb')
@@ -13,7 +13,7 @@ addSettingsListener(key => {
 
 addProtocol('maybe-cache', async (params, abortController) => {
     const [url, layer] = params.url.split('://')[1]
-    .split('#')
+        .split('#')
 
     const cacher = await cacherPromise.then(r => r.default)
 
@@ -24,11 +24,11 @@ addProtocol('maybe-cache', async (params, abortController) => {
     }
 
     try {
-        const buffer = await fetch('https://' + url).then(r => r.arrayBuffer())
+        const { data } = await getData({ ...params, url: 'https://' + url }, abortController)
         if (cacheLayers.has(layer)) {
-            await cacher.saveTile(layer, url, new Blob([buffer]))
+            await cacher.saveTile(layer, url, new Blob([data]))
         }
-        return { data: buffer }
+        return { data }
     } catch (err) {
         return failed
     }

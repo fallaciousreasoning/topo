@@ -1,5 +1,9 @@
+import { createBlendLayer } from "../caches/alphaBlendProtocol";
 import { BaseLayerDefinition } from "./config";
 
+const alpha50 = createBlendLayer(0.8, 
+    `maybe-cache://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png`
+    , `https://basemaps.linz.govt.nz/v1/tiles/geographx-nz-dem-2012-8m/WebMercatorQuad/{z}/{x}/{y}.webp?api=d01fbtg0ar3v159zx4e0ajt0n09`);
 export default {
     id: 'topo-raster',
     name: 'LINZ Topo50',
@@ -11,7 +15,7 @@ export default {
             id: 'topo50',
             type: 'raster',
             tiles: [
-                `maybe-cache://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png`
+                alpha50,//`maybe-cache://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png`
             ],
             minzoom: 13,
         },
