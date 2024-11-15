@@ -18,8 +18,7 @@ const canvas = document.createElement('canvas')
 canvas.width = 256
 canvas.height = 256
 const context = canvas.getContext('2d')!
-context.globalCompositeOperation = 'multiply'
-context.globalAlpha = 0.8
+context.globalCompositeOperation = 'color-burn'
 
 window['canvas'] = canvas
 
@@ -47,22 +46,20 @@ addProtocol('alpha-blend', async (params, abortController) => {
 
         let alpha = 1
         for (const buffer of imageBuffers) {
-            context.globalAlpha = 0.5
             context.drawImage(buffer, 0, 0)
+            alpha *=1
         }
-        // context.fillStyle = 'red'
-        // context.fillRect(10, 10, 240, 240)
 
-        const blob = new Blob([context.getImageData(0, 0, canvas.width, canvas.height).data])
+        const {resolve, promise} = Promise.withResolvers<Blob | null>()
+        canvas.toBlob(resolve)
+        const blob = await promise
+
         const image = new Image()
-        const {resolve, promise} = Promise.withResolvers()
-        image.src = URL.createObjectURL(blob)
-        image.onload = resolve
+        image.src = URL.createObjectURL(blob!)
 
         document.body.appendChild(image)
-await promise;
         return {
-            data: await blob.arrayBuffer()
+            data: await blob!.arrayBuffer()
         }
     } catch (err) {
         console.log(err)
