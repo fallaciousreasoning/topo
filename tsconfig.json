@@ -16,7 +16,7 @@
     "jsx": "react",
     "sourceMap": true,
     "noImplicitAny": false,
-    "target": "ES2023",
+    "target": "ES2022",
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,
