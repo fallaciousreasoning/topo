@@ -6,6 +6,6 @@ import TrackLayer from "./TrackLayer";
 export default function () {
     return <DrawContext>
         <DrawControls />
-        <TrackLayer />
+        {/* <TrackLayer /> */}
     </DrawContext>
 }
