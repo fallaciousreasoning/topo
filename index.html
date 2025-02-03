@@ -16,9 +16,8 @@
 
 	<script defer src='./src/App.tsx' type="module"></script>
 	<script defer>
-		// No ServiceWorker for now - hopefully just reenabling this will work.
-		// if ('serviceWorker' in navigator)
-		// 	navigator.serviceWorker.register('/serviceWorker.js');
+		if ('serviceWorker' in navigator)
+			navigator.serviceWorker.register('/serviceWorker.js');
 	</script>
 </head>
 
