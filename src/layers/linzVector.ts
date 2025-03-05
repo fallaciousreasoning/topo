@@ -8,7 +8,7 @@ export default {
     cacheable: true,
     description: 'NZ Topo50 Maps',
     sources: {
-        "LINZ Basemaps": {
+        "topoVector": {
             "attribution": "© 2022 Toitū Te Whenua - CC BY 4.0",
             "type": "vector",
             "tiles": [
@@ -54,7 +54,7 @@ export default {
                 "fill-color": "rgba(226, 226, 226, 0.75)"
             },
             "id": "Landcover-Sand",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 8
@@ -96,7 +96,7 @@ export default {
                 "line-color": "rgba(0, 0, 0, 1)"
             },
             "id": "Landcover-Rock-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 14
@@ -128,7 +128,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Coastline2",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "coastline",
             "type": "fill",
             "minzoom": 0
@@ -155,7 +155,7 @@ export default {
                 "fill-opacity": 0.5
             },
             "id": "Poi-Mine-Quarry-Poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill",
             "minzoom": 12
@@ -188,7 +188,7 @@ export default {
                 "fill-outline-color": "rgba(210, 210, 210, 0.27)"
             },
             "id": "Vegetation-Scatteredscrub",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -233,7 +233,7 @@ export default {
                 }
             },
             "id": "Vegetation-Scrub",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -270,7 +270,7 @@ export default {
                 "fill-outline-color": "rgba(210, 210, 210, 0.27)"
             },
             "id": "Vegetation-Exotic",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 0
@@ -319,7 +319,7 @@ export default {
                 "fill-translate-anchor": "viewport"
             },
             "id": "Vegetation-Exotic-Random-Dense-Quarter",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 11
@@ -368,7 +368,7 @@ export default {
                 "fill-translate-anchor": "viewport"
             },
             "id": "Vegetation-Exotic-Random-Dense-Half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 13
@@ -416,7 +416,7 @@ export default {
                 "fill-translate-anchor": "viewport"
             },
             "id": "Vegetation-Exotic-Random-Dense",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 16
@@ -457,7 +457,7 @@ export default {
                 "fill-outline-color": "rgba(210, 210, 210, 0.27)"
             },
             "id": "Vegetation-Native",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -505,7 +505,7 @@ export default {
                 }
             },
             "id": "Landcover-Ice",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -527,7 +527,7 @@ export default {
                 "fill-outline-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Landcover-Orchard-Fill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 10
@@ -551,7 +551,7 @@ export default {
                 "fill-outline-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Landcover-Vineyard-Fill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 10
@@ -588,7 +588,7 @@ export default {
                 }
             },
             "id": "Landcover-Swamp-Fill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -616,7 +616,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Landcover-Swamp-sparse",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 16
@@ -646,7 +646,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Landcover-Swamp-sparse-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 14
@@ -690,7 +690,7 @@ export default {
                 ]
             },
             "id": "Landcover-Swamp-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 10
@@ -739,7 +739,7 @@ export default {
                 }
             },
             "id": "Parcels-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "parcel_boundaries",
             "type": "line",
             "minzoom": 15
@@ -772,7 +772,7 @@ export default {
                 "fill-antialias": false
             },
             "id": "Landcover-Shingle-pattern-shade",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -792,7 +792,7 @@ export default {
                 "fill-color": "rgba(211, 211, 211, 1)"
             },
             "id": "Aeroway-Aerodrome",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aeroway",
             "type": "fill",
             "minzoom": 10
@@ -819,7 +819,7 @@ export default {
                 "fill-antialias": false
             },
             "id": "Aeroway-Runway-Sealed",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aeroway",
             "type": "fill",
             "minzoom": 13
@@ -848,7 +848,7 @@ export default {
                 ]
             },
             "id": "Aeroway-Runway-Grass-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aeroway",
             "type": "line",
             "minzoom": 13
@@ -890,7 +890,7 @@ export default {
                 "line-color": "rgba(125, 125, 125, 1)"
             },
             "id": "Aeroway-Runway-Sealed-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aeroway",
             "type": "line",
             "minzoom": 13
@@ -956,7 +956,7 @@ export default {
                 }
             },
             "id": "Water-Polys-Outline",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "line",
             "minzoom": 11
@@ -1001,7 +1001,7 @@ export default {
                 }
             },
             "id": "Water-Canal-Poly-Named",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill",
             "minzoom": 9
@@ -1020,7 +1020,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Water-Lagoon",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill"
         },
@@ -1043,7 +1043,7 @@ export default {
                 "fill-translate-anchor": "map"
             },
             "id": "Water-Lake",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill",
             "minzoom": 13
@@ -1072,7 +1072,7 @@ export default {
                 "fill-translate-anchor": "map"
             },
             "id": "Water-Lake-Named",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill",
             "minzoom": 0
@@ -1101,7 +1101,7 @@ export default {
                 "fill-translate-anchor": "map"
             },
             "id": "Water-River-Poly-Named",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill",
             "minzoom": 8
@@ -1125,7 +1125,7 @@ export default {
                 "fill-translate-anchor": "map"
             },
             "id": "Water-Canal-Poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill",
             "minzoom": 13
@@ -1149,7 +1149,7 @@ export default {
                 "fill-translate-anchor": "map"
             },
             "id": "Water-River-Poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "fill",
             "minzoom": 13
@@ -1173,7 +1173,7 @@ export default {
                 "fill-pattern": "sand_land_poly_quarter"
             },
             "id": "Landcover-Sand-pattern",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 11
@@ -1196,7 +1196,7 @@ export default {
                 "fill-pattern": "sand_land_poly_half"
             },
             "id": "Landcover-Sand-land-pattern-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 13
@@ -1219,7 +1219,7 @@ export default {
                 "fill-pattern": "gravel_poly_half"
             },
             "id": "Landcover-Scree-poly-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 12
@@ -1241,7 +1241,7 @@ export default {
                 "fill-pattern": "gravel_poly"
             },
             "id": "Landcover-Scree-poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 15
@@ -1266,7 +1266,7 @@ export default {
                 "fill-antialias": false
             },
             "id": "Landcover-Shingle-poly-quarter",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 11
@@ -1290,7 +1290,7 @@ export default {
                 "fill-antialias": false
             },
             "id": "Landcover-Shingle-poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 15
@@ -1313,7 +1313,7 @@ export default {
                 "fill-pattern": "moraine_poly_half"
             },
             "id": "Landcover-Moraine-poly-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 12
@@ -1335,7 +1335,7 @@ export default {
                 "fill-pattern": "moraine_poly"
             },
             "id": "Landcover-Moraine-poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill",
             "minzoom": 15
@@ -1368,7 +1368,7 @@ export default {
                 }
             },
             "id": "Landcover-Moraine-Wall-pattern",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -1404,7 +1404,7 @@ export default {
                 ]
             },
             "id": "Water-Reef",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "line",
             "minzoom": 10
@@ -1457,7 +1457,7 @@ export default {
                 }
             },
             "id": "Waterway-Canal-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 13
@@ -1519,7 +1519,7 @@ export default {
                 }
             },
             "id": "Waterway-Canal-Ln-Named",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 8
@@ -1572,7 +1572,7 @@ export default {
                 }
             },
             "id": "Waterway-Drain-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 13
@@ -1634,7 +1634,7 @@ export default {
                 }
             },
             "id": "Waterway-Drain-Ln-Named",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 8
@@ -1679,7 +1679,7 @@ export default {
                 }
             },
             "id": "Waterway-River-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 13
@@ -1741,7 +1741,7 @@ export default {
                 }
             },
             "id": "Waterway-River-Ln-Named",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 8
@@ -1778,7 +1778,7 @@ export default {
                 "line-color": "rgba(73, 73, 73, 1)"
             },
             "id": "Water-Dry-Dock-ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "line",
             "minzoom": 12
@@ -1803,7 +1803,7 @@ export default {
                 ]
             },
             "id": "Water-Shoal-ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "line",
             "minzoom": 12
@@ -1825,7 +1825,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Waterway-Waterfall-Poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "fill"
         },
@@ -1851,7 +1851,7 @@ export default {
                 "line-color": "rgba(73, 71, 71, 1)"
             },
             "id": "Waterway-Flume",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 13
@@ -1893,7 +1893,7 @@ export default {
                 ]
             },
             "id": "Waterway-Rapid",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line",
             "minzoom": 13
@@ -1921,7 +1921,7 @@ export default {
                 "fill-pattern": "moraine_poly_half"
             },
             "id": "Waterway-Rapid-Poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "fill",
             "minzoom": 12
@@ -1943,7 +1943,7 @@ export default {
                 "line-color": "rgba(78, 78, 78, 1)"
             },
             "id": "Waterway-Spillway-Edge",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line"
         },
@@ -1975,7 +1975,7 @@ export default {
                 "line-color": "rgba(0, 140, 204, 1)"
             },
             "id": "Waterway-Waterfall-Edge",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line"
         },
@@ -2011,7 +2011,7 @@ export default {
                 ]
             },
             "id": "Waterway-Waterfall-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line"
         },
@@ -2031,7 +2031,7 @@ export default {
                 "line-color": "rgba(0, 140, 204, 1)"
             },
             "id": "Waterway-Waterfall-Ln-lines",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line"
         },
@@ -2068,7 +2068,7 @@ export default {
                 }
             },
             "id": "Waterway-WaterRace",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "line"
         },
@@ -2090,7 +2090,7 @@ export default {
                 "fill-pattern": "cemetery_poly_half"
             },
             "id": "Landuse-Cemetery-poly-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 12
@@ -2108,7 +2108,7 @@ export default {
                 "fill-color": "rgba(216, 213, 213, 0.75)"
             },
             "id": "Landuse-GravelPit-shade",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill"
         },
@@ -2129,7 +2129,7 @@ export default {
                 "fill-pattern": "gravel_poly_quarter"
             },
             "id": "Landuse-GravelPit-poly-quarter",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 11
@@ -2151,7 +2151,7 @@ export default {
                 "fill-pattern": "gravel_poly_half"
             },
             "id": "Landuse-GravelPit-poly-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 13
@@ -2172,7 +2172,7 @@ export default {
                 "fill-pattern": "gravel_poly"
             },
             "id": "Landuse-GravelPit-poly",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 15
@@ -2191,7 +2191,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Landuse-Landfill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 12
@@ -2212,7 +2212,7 @@ export default {
                 "fill-pattern": "mangrove_poly_sparse"
             },
             "id": "Landuse-Mangrove-poly-sparse",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 15
@@ -2234,7 +2234,7 @@ export default {
                 "fill-pattern": "mangrove_poly_sparse_half"
             },
             "id": "Landuse-Mangrove-poly-sparse-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 14
@@ -2255,7 +2255,7 @@ export default {
                 "fill-color": "rgba(96, 154, 101, 0.34)"
             },
             "id": "Landuse-Mangrove",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 12
@@ -2279,7 +2279,7 @@ export default {
                 "fill-pattern": "marine_farm_poly_half"
             },
             "id": "Landuse-MarineFarm-half",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 12
@@ -2302,7 +2302,7 @@ export default {
                 "fill-pattern": "marine_farm_poly"
             },
             "id": "Landuse-MarineFarm",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 15
@@ -2344,7 +2344,7 @@ export default {
                 }
             },
             "id": "Landuse-Pond",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 10
@@ -2366,7 +2366,7 @@ export default {
                 "fill-pattern": "gravel_poly_quarter"
             },
             "id": "Landuse-PumicePit",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill"
         },
@@ -2392,7 +2392,7 @@ export default {
                 "fill-outline-color": "rgba(18, 18, 18, 1)"
             },
             "id": "Landuse-Reservoir-Covered",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 10
@@ -2416,7 +2416,7 @@ export default {
                 "fill-outline-color": "rgba(18, 18, 18, 1)"
             },
             "id": "Landuse-Reservoir-Empty",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 10
@@ -2466,7 +2466,7 @@ export default {
                 "fill-outline-color": "rgba(164, 164, 164, 0.01)"
             },
             "id": "Landuse-Residential",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "fill",
             "minzoom": 8
@@ -2494,7 +2494,7 @@ export default {
                 "line-width": 20
             },
             "id": "Landcover-Cliff-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 13
@@ -2523,7 +2523,7 @@ export default {
                 "line-color": "rgba(81, 79, 79, 1)"
             },
             "id": "Landcover-Cutting-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 13
@@ -2556,7 +2556,7 @@ export default {
                 "line-width": 30
             },
             "id": "Landcover-Embankment",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 13
@@ -2582,7 +2582,7 @@ export default {
                 "fill-color": "rgba(121, 195, 128, 0.2)"
             },
             "id": "Landcover-GolfCourse",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "fill"
         },
@@ -2612,7 +2612,7 @@ export default {
                 "line-color": "rgba(81, 79, 79, 1)"
             },
             "id": "Landcover-Slip-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 13
@@ -2661,7 +2661,7 @@ export default {
                 "line-color": "rgba(61, 58, 58, 1)"
             },
             "id": "Landcover-Stopbank",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 13
@@ -2699,7 +2699,7 @@ export default {
                 }
             },
             "id": "Fence-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 14
@@ -2742,7 +2742,7 @@ export default {
                 }
             },
             "id": "Fence-Posts",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 16.5
@@ -2765,7 +2765,7 @@ export default {
                 "line-color": "rgba(148, 199, 111, 0.75)"
             },
             "id": "Vegetation-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "line",
             "minzoom": 14
@@ -2818,7 +2818,7 @@ export default {
                 }
             },
             "id": "Coastline-Ln-2",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "coastline",
             "type": "line",
             "minzoom": 0
@@ -2839,7 +2839,7 @@ export default {
                 "fill-color": "rgb(112,172,242)"
             },
             "id": "Poi-FishFarm",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill"
         },
@@ -2856,7 +2856,7 @@ export default {
                 "fill-color": "rgba(208, 208, 208, 0.85)"
             },
             "id": "Poi-RifleRange-Fill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill"
         },
@@ -2878,7 +2878,7 @@ export default {
                 ]
             },
             "id": "Poi-RifleRange-Outline",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line"
         },
@@ -2895,7 +2895,7 @@ export default {
                 "fill-color": "rgba(121, 195, 128, 0.2)"
             },
             "id": "Poi-Showground",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill",
             "minzoom": 12
@@ -2913,7 +2913,7 @@ export default {
                 "fill-color": "rgba(121, 195, 128, 0.2)"
             },
             "id": "Poi-SportsField",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill"
         },
@@ -2962,7 +2962,7 @@ export default {
                 "fill-outline-color": "rgba(67, 67, 67, 1)"
             },
             "id": "Poi-Storage-Tank-Empty",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill",
             "minzoom": 0
@@ -3002,7 +3002,7 @@ export default {
                 "fill-outline-color": "rgba(67, 67, 67, 1)"
             },
             "id": "Poi-Storage-Tank-Fuel",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill",
             "minzoom": 0
@@ -3042,7 +3042,7 @@ export default {
                 "fill-outline-color": "rgba(67, 67, 67, 1)"
             },
             "id": "Poi-Storage-Tank-Water",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill",
             "minzoom": 0
@@ -3057,7 +3057,7 @@ export default {
                 ]
             ],
             "id": "Poi-Siphon",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "fill",
             "minzoom": 12
@@ -3103,7 +3103,7 @@ export default {
                 "circle-pitch-alignment": "map"
             },
             "id": "Poi-Tank-Pt-Background",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "circle",
             "minzoom": 10
@@ -3153,7 +3153,7 @@ export default {
                 "circle-pitch-alignment": "map"
             },
             "id": "Poi-Tank-Pt-Fill-Empty",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "circle",
             "minzoom": 10
@@ -3204,7 +3204,7 @@ export default {
                 "circle-pitch-alignment": "map"
             },
             "id": "Poi-Tank-Pt-Fill-Fuel",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "circle",
             "minzoom": 10
@@ -3255,7 +3255,7 @@ export default {
                 "circle-pitch-alignment": "map"
             },
             "id": "Poi-Tank-Pt-Fill-Water",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "circle",
             "minzoom": 10
@@ -3289,7 +3289,7 @@ export default {
                 "line-color": "rgba(78, 78, 78, 1)"
             },
             "id": "Poi-Boatramp-Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 13
@@ -3323,7 +3323,7 @@ export default {
                 "line-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-Boatramp-Fill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 13
@@ -3344,7 +3344,7 @@ export default {
                 "line-color": "rgba(55, 55, 55, 1)"
             },
             "id": "Poi-Dredge-Tailing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 12
@@ -3372,7 +3372,7 @@ export default {
                 ]
             },
             "id": "Poi-Mine-Quarry-Outline",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 12
@@ -3406,7 +3406,7 @@ export default {
                 "line-color": "rgb(235,137,133)"
             },
             "id": "Poi-Pipeline",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 10
@@ -3430,7 +3430,7 @@ export default {
                 "line-color": "rgba(84, 84, 84, 1)"
             },
             "id": "Poi-Racetrack",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 13
@@ -3460,7 +3460,7 @@ export default {
                 "line-color": "rgba(64, 64, 64, 1)"
             },
             "id": "Poi-Slipway-Symbol-Dash",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line"
         },
@@ -3496,7 +3496,7 @@ export default {
                 ]
             },
             "id": "Poi-Slipway-Symbol-Line",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line"
         },
@@ -3517,7 +3517,7 @@ export default {
                 "line-color": "rgba(73, 73, 73, 1)"
             },
             "id": "Poi-Wharf-Edge",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 10
@@ -3554,7 +3554,7 @@ export default {
                 "line-color": "rgba(73, 73, 73, 1)"
             },
             "id": "Poi-Wharf-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "line",
             "minzoom": 10
@@ -3600,7 +3600,7 @@ export default {
                 }
             },
             "id": "Buildings-Shadow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "building",
             "type": "fill",
             "minzoom": 17
@@ -3638,7 +3638,7 @@ export default {
                 "fill-antialias": true
             },
             "id": "Buildings",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "building",
             "type": "fill",
             "minzoom": 14
@@ -3664,7 +3664,7 @@ export default {
                 "line-color": "rgba(152, 145, 145,0.75)"
             },
             "id": "Buildings-Outline",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "building",
             "type": "line",
             "minzoom": 17
@@ -3687,7 +3687,7 @@ export default {
                 "circle-color": "rgba(47, 47, 46, 1)"
             },
             "id": "Height-Point",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "contours",
             "type": "circle",
             "minzoom": 13
@@ -3742,7 +3742,7 @@ export default {
                 "text-translate-anchor": "map"
             },
             "id": "Height-Point-Labels",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "contours",
             "type": "symbol",
             "minzoom": 13
@@ -3764,7 +3764,7 @@ export default {
                 ]
             },
             "id": "Transport-FerryCrossing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -3808,7 +3808,7 @@ export default {
                 "line-color": "rgba(231, 231, 231, 0.4)"
             },
             "id": "Transport-CycleTracks-Shadow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -3852,7 +3852,7 @@ export default {
                 "line-color": "rgba(231, 231, 231, 0.4)"
             },
             "id": "Transport-FootTracks-Shadow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -3896,7 +3896,7 @@ export default {
                 "line-color": "rgba(205, 53, 53, 0.4)"
             },
             "id": "Transport-ClosedFootRouteTracks-Shadow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -3940,7 +3940,7 @@ export default {
                 "line-color": "rgba(205, 53, 53, 0.4)"
             },
             "id": "Transport-ClosedFootTracks-Shadow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4010,7 +4010,7 @@ export default {
                 }
             },
             "id": "Transport-CycleTracks",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4076,7 +4076,7 @@ export default {
                 }
             },
             "id": "Transport-FootTracks",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4125,7 +4125,7 @@ export default {
                 "line-color": "rgba(231, 231, 231, 0.4)"
             },
             "id": "Transport-VehicleTracks-Shadow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4203,7 +4203,7 @@ export default {
                 }
             },
             "id": "Transport-VehicleTracks",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4278,7 +4278,7 @@ export default {
                 }
             },
             "id": "Transport-1Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4359,7 +4359,7 @@ export default {
                 }
             },
             "id": "Transport-2Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4423,7 +4423,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-1HWY-Casing-14",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4488,7 +4488,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-2HWY-Casing-14",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4555,7 +4555,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-HWY-Casing-14",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -4612,7 +4612,7 @@ export default {
                 "line-color": "rgba(255, 254, 252, 1)"
             },
             "id": "Transport-UnMetalled",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4674,7 +4674,7 @@ export default {
                 "line-color": "rgba(255, 254, 252, 1)"
             },
             "id": "Transport-1Metalled-White",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4755,7 +4755,7 @@ export default {
                 }
             },
             "id": "Transport-1Metalled-Orange",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4824,7 +4824,7 @@ export default {
                 ]
             },
             "id": "Transport-1-UnderCons",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4906,7 +4906,7 @@ export default {
                 }
             },
             "id": "Transport-1Sealed",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -4973,7 +4973,7 @@ export default {
                 "line-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Transport-2UnMetalled",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -5040,7 +5040,7 @@ export default {
                 "line-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Transport-2Metalled-White",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -5111,7 +5111,7 @@ export default {
                 "line-color": "rgba(133, 130, 130, 1)"
             },
             "id": "Transport-2-UnderCons",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -5182,7 +5182,7 @@ export default {
                 "line-color": "rgba(255, 254, 252, 1)"
             },
             "id": "Transport-2UnderContruction",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -5268,7 +5268,7 @@ export default {
                 }
             },
             "id": "Transport-2Metalled-Orange",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -5355,7 +5355,7 @@ export default {
                 }
             },
             "id": "Transport-2+Sealed",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -5379,7 +5379,7 @@ export default {
                 "line-color": "rgba(24, 23, 23, 0.80)"
             },
             "id": "Transport-Cable-Car-People",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line"
         },
@@ -5402,7 +5402,7 @@ export default {
                 "line-color": "rgba(24, 23, 23, 0.80)"
             },
             "id": "Transport-Cable-Car-Industrial",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line"
         },
@@ -5420,7 +5420,7 @@ export default {
                 "line-color": "rgba(24, 23, 23, 0.80)"
             },
             "id": "Transport-Ski-Tow",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line"
         },
@@ -5438,7 +5438,7 @@ export default {
                 "line-color": "rgba(24, 23, 23, 0.80)"
             },
             "id": "Transport-Ski-Lift",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line"
         },
@@ -5465,7 +5465,7 @@ export default {
                 "line-color": "rgba(67, 61, 61, 0.95)"
             },
             "id": "Transport-Railway-Siding",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 11
@@ -5498,7 +5498,7 @@ export default {
                 "line-color": "rgba(67, 61, 61, 0.95)"
             },
             "id": "Transport-Railway-Single",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 11
@@ -5542,7 +5542,7 @@ export default {
                 "line-color": "rgba(67, 61, 61, 0.95)"
             },
             "id": "Transport-Railway-Multiple",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 11
@@ -5578,7 +5578,7 @@ export default {
                 }
             },
             "id": "Transport-Railway-High",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -5643,7 +5643,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-1HWY-Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -5709,7 +5709,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-2HWY-Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -5777,7 +5777,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-HWY-Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -5819,7 +5819,7 @@ export default {
                 "line-color": "rgba(120, 120, 120, 1)"
             },
             "id": "Transport-Roads-9-Casing",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 0
@@ -5883,7 +5883,7 @@ export default {
                 "line-color": "rgba(240, 164, 82, 1)"
             },
             "id": "Transport-1HWY",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -5949,7 +5949,7 @@ export default {
                 "line-color": "rgba(240, 164, 82, 1)"
             },
             "id": "Transport-2HWY",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -6016,7 +6016,7 @@ export default {
                 "line-color": "rgba(240, 164, 82, 1)"
             },
             "id": "Transport-HWY",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 8
@@ -6060,7 +6060,7 @@ export default {
                 "line-color": "rgba(210, 162, 84, 1)"
             },
             "id": "Transport-Roads-9",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 0
@@ -6104,7 +6104,7 @@ export default {
                 "line-color": "rgba(78, 78, 78, 1)"
             },
             "id": "Transport-Bridge-Foot",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 13
@@ -6157,7 +6157,7 @@ export default {
                 "line-color": "rgba(78, 78, 78, 1)"
             },
             "id": "Transport-Bridge-VT",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -6190,7 +6190,7 @@ export default {
                 "circle-pitch-alignment": "map"
             },
             "id": "Transport-Fords",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "circle",
             "minzoom": 12
@@ -6271,7 +6271,7 @@ export default {
                 "text-halo-color": "rgba(205, 53, 53, 0.4)"
             },
             "id": "All-ClosedFootRouteTrack-Labels",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 13
@@ -6355,7 +6355,7 @@ export default {
                 "text-opacity": 0.9
             },
             "id": "All-ClosedFootTrack-Labels",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 13
@@ -6448,7 +6448,7 @@ export default {
                 "text-halo-color": "rgba(243, 243, 242, 0.9)"
             },
             "id": "All-CycleTrack-Labels",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 13
@@ -6539,7 +6539,7 @@ export default {
                 "text-halo-color": "rgba(243, 243, 242, 0.9)"
             },
             "id": "All-FootTrack-Labels",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 13
@@ -6573,7 +6573,7 @@ export default {
                 "line-color": "rgba(73, 73, 73, 1)"
             },
             "id": "Landuse-Boom",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line",
             "minzoom": 12
@@ -6607,7 +6607,7 @@ export default {
                 "line-color": "rgba(73, 73, 73, 1)"
             },
             "id": "Landuse-Breakwater",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line",
             "minzoom": 12
@@ -6641,7 +6641,7 @@ export default {
                 "line-color": "rgba(78, 78, 78, 1)"
             },
             "id": "Landuse-Dam",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line"
         },
@@ -6658,7 +6658,7 @@ export default {
                 "line-color": "rgba(65, 63, 63, 1)"
             },
             "id": "Landuse-Ladder",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line"
         },
@@ -6676,7 +6676,7 @@ export default {
                 "line-color": "rgba(25, 114, 242, 0.45)"
             },
             "id": "Landuse-MarineFarm-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line"
         },
@@ -6725,7 +6725,7 @@ export default {
                 "text-halo-width": 2
             },
             "id": "Poi-Beacon",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -6769,7 +6769,7 @@ export default {
                 ]
             },
             "id": "Poi-Beacon-Lighthouse",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -6809,7 +6809,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-Bivouac-Rock",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -6848,7 +6848,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-Bivouac",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -6875,7 +6875,7 @@ export default {
                 "text-size": 12
             },
             "id": "Poi-Buoy",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -6911,7 +6911,7 @@ export default {
                 ]
             },
             "id": "Poi-Cave-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -6991,7 +6991,7 @@ export default {
                 }
             },
             "id": "Poi-Cemetery-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7020,7 +7020,7 @@ export default {
                 ]
             },
             "id": "Poi-Chimney",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7045,7 +7045,7 @@ export default {
                 "text-anchor": "bottom-left"
             },
             "id": "Poi-Dredge",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7073,7 +7073,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Poi-FishFarm-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 16
@@ -7121,7 +7121,7 @@ export default {
                 }
             },
             "id": "Poi-Flare",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7182,7 +7182,7 @@ export default {
                 }
             },
             "id": "Poi-Floodgate",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 13
@@ -7220,7 +7220,7 @@ export default {
                 }
             },
             "id": "Poi-GasValve",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -7269,7 +7269,7 @@ export default {
                 }
             },
             "id": "Poi-Gate",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7305,7 +7305,7 @@ export default {
                 "text-opacity": 1
             },
             "id": "Poi-GeoBore",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -7333,7 +7333,7 @@ export default {
                 ]
             },
             "id": "Poi-GeoBore-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 19
@@ -7367,7 +7367,7 @@ export default {
                 "icon-opacity": 0.9
             },
             "id": "Poi-Grave-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7426,7 +7426,7 @@ export default {
                 }
             },
             "id": "Poi-Historic-Site",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7475,7 +7475,7 @@ export default {
                 "text-opacity": 1
             },
             "id": "Poi-Hut-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -7510,7 +7510,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Poi-Kiln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7533,7 +7533,7 @@ export default {
                 "text-anchor": "top"
             },
             "id": "Poi-Ladder",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol"
         },
@@ -7567,7 +7567,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-Ladder-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -7600,7 +7600,7 @@ export default {
                 "icon-opacity": 0.85
             },
             "id": "Poi-Mast-Label-Triangle",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7640,7 +7640,7 @@ export default {
                 "text-opacity": 0.9
             },
             "id": "Poi-Mine-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 13
@@ -7694,7 +7694,7 @@ export default {
                 "text-halo-width": 2
             },
             "id": "Poi-Monument",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7737,7 +7737,7 @@ export default {
                 }
             },
             "id": "Poi-Pa",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -7774,7 +7774,7 @@ export default {
                 }
             },
             "id": "Poi-Pylon",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 15
@@ -7819,7 +7819,7 @@ export default {
                 "text-halo-width": 1
             },
             "id": "Poi-Quarry-Poly-NoName",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 13
@@ -7870,7 +7870,7 @@ export default {
                 "text-halo-width": 0.75
             },
             "id": "Poi-Quarry-Poly-Name",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 13
@@ -7907,7 +7907,7 @@ export default {
                 "text-translate-anchor": "viewport"
             },
             "id": "Poi-Racetrack-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 13
@@ -7926,7 +7926,7 @@ export default {
                 "icon-size": 0.5
             },
             "id": "Poi-Radar-Dome",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8027,7 +8027,7 @@ export default {
                 ]
             },
             "id": "Poi-Railway-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8045,7 +8045,7 @@ export default {
                 "icon-image": "redoubt_pnt"
             },
             "id": "Poi-Redoubt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8094,7 +8094,7 @@ export default {
                 }
             },
             "id": "Poi-RifleRange-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -8129,7 +8129,7 @@ export default {
                 "icon-image": "satellite_station_pnt"
             },
             "id": "Poi-Satellite-Station-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -8150,7 +8150,7 @@ export default {
                 "icon-opacity": 0.9
             },
             "id": "Poi-Shaft",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8168,7 +8168,7 @@ export default {
                 "icon-image": "sinkhole_pnt"
             },
             "id": "Poi-Sinkhole",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8190,7 +8190,7 @@ export default {
                 "icon-opacity": 0.85
             },
             "id": "Poi-Siphon-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8229,7 +8229,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-Showground-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8270,7 +8270,7 @@ export default {
                 "icon-opacity": 0.8
             },
             "id": "Poi-Soakhole",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8297,7 +8297,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-SportsField-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8341,7 +8341,7 @@ export default {
                 }
             },
             "id": "Poi-Stockyard",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8375,7 +8375,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Poi-Trig-Elevation",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 15
@@ -8425,7 +8425,7 @@ export default {
                 }
             },
             "id": "Poi-Trig-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8500,7 +8500,7 @@ export default {
                 "text-halo-width": 0.75
             },
             "id": "Poi-Well",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8573,7 +8573,7 @@ export default {
                 "text-halo-width": 1
             },
             "id": "Poi-Windmill",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol"
         },
@@ -8622,7 +8622,7 @@ export default {
                 ]
             },
             "id": "Poi-Wreck",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "poi",
             "type": "symbol",
             "minzoom": 12
@@ -8685,7 +8685,7 @@ export default {
                 ]
             },
             "id": "Orchard-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol",
             "minzoom": 14
@@ -8747,7 +8747,7 @@ export default {
                 ]
             },
             "id": "Vineyard-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol",
             "minzoom": 14
@@ -8779,7 +8779,7 @@ export default {
                 "fill-extrusion-color": "rgba(190, 190, 190, 1)"
             },
             "id": "Building3D",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "building",
             "type": "fill-extrusion",
             "minzoom": 18
@@ -8825,7 +8825,7 @@ export default {
                 "line-color": "rgba(98, 88, 13, 1)"
             },
             "id": "Transport-Tunnel-VT",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "line",
             "minzoom": 10
@@ -8867,7 +8867,7 @@ export default {
                 "line-color": "rgba(57, 57, 57, 1)"
             },
             "id": "Landuse-Powerline",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line",
             "minzoom": 14
@@ -8911,7 +8911,7 @@ export default {
                 "line-color": "rgba(57, 57, 57, 1)"
             },
             "id": "Landuse-Powerline-Pylon",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line",
             "minzoom": 11
@@ -8949,7 +8949,7 @@ export default {
                 "line-color": "rgba(57, 57, 57, 1)"
             },
             "id": "Landuse-Telephone",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line",
             "minzoom": 14
@@ -8991,7 +8991,7 @@ export default {
                 "line-color": "rgba(57, 57, 57, 1)"
             },
             "id": "Landuse-Walkwire",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "line",
             "minzoom": 14
@@ -9032,7 +9032,7 @@ export default {
                 "text-halo-width": 0.75
             },
             "id": "Landuse-Dam-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 14
@@ -9066,7 +9066,7 @@ export default {
                 }
             },
             "id": "Landuse-GravelPit-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 12
@@ -9090,7 +9090,7 @@ export default {
                 ]
             },
             "id": "Landuse-Grave-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 12
@@ -9140,7 +9140,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Landuse-Landfill-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 12
@@ -9163,7 +9163,7 @@ export default {
                 "icon-opacity": 0.8
             },
             "id": "Landuse-Mangrove-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 13
@@ -9190,7 +9190,7 @@ export default {
                 "text-halo-color": "rgba(239, 239, 239, 1)"
             },
             "id": "Landuse-MarineFarm-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 15
@@ -9239,7 +9239,7 @@ export default {
                 "text-halo-color": "rgba(255, 255, 255, 1)"
             },
             "id": "Landuse-PumicePit-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 12
@@ -9262,7 +9262,7 @@ export default {
                 ]
             },
             "id": "Landuse-Tower",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landuse",
             "type": "symbol",
             "minzoom": 12
@@ -9292,7 +9292,7 @@ export default {
                 "circle-color": "rgba(121, 160, 72, 0.4)"
             },
             "id": "Landcover-Tree-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "circle",
             "minzoom": 12
@@ -9378,7 +9378,7 @@ export default {
                 "text-color": "rgba(176, 0, 0, 1)"
             },
             "id": "Landcover-Fumarole",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol"
         },
@@ -9423,7 +9423,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Landcover-GolfCourse-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol",
             "minzoom": 12
@@ -9442,7 +9442,7 @@ export default {
                 "icon-size": 1
             },
             "id": "Landcover-Rock-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol"
         },
@@ -9476,7 +9476,7 @@ export default {
                 "text-halo-color": "rgb(255,255,255)"
             },
             "id": "Landcover_RockOutcrop",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol"
         },
@@ -9522,7 +9522,7 @@ export default {
                 ]
             },
             "id": "Landcover-Swamp-Name",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol",
             "minzoom": 14
@@ -9567,7 +9567,7 @@ export default {
                 ]
             },
             "id": "Landcover-Swamp-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol",
             "minzoom": 13
@@ -9611,7 +9611,7 @@ export default {
                 }
             },
             "id": "Landcover-Swamp-pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "landcover",
             "type": "symbol",
             "minzoom": 12
@@ -9645,7 +9645,7 @@ export default {
                 "text-halo-width": 0.25
             },
             "id": "Housenumber",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "housenumber",
             "type": "symbol",
             "minzoom": 17
@@ -9692,7 +9692,7 @@ export default {
                 "text-halo-color": "rgba(239, 239, 239, 0.80)"
             },
             "id": "Waterway-Flume-Name",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 13
@@ -9734,7 +9734,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Waterway-Rapid-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 13
@@ -9803,7 +9803,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Water-Spring-Cold",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "symbol"
         },
@@ -9870,7 +9870,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Water-Spring-Hot",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "symbol"
         },
@@ -9969,7 +9969,7 @@ export default {
                 "text-color": "rgba(255, 255, 255, 1)"
             },
             "id": "All-Highway-Labels-three",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 8
@@ -10084,7 +10084,7 @@ export default {
                 "text-color": "rgba(255, 255, 255, 1)"
             },
             "id": "All-Highway-Labels-standard",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 8
@@ -10112,7 +10112,7 @@ export default {
                 "text-font": []
             },
             "id": "Transport-Ferry-Symbol",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 11
@@ -10181,7 +10181,7 @@ export default {
                 "text-halo-color": "rgba(230, 230, 230, 0.5)"
             },
             "id": "Transport-Tunnel-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 15
@@ -10249,7 +10249,7 @@ export default {
                 "text-halo-color": "rgba(243, 243, 242, 0.9)"
             },
             "id": "All-Road-Labels",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "transportation",
             "type": "symbol",
             "minzoom": 13
@@ -10290,7 +10290,7 @@ export default {
                 "text-halo-width": 1
             },
             "id": "Aeroway-Aerodrome-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aerodrome_label",
             "type": "symbol",
             "minzoom": 12
@@ -10323,7 +10323,7 @@ export default {
                 "text-halo-color": "rgba(246, 246, 246, 1)"
             },
             "id": "Aeroway-Runway-Grass-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aeroway",
             "type": "symbol",
             "minzoom": 15
@@ -10348,7 +10348,7 @@ export default {
                 "icon-opacity": 0.8
             },
             "id": "Aeroway-Helipads",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "aeroway",
             "type": "symbol",
             "minzoom": 12
@@ -10386,7 +10386,7 @@ export default {
                 "text-halo-color": "rgba(239, 239, 239, 1)"
             },
             "id": "All-Reef-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "symbol",
             "minzoom": 13
@@ -10419,7 +10419,7 @@ export default {
                 "text-halo-color": "rgba(239, 239, 239, 1)"
             },
             "id": "All-Lake-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "symbol",
             "minzoom": 11
@@ -10462,7 +10462,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "All-Canal-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "symbol",
             "minzoom": 12
@@ -10505,7 +10505,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "All-River-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "water",
             "type": "symbol",
             "minzoom": 12
@@ -10543,7 +10543,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "All-Waterway-Canal-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 12
@@ -10581,7 +10581,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "All-Waterway-Drain-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 12
@@ -10619,7 +10619,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "All-Waterway-River-Names",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 12
@@ -10656,7 +10656,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Waterway-Waterfall-Label",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol"
         },
@@ -10697,7 +10697,7 @@ export default {
                 "text-color": "rgba(0, 140, 204, 1)"
             },
             "id": "Waterway-Waterfall-Pt-Ln",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 12
@@ -10747,7 +10747,7 @@ export default {
                 "text-halo-width": 1.5
             },
             "id": "Waterway-Waterfall-Pt",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "waterway",
             "type": "symbol",
             "minzoom": 14
@@ -10904,7 +10904,7 @@ export default {
                 }
             },
             "id": "Place-Names-13-Water",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "place",
             "type": "symbol",
             "minzoom": 13
@@ -11077,7 +11077,7 @@ export default {
                 }
             },
             "id": "Place-Names-13-Natural",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "place",
             "type": "symbol",
             "minzoom": 13
@@ -11250,7 +11250,7 @@ export default {
                 }
             },
             "id": "Place-Names-13-Place",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "place",
             "type": "symbol",
             "minzoom": 13
@@ -11410,7 +11410,7 @@ export default {
                 }
             },
             "id": "Place-Names-3-12-Water",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "place",
             "type": "symbol",
             "minzoom": 3
@@ -11571,7 +11571,7 @@ export default {
                 }
             },
             "id": "Place-Names-3-12-Natural",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "place",
             "type": "symbol",
             "minzoom": 3
@@ -11742,7 +11742,7 @@ export default {
                 }
             },
             "id": "Place-Names-3-12-Place",
-            "source": "LINZ Basemaps",
+            "source": "topoVector",
             "source-layer": "place",
             "type": "symbol",
             "minzoom": 3

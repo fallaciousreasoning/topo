@@ -1,7 +1,7 @@
 import { BaseLayerDefinition } from "./config";
 
 export default {
-    id: 'open-topo-maps',
+    id: 'open-topo',
     name: 'Open Topo Maps',
     description: 'Maps generated from the open topo map data',
     cacheable: true,
