@@ -26,6 +26,9 @@ export default {
             tiles: [
                 hillshade50,
             ],
+            // Note: Important to set this to 128 so that maplibre-gl picks the
+            // zoom + 1 tiles instead of upscaling the zoom level tiles.
+            tileSize: 128,
             minzoom: 13,
         },
         topo250: {
@@ -34,6 +37,7 @@ export default {
             tiles: [
                 hillshade250,
             ],
+            tileSize: 128,
             minzoom: 0,
             maxzoom: 13,
         }

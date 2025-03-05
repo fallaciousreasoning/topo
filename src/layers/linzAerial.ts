@@ -12,7 +12,8 @@ export default {
             type: 'raster',
             tiles: [
                 `https://basemaps.linz.govt.nz/v1/tiles/aerial/EPSG:3857/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}`
-            ]
+            ],
+            tileSize: 256,
         }
     },
     layers: [

@@ -12,6 +12,7 @@ export default {
             tiles: [
                 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
             ],
+            tileSize: 128,
             type: 'raster'
         }
     },

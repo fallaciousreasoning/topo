@@ -12,6 +12,7 @@ export default {
             tiles: [
                 'https://a.tile.opentopomap.org/{z}/{x}/{y}.png'
             ],
+            tileSize: 128,
             type: 'raster'
         }
     },
