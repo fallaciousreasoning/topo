@@ -150,6 +150,10 @@ export class Drawing {
         return this.#redoStack.length > 0;
     }
 
+    get canClear(): boolean {
+        return this.#track.coordinates.length > 0;
+    }
+
     get source(): GeoJSONSource {
         return this.#map.getSource(this.#sourceId) as GeoJSONSource;
     }
