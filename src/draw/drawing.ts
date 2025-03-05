@@ -1,4 +1,4 @@
-import { Feature, GeoJSONSource, Map } from "maplibre-gl";
+import { Feature, GeoJSONSource, Map, MapGeoJSONFeature, MapMouseEvent, MapTouchEvent, Point } from "maplibre-gl";
 import { Track } from "../tracks/track";
 import { range } from "../utils/array";
 import { getClosestPoint } from "../utils/vector";
@@ -22,13 +22,58 @@ const addHoverState = (map: Map, layerIds: string[]) => {
     }
 }
 
+const createDragger = (map: Map, e: MapMouseEvent & {
+    features?: MapGeoJSONFeature[];
+}, drawing: Drawing) => {
+    const feature = e.features?.[0]
+    if (feature?.geometry.type !== 'Point') return
+
+    const pointIndex = feature.properties.pointIndex
+    const center = feature.geometry.coordinates
+    const clickedAt = e.lngLat.toArray()
+    const offset = [clickedAt[0] - center[0], clickedAt[1] - center[1]] as const
+
+    const getCoord = (e: MapMouseEvent | MapTouchEvent) => [e.lngLat.toArray()[0] - offset[0], e.lngLat.toArray()[1] - offset[1]] as [number, number]
+    let replacementPoint: IndexedPoint | undefined
+
+    const handleMove = (e: MapMouseEvent | MapTouchEvent) => {
+        e.preventDefault()
+        replacementPoint = {
+            coord: getCoord(e),
+            pointIndex
+        }
+        drawing.setReplacementPoint(pointIndex, replacementPoint)
+    }
+
+    const listeners = [
+        map.on('mousemove', handleMove),
+        map.on('touchmove', handleMove),
+    ]
+
+    const finish = () => {
+        listeners.forEach(l => l.unsubscribe())
+
+        if (!replacementPoint) return
+        drawing.updateTrack(t => ({ ...t, coordinates: t.coordinates.map((c, i) => i === pointIndex ? replacementPoint!.coord : c) }))
+        drawing.setReplacementPoint(pointIndex, undefined)
+    }
+    listeners.push(map.on('mouseup', finish))
+    listeners.push(map.on('touchend', finish))
+}
+
+interface IndexedPoint {
+    coord: [number, number]
+    pointIndex: number
+}
+
 export class Drawing {
     get features(): GeoJSON.FeatureCollection {
-        const coords = [...(this.#track?.coordinates ?? [])]
+        const coords = [...(this.#track?.coordinates?.map((c, i) => this.#replacementPoints[i]?.coord ?? c) ?? [])]
         const points: GeoJSON.Feature[] = coords.map((c, i) => ({
             type: 'Feature',
             properties: {
-                class: "point"
+                class: "point",
+                pointIndex: i
             },
             id: i,
             geometry: {
@@ -71,6 +116,16 @@ export class Drawing {
                 ...additionalPoints
             ]
         }
+    }
+
+    #replacementPoints: { [index: number]: IndexedPoint } = {}
+    setReplacementPoint(index: number, indexedPoint: IndexedPoint | undefined) {
+        if (indexedPoint) {
+            this.#replacementPoints[index] = indexedPoint
+        } else {
+            delete this.#replacementPoints[index]
+        }
+        this.notifyListeners()
     }
 
     #sourceId = 'drawing-source';
@@ -130,7 +185,6 @@ export class Drawing {
                 coord: closest,
                 pointIndex: feature.properties.pointIndex
             }
-            console.log(this.#closestPoint)
 
             this.notifyListeners()
         })
@@ -155,14 +209,27 @@ export class Drawing {
 
             e.preventDefault()
 
-            console.log(this.#closestPoint)
             const insertAfter = this.#closestPoint.pointIndex
             const clone = [...this.#track.coordinates]
             clone.splice(insertAfter + 1, 0, this.#closestPoint.coord)
-
-            const point = e.lngLat.toArray() as [number, number]
-            this.updateTrack(track => ({ coordinates: [...track.coordinates, point] }))
+            this.#closestPoint = undefined
+            this.updateTrack({ coordinates: clone })
         })
+
+        this.#map.on('mousedown', 'hit-test-points', e => {
+            e.preventDefault()
+            createDragger(this.#map, e, this)
+        })
+
+        this.#map.on('touchstart', 'hit-test-points', e => {
+            e.preventDefault()
+            createDragger(this.#map, e as any, this)
+        })
+
+        this.#map.on('click', (e) => {
+            if (e.defaultPrevented) return
+            this.updateTrack(t => ({ ...t, coordinates: [...t.coordinates, e.lngLat.toArray()] }))
+        });
 
         setTimeout(() => this.initialize(), 1000)
     }
