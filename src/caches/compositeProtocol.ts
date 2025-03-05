@@ -56,7 +56,6 @@ addProtocol(PROTOCOL, async (params, abortController) => {
             data: await blob!.arrayBuffer()
         }
     } catch (err) {
-        console.log(err)
     }
 
     return failed
