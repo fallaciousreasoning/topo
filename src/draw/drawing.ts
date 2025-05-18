@@ -1,392 +1,456 @@
-import { Feature, GeoJSONSource, Map, MapGeoJSONFeature, MapMouseEvent, MapTouchEvent, Point } from "maplibre-gl";
+import {
+  Feature,
+  GeoJSONFeature,
+  GeoJSONSource,
+  LngLat,
+  Map,
+  MapGeoJSONFeature,
+  MapMouseEvent,
+  MapTouchEvent,
+  Point,
+} from "maplibre-gl";
 import { Track } from "../tracks/track";
 import { range } from "../utils/array";
 import { getClosestPoint } from "../utils/vector";
+import { MapEvent } from "ol";
 
 type Listener = (drawing: Drawing) => void;
 
 const addHoverState = (map: Map, layerIds: string[]) => {
-    for (const layerId of layerIds) {
-        map.on('mousemove', layerId, e => {
-            if (!e.features || !map) return
-            if (e.features.length > 0) {
-                map.removeFeatureState({ source: 'drawing-source' })
-                const id = e.features[0].id!
-                map.setFeatureState({ source: 'drawing-source', id }, { hover: true })
-            }
-        })
+  for (const layerId of layerIds) {
+    map.on("mousemove", layerId, (e) => {
+      if (!e.features || !map) return;
+      if (e.features.length > 0) {
+        map.removeFeatureState({ source: "drawing-source" });
+        const id = e.features[0].id!;
+        map.setFeatureState({ source: "drawing-source", id }, { hover: true });
+      }
+    });
 
-        map.on('mouseleave', layerId, () => {
-            map.removeFeatureState({ source: 'drawing-source' })
-        })
-    }
-}
+    map.on("mouseleave", layerId, () => {
+      map.removeFeatureState({ source: "drawing-source" });
+    });
+  }
+};
 
-const createDragger = (map: Map, e: MapMouseEvent & {
+const createDragger = (
+  map: Map,
+  e: {
+    lngLat: LngLat;
     features?: MapGeoJSONFeature[];
-}, drawing: Drawing) => {
-    const feature = e.features?.[0]
-    if (feature?.geometry.type !== 'Point') return
+  },
+  drawing: Drawing,
+) => {
+  const feature = e.features?.[0];
+  if (feature?.geometry.type !== "Point") return;
 
-    const pointIndex = feature.properties.pointIndex
-    const center = feature.geometry.coordinates
-    const clickedAt = e.lngLat.toArray()
-    const offset = [clickedAt[0] - center[0], clickedAt[1] - center[1]] as const
+  if (drawing.hasDragger) return;
+  drawing.hasDragger = true;
 
-    const getCoord = (e: MapMouseEvent | MapTouchEvent) => [e.lngLat.toArray()[0] - offset[0], e.lngLat.toArray()[1] - offset[1]] as [number, number]
-    let replacementPoint: IndexedPoint | undefined
+  const pointIndex = feature.properties.pointIndex;
+  const center = feature.geometry.coordinates;
+  const clickedAt = e.lngLat.toArray();
+  const offset = [clickedAt[0] - center[0], clickedAt[1] - center[1]] as const;
 
-    const handleMove = (e: MapMouseEvent | MapTouchEvent) => {
-        e.preventDefault()
-        replacementPoint = {
-            coord: getCoord(e),
-            pointIndex
-        }
-        drawing.setReplacementPoint(pointIndex, replacementPoint)
-    }
+  const getCoord = (e: MapMouseEvent | MapTouchEvent) =>
+    [e.lngLat.toArray()[0] - offset[0], e.lngLat.toArray()[1] - offset[1]] as [
+      number,
+      number,
+    ];
+  let replacementPoint: IndexedPoint | undefined;
 
-    const listeners = [
-        map.on('mousemove', handleMove),
-        map.on('touchmove', handleMove),
-    ]
+  const handleMove = (e: MapMouseEvent | MapTouchEvent) => {
+    e.preventDefault();
 
-    const finish = () => {
-        listeners.forEach(l => l.unsubscribe())
+    replacementPoint = {
+      coord: getCoord(e),
+      pointIndex,
+    };
+    drawing.setReplacementPoint(pointIndex, replacementPoint);
+  };
 
-        if (!replacementPoint) return
-        drawing.updateTrack(t => ({ ...t, coordinates: t.coordinates.map((c, i) => i === pointIndex ? replacementPoint!.coord : c) }))
-        drawing.setReplacementPoint(pointIndex, undefined)
-    }
-    listeners.push(map.on('mouseup', finish))
-    listeners.push(map.on('touchend', finish))
-}
+  const listeners = [
+    map.on("mousemove", handleMove),
+    map.on("touchmove", handleMove),
+  ];
+
+  const finish = () => {
+    listeners.forEach((l) => l.unsubscribe());
+
+    if (!replacementPoint) return;
+    drawing.updateTrack((t) => ({
+      ...t,
+      coordinates: t.coordinates.map((c, i) =>
+        i === pointIndex ? replacementPoint!.coord : c,
+      ),
+    }));
+    drawing.setReplacementPoint(pointIndex, undefined);
+    drawing.hasDragger = false;
+  };
+  listeners.push(map.on("mouseup", finish));
+  listeners.push(map.on("touchend", finish));
+};
 
 interface IndexedPoint {
-    coord: [number, number]
-    pointIndex: number
+  coord: [number, number];
+  pointIndex: number;
 }
 
 export class Drawing {
-    get features(): GeoJSON.FeatureCollection {
-        const coords = [...(this.#track?.coordinates?.map((c, i) => this.#replacementPoints[i]?.coord ?? c) ?? [])]
-        const points: GeoJSON.Feature[] = coords.map((c, i) => ({
-            type: 'Feature',
+  hasDragger = false;
+
+  get features(): GeoJSON.FeatureCollection {
+    const coords = [
+      ...(this.#track?.coordinates?.map(
+        (c, i) => this.#replacementPoints[i]?.coord ?? c,
+      ) ?? []),
+    ];
+    const points: GeoJSON.Feature[] = coords.map((c, i) => ({
+      type: "Feature",
+      properties: {
+        class: "point",
+        pointIndex: i,
+      },
+      id: i,
+      geometry: {
+        type: "Point",
+        coordinates: c,
+      },
+    }));
+
+    const lines: GeoJSON.Feature[] = range(coords.length - 1).map((i) => ({
+      id: i + points.length,
+      type: "Feature",
+      properties: {
+        class: "segment",
+        pointIndex: i,
+      },
+      geometry: {
+        type: "LineString",
+        coordinates: [coords[i], coords[i + 1]],
+      },
+    }));
+
+    const additionalPoints: GeoJSON.Feature[] = this.#closestPoint
+      ? [
+          {
+            type: "Feature",
             properties: {
-                class: "point",
-                pointIndex: i
+              class: "split-point",
             },
-            id: i,
+            id: points.length + lines.length + 1,
             geometry: {
-                type: 'Point',
-                coordinates: c
-            }
-        }))
-
-        const lines: GeoJSON.Feature[] = range(coords.length - 1).map(i => ({
-            id: i + points.length,
-            type: 'Feature',
-            properties: {
-                class: "segment",
-                pointIndex: i,
+              type: "Point",
+              coordinates: this.#closestPoint.coord,
             },
-            geometry: {
-                type: 'LineString',
-                coordinates: [coords[i], coords[i + 1]]
-            }
-        }))
+          },
+        ]
+      : [];
+    return {
+      type: "FeatureCollection",
+      features: [...points, ...lines, ...additionalPoints],
+    };
+  }
 
-        const additionalPoints: GeoJSON.Feature[] = this.#closestPoint
-            ? [({
-                type: 'Feature',
-                properties: {
-                    class: "split-point"
-                },
-                id: points.length + lines.length + 1,
-                geometry: {
-                    type: 'Point',
-                    coordinates: this.#closestPoint.coord
-                }
-            })]
-            : []
-        return {
-            type: 'FeatureCollection',
-            features: [
-                ...points,
-                ...lines,
-                ...additionalPoints
-            ]
-        }
+  #replacementPoints: { [index: number]: IndexedPoint } = {};
+  setReplacementPoint(index: number, indexedPoint: IndexedPoint | undefined) {
+    if (indexedPoint) {
+      this.#replacementPoints[index] = indexedPoint;
+    } else {
+      delete this.#replacementPoints[index];
     }
+    this.notifyListeners();
+  }
 
-    #replacementPoints: { [index: number]: IndexedPoint } = {}
-    setReplacementPoint(index: number, indexedPoint: IndexedPoint | undefined) {
-        if (indexedPoint) {
-            this.#replacementPoints[index] = indexedPoint
-        } else {
-            delete this.#replacementPoints[index]
-        }
-        this.notifyListeners()
-    }
+  #sourceId = "drawing-source";
+  #map: Map;
 
-    #sourceId = 'drawing-source';
-    #map: Map;
+  // The closest point on the track to the mouse. When the user clicks on the track it will be split at this point.
+  #closestPoint: { coord: [number, number]; pointIndex: number } | undefined;
 
-    // The closest point on the track to the mouse. When the user clicks on the track it will be split at this point.
-    #closestPoint: { coord: [number, number], pointIndex: number } | undefined;
+  #listeners: Listener[] = [];
+  #track: Track = {
+    coordinates: [],
+  };
 
-    #listeners: Listener[] = [];
-    #track: Track = {
-        coordinates: []
+  #undoStack: Track[] = [];
+  #redoStack: Track[] = [];
+
+  get canUndo(): boolean {
+    return this.#undoStack.length > 0;
+  }
+
+  get canRedo(): boolean {
+    return this.#redoStack.length > 0;
+  }
+
+  get canClear(): boolean {
+    return this.#track.coordinates.length > 0;
+  }
+
+  get source(): GeoJSONSource {
+    return this.#map.getSource(this.#sourceId) as GeoJSONSource;
+  }
+
+  constructor(map: Map, track?: Track) {
+    this.#map = map;
+    this.#track = track ?? { coordinates: [] };
+
+    this.#map.addSource(this.#sourceId, {
+      type: "geojson",
+      data: this.features,
+    });
+
+    this.addListener((drawing) => this.source.setData(drawing.features));
+
+    // Add hover state handlers:
+    addHoverState(this.#map, ["hit-test-lines", "hit-test-points"]);
+
+    const updateClosestPoint = (
+      e: (MapTouchEvent | MapMouseEvent) & {
+        features?: MapGeoJSONFeature[];
+      },
+    ) => {
+      const feature = e.features?.[0];
+      if (!feature) return;
+
+      if (feature.geometry.type !== "LineString") return;
+
+      const start = feature.geometry.coordinates.at(0)!;
+      const end = feature.geometry.coordinates.at(-1)!;
+
+      const mouse = e.lngLat.toArray() as [number, number];
+      const closest = getClosestPoint(
+        start as [number, number],
+        end as [number, number],
+        mouse,
+      );
+      this.#closestPoint = {
+        coord: closest,
+        pointIndex: feature.properties.pointIndex,
+      };
+
+      this.notifyListeners();
     };
 
-    #undoStack: Track[] = [];
-    #redoStack: Track[] = [];
+    // Add interaction handlers:
+    // When the mouse hovers over a line, we find the closest point on the line and store it:
+    this.#map.on("mousemove", "hit-test-lines", updateClosestPoint);
+    this.#map.on("touchstart", "hit-test-lines", updateClosestPoint);
 
-    get canUndo(): boolean {
-        return this.#undoStack.length > 0;
+    // When the mouse leaves the hit-test-lines layer, we clear the closest point:
+    const handleEndClosestPoint = () => {
+      this.#closestPoint = undefined;
+      this.notifyListeners();
+    };
+    this.#map.on("mouseleave", "hit-test-lines", handleEndClosestPoint);
+    this.#map.on("touchend", "hit-test-lines", handleEndClosestPoint);
+
+    // When the mouse is over a join, we shouldn't show the split point.
+    this.#map.on("mousemove", "hit-test-points", handleEndClosestPoint);
+
+    const handleCreatePointDragger = (
+      e: (MapMouseEvent | MapTouchEvent) & {
+        features?: MapGeoJSONFeature[];
+      },
+    ) => {
+      e.preventDefault();
+      createDragger(this.#map, e, this);
+    };
+
+    this.#map.on("mousedown", "hit-test-points", handleCreatePointDragger);
+    this.#map.on("touchstart", "hit-test-points", handleCreatePointDragger);
+
+    const handleCreatePointAndDrag = (
+      e: (MapMouseEvent | MapTouchEvent) & {
+        features?: GeoJSONFeature[];
+      },
+    ) => {
+      e.preventDefault();
+
+      if (this.hasDragger) return;
+
+      if (!this.#closestPoint) {
+        return;
+      }
+
+      const insertAfter = this.#closestPoint.pointIndex;
+      const clone = [...this.#track.coordinates];
+      const pointIndex = insertAfter + 1;
+      clone.splice(pointIndex, 0, this.#closestPoint.coord);
+      this.#closestPoint = undefined;
+      this.updateTrack({ coordinates: clone });
+
+      createDragger(
+        this.#map,
+        {
+          lngLat: e.lngLat,
+          features: [
+            {
+              geometry: {
+                type: "Point",
+                coordinates: clone.at(pointIndex)!,
+              },
+              properties: {
+                pointIndex: pointIndex,
+              },
+              id: pointIndex,
+            } as any,
+          ],
+        },
+        this,
+      );
+    };
+    this.#map.on("touchstart", "hit-test-lines", handleCreatePointAndDrag);
+    this.#map.on("mousedown", "hit-test-lines", handleCreatePointAndDrag);
+
+    this.#map.on("click", (e) => {
+      if (e.defaultPrevented) return;
+      this.updateTrack((t) => ({
+        ...t,
+        coordinates: [...t.coordinates, e.lngLat.toArray()],
+      }));
+    });
+
+    setTimeout(() => this.initialize(), 1000);
+  }
+
+  initialize() {
+    // Render the track:
+    this.#map.addLayer({
+      id: "lines",
+      type: "line",
+      source: this.#sourceId,
+      filter: ["==", "class", "segment"],
+      layout: {
+        visibility: "visible",
+        "line-cap": "butt",
+        "line-join": "bevel",
+      },
+      paint: {
+        "line-width": 5,
+        "line-color": "rgb(0, 0, 255)",
+        "line-opacity": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          1,
+          0.5,
+        ],
+      },
+    });
+
+    this.#map.addLayer({
+      id: "points",
+      type: "circle",
+      source: this.#sourceId,
+      layout: {
+        visibility: "visible",
+      },
+      filter: ["==", "class", "point"],
+      paint: {
+        "circle-color": "rgba(0, 0, 255, 1)",
+        "circle-stroke-color": "white",
+        "circle-stroke-width": 1,
+        "circle-radius": 6,
+        "circle-opacity": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          1,
+          0.5,
+        ],
+      },
+    });
+
+    // // Add hit testing layers:
+    this.#map.addLayer({
+      id: "hit-test-lines",
+      type: "line",
+      source: this.#sourceId,
+      filter: ["==", "class", "segment"],
+      paint: {
+        "line-width": 20,
+        "line-opacity": 0,
+      },
+    });
+
+    this.#map.addLayer({
+      id: "hit-test-points",
+      type: "circle",
+      source: this.#sourceId,
+      layout: {
+        visibility: "visible",
+      },
+      filter: ["==", "class", "point"],
+      paint: {
+        "circle-radius": 10,
+        "circle-opacity": 0,
+      },
+    });
+
+    this.#map.addLayer({
+      id: "split-points",
+      source: this.#sourceId,
+      type: "circle",
+      layout: {
+        visibility: "visible",
+      },
+      filter: ["==", "class", "split-point"],
+      paint: {
+        "circle-color": "rgba(100, 100, 255, 1)",
+        "circle-stroke-color": "white",
+        "circle-stroke-width": 1,
+        "circle-radius": 5,
+      },
+    });
+  }
+
+  updateTrack(change: Track | ((track: Track) => Track)) {
+    const newValue =
+      typeof change === "function"
+        ? change(this.#track)
+        : { ...this.#track, ...change };
+
+    this.#undoStack.push(this.#track);
+    this.#track = newValue;
+
+    this.notifyListeners();
+  }
+
+  undo() {
+    if (!this.canUndo) return;
+
+    this.#redoStack.push(this.#track);
+    this.#track = this.#undoStack.pop()!;
+    this.notifyListeners();
+  }
+
+  redo() {
+    if (!this.canRedo) return;
+
+    this.#undoStack.push(this.#track);
+    this.#track = this.#redoStack.pop()!;
+    this.notifyListeners();
+  }
+
+  clear() {
+    this.#track = { coordinates: [] };
+    this.#undoStack = [];
+    this.#redoStack = [];
+    this.notifyListeners();
+  }
+
+  notifyListeners() {
+    for (const listener of this.#listeners) {
+      listener(this);
     }
+  }
 
-    get canRedo(): boolean {
-        return this.#redoStack.length > 0;
-    }
+  addListener(listener: Listener) {
+    this.#listeners.push(listener);
+    return () => this.removeListener(listener);
+  }
 
-    get canClear(): boolean {
-        return this.#track.coordinates.length > 0;
-    }
-
-    get source(): GeoJSONSource {
-        return this.#map.getSource(this.#sourceId) as GeoJSONSource;
-    }
-
-    constructor(map: Map, track?: Track) {
-        this.#map = map;
-        this.#track = track ?? { coordinates: [] }
-
-        this.#map.addSource(this.#sourceId, {
-            type: 'geojson',
-            data: this.features
-        })
-
-        this.addListener(drawing => this.source.setData(drawing.features))
-
-        // Add hover state handlers:
-        addHoverState(this.#map, ['hit-test-lines', 'hit-test-points'])
-
-        // Add interaction handlers:
-        // When the mouse hovers over a line, we find the closest point on the line and store it:
-        this.#map.on('mousemove', 'hit-test-lines', e => {
-            const feature = e.features?.[0]
-            if (!feature) return
-
-            if (feature.geometry.type !== 'LineString') return
-
-            const start = feature.geometry.coordinates.at(0)!
-            const end = feature.geometry.coordinates.at(-1)!
-
-            const mouse = e.lngLat.toArray() as [number, number]
-            const closest = getClosestPoint(start as [number, number], end as [number, number], mouse)
-            this.#closestPoint = {
-                coord: closest,
-                pointIndex: feature.properties.pointIndex
-            }
-
-            this.notifyListeners()
-        })
-
-        // When the mouse leaves the hit-test-lines layer, we clear the closest point:
-        this.#map.on('mouseleave', 'hit-test-lines', () => {
-            this.#closestPoint = undefined
-            this.notifyListeners()
-        })
-
-        // When the mouse is over a join, we shouldn't show the split point.
-        this.#map.on('mousemove', 'hit-test-points', e => {
-            this.#closestPoint = undefined
-            this.notifyListeners()
-        })
-
-        this.#map.on('click', 'hit-test-lines', e => {
-            if (e.defaultPrevented) return
-            if (!this.#closestPoint) {
-                return
-            }
-
-            e.preventDefault()
-
-            const insertAfter = this.#closestPoint.pointIndex
-            const clone = [...this.#track.coordinates]
-            clone.splice(insertAfter + 1, 0, this.#closestPoint.coord)
-            this.#closestPoint = undefined
-            this.updateTrack({ coordinates: clone })
-        })
-
-        this.#map.on('mousedown', 'hit-test-points', e => {
-            e.preventDefault()
-            createDragger(this.#map, e, this)
-        })
-
-        this.#map.on('touchstart', 'hit-test-points', e => {
-            e.preventDefault()
-            createDragger(this.#map, e as any, this)
-        })
-
-        this.#map.on('click', (e) => {
-            if (e.defaultPrevented) return
-            this.updateTrack(t => ({ ...t, coordinates: [...t.coordinates, e.lngLat.toArray()] }))
-        });
-
-        setTimeout(() => this.initialize(), 1000)
-    }
-
-    initialize() {
-        // Render the track:
-        this.#map.addLayer({
-            id: 'lines',
-            type: 'line',
-            source: this.#sourceId,
-            filter: [
-                '==',
-                'class',
-                'segment'
-            ],
-            layout: {
-                "visibility": "visible",
-                "line-cap": "butt",
-                "line-join": "bevel"
-            },
-            paint: {
-                "line-width": 5,
-                "line-color": 'rgb(0, 0, 255)',
-                'line-opacity': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    1,
-                    0.5
-                ]
-            }
-        })
-
-        this.#map.addLayer({
-            id: 'points',
-            type: 'circle',
-            source: this.#sourceId,
-            layout: {
-                visibility: 'visible'
-            },
-            filter: [
-                '==', 'class', 'point'
-            ],
-            paint: {
-                "circle-color": 'rgba(0, 0, 255, 1)',
-                "circle-stroke-color": "white",
-                "circle-stroke-width": 1,
-                "circle-radius": 6,
-                "circle-opacity": [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    1,
-                    0.5
-                ]
-            }
-        })
-
-        // // Add hit testing layers:
-        this.#map.addLayer({
-            id: 'hit-test-lines',
-            type: 'line',
-            source: this.#sourceId,
-            filter: [
-                '==',
-                'class',
-                'segment'
-            ],
-            paint: {
-                "line-width": 20,
-                'line-opacity': 0
-            }
-        })
-
-        this.#map.addLayer({
-            id: 'hit-test-points',
-            type: 'circle',
-            source: this.#sourceId,
-            layout: {
-                visibility: 'visible'
-            },
-            filter: [
-                '==', 'class', 'point'
-            ],
-            paint: {
-                "circle-radius": 10,
-                "circle-opacity": 0
-            }
-        })
-
-        this.#map.addLayer({
-            id: "split-points",
-            source: this.#sourceId,
-            type: "circle",
-            layout: {
-                visibility: 'visible'
-            },
-            filter: [
-                '==', 'class', 'split-point'
-            ],
-            paint: {
-                "circle-color": 'rgba(100, 100, 255, 1)',
-                "circle-stroke-color": "white",
-                "circle-stroke-width": 1,
-                "circle-radius": 5,
-            }
-        })
-    }
-
-    updateTrack(change: Track | ((track: Track) => Track)) {
-        const newValue = typeof change === 'function'
-            ? change(this.#track)
-            : { ...this.#track, ...change }
-
-        this.#undoStack.push(this.#track)
-        this.#track = newValue
-
-        this.notifyListeners()
-    }
-
-    undo() {
-        if (!this.canUndo) return;
-
-        this.#redoStack.push(this.#track);
-        this.#track = this.#undoStack.pop()!;
-        this.notifyListeners();
-    }
-
-    redo() {
-        if (!this.canRedo) return;
-
-        this.#undoStack.push(this.#track);
-        this.#track = this.#redoStack.pop()!;
-        this.notifyListeners();
-    }
-
-    clear() {
-        this.#track = { coordinates: [] }
-        this.#undoStack = []
-        this.#redoStack = []
-        this.notifyListeners()
-    }
-
-    notifyListeners() {
-        for (const listener of this.#listeners) {
-            listener(this);
-        }
-    }
-
-    addListener(listener: Listener) {
-        this.#listeners.push(listener);
-        return () => this.removeListener(listener);
-    }
-
-    removeListener(listener: Listener) {
-        this.#listeners = this.#listeners.filter(l => l !== listener);
-    }
+  removeListener(listener: Listener) {
+    this.#listeners = this.#listeners.filter((l) => l !== listener);
+  }
 }
