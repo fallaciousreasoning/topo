@@ -1,5 +1,4 @@
 export const range = (n: number) => {
-    if (n <= 0) return []
     return Array.from(Array(n)).map((_, i) => i)
 }
 

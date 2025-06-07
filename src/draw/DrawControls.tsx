@@ -1,18 +1,18 @@
 import * as React from 'react'
 import Control from '../controls/Control'
-import { useDrawing } from './Drawing'
+import { useDrawContext } from './DrawContext'
 
 export default function DrawControls() {
-    const drawing = useDrawing()
+    const draw = useDrawContext()
 
     return <Control position='top-left'>
-        <button type='button' disabled={!drawing.canUndo} onClick={() => drawing.undo()}>
+        <button type='button' disabled={!draw.canUndo} onClick={draw.undo}>
             ↶
         </button>
-        <button type='button' disabled={!drawing.canRedo} onClick={() => drawing.redo()}>
+        <button type='button' disabled={!draw.canRedo} onClick={draw.redo}>
             ↷
         </button>
-        <button type='button' disabled={!drawing.canClear} onClick={() => drawing.clear()}>
+        <button type='button' disabled={!draw.track} onClick={draw.clear}>
             ⨯
         </button>
     </Control>
