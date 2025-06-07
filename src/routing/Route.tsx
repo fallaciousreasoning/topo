@@ -1,50 +1,52 @@
-import * as React from 'react';
-import { useParams } from './router';
+import * as React from "react";
+import { useParams } from "./router";
 
 interface Props {
-    path: string,
-    exact: boolean
-    children: React.ReactNode | ((props: any) => React.ReactNode)
+  path: string;
+  exact?: boolean;
+  children: React.ReactNode | ((props: any) => React.ReactNode);
 }
 
-const parseMatch = (currentPage: string | null, path: string, exact: boolean) => {
-    if (!currentPage)
-        return currentPage === path;
+const parseMatch = (
+  currentPage: string | null,
+  path: string,
+  exact: boolean,
+) => {
+  if (!currentPage) return currentPage === path;
 
-    const pathParts = path.split('/');
-    const pageParts = currentPage.split('/')
+  const pathParts = path.split("/");
+  const pageParts = currentPage.split("/");
 
-    if (exact && pageParts.length !== pathParts.length) return false
+  if (exact && pageParts.length !== pathParts.length) return false;
 
-    const params = {}
-    for (let i = 0; i < pathParts.length; ++i) {
-        const pathPart = pathParts[i]
-        const pagePart = pageParts[i]
+  const params = {};
+  for (let i = 0; i < pathParts.length; ++i) {
+    const pathPart = pathParts[i];
+    const pagePart = pageParts[i];
 
-        if (pathPart.startsWith(':')) {
-            params[pathPart.replace(/(^:)|(\?$)/gi, '')] = decodeURIComponent(pagePart)
+    if (pathPart.startsWith(":")) {
+      params[pathPart.replace(/(^:)|(\?$)/gi, "")] =
+        decodeURIComponent(pagePart);
 
-            // We can't have empty path parts, unless the user has said they can be
-            // empty.
-            if (!pathPart && !pagePart.endsWith('?')) return false;
-            continue
-        }
-
-        if (pathPart !== pagePart) return false
+      // We can't have empty path parts, unless the user has said they can be
+      // empty.
+      if (!pathPart && !pagePart.endsWith("?")) return false;
+      continue;
     }
 
-    return params
-}
+    if (pathPart !== pagePart) return false;
+  }
 
-export default function Route({ path = '', exact = false, children }: Props) {
-    const { page } = useParams()
-    const match = parseMatch(page, path, exact)
+  return params;
+};
 
-    if (!match) return null
+export default function Route({ path = "", exact = false, children }: Props) {
+  const { page } = useParams();
+  const match = parseMatch(page, path, exact);
 
-    const result = typeof children === 'function'
-        ? children(match)
-        : children
+  if (!match) return null;
 
-    return result
+  const result = typeof children === "function" ? children(match) : children;
+
+  return result;
 }
