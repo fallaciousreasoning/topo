@@ -1,15 +1,14 @@
 import React, { useContext, useMemo, useState } from "react"
 import { Track } from "../tracks/track"
-import { useMap } from "../map/Map"
-import { Drawing } from "./drawing"
 
 interface DrawContext {
-    updateTrack: Drawing['updateTrack'],
-    undo: Drawing['undo'],
-    redo: Drawing['redo'],
-    canUndo: Drawing['canUndo'],
-    canRedo: Drawing['canRedo'],
-    clear: Drawing['clear'],
+    track: Track,
+    updateTrack: (change: Partial<Track> | ((track: Track) => Track)) => void,
+    undo: () => void,
+    redo: () => void,
+    canUndo: boolean,
+    canRedo: boolean,
+    clear: () => void,
 }
 
 const defaultTrack: Track = {
@@ -27,6 +26,7 @@ const defaultTrack: Track = {
 }
 
 const Context = React.createContext<DrawContext>({
+    track: defaultTrack,
     updateTrack: () => { },
     undo: () => { },
     redo: () => { },
@@ -42,9 +42,6 @@ export function useDrawContext() {
 export default function (props: React.PropsWithChildren) {
     const [stack, setStack] = useState<Track[]>([defaultTrack])
     const [redoStack, setRedoStack] = useState<Track[]>([])
-    const { map } = useMap()
-
-    const drawing = useMemo(() => new Drawing(map, defaultTrack), [stack])
 
     const value = useMemo<DrawContext>(() => {
         const track = stack.at(-1) ?? defaultTrack
@@ -76,7 +73,7 @@ export default function (props: React.PropsWithChildren) {
 
     }, [stack, redoStack])
 
-    return <Context.Provider value={drawing}>
+    return <Context.Provider value={value}>
         {props.children}
     </Context.Provider>
 }
