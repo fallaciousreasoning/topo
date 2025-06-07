@@ -10,14 +10,14 @@ const addHoverState = (map: Map, layerIds: string[]) => {
         map.on('mousemove', layerId, e => {
             if (!e.features || !map) return
             if (e.features.length > 0) {
-                map.removeFeatureState({ source: 'drawing-source' })
+                map.removeFeatureState({ source: 'drawing' })
                 const id = e.features[0].id!
-                map.setFeatureState({ source: 'drawing-source', id }, { hover: true })
+                map.setFeatureState({ source: 'drawing', id }, { hover: true })
             }
         })
 
         map.on('mouseleave', layerId, () => {
-            map.removeFeatureState({ source: 'drawing-source' })
+            map.removeFeatureState({ source: 'drawing' })
         })
     }
 }
@@ -73,7 +73,7 @@ export class Drawing {
         }
     }
 
-    #sourceId = 'drawing-source';
+    #sourceId = 'drawing';
     #map: Map;
 
     // The closest point on the track to the mouse. When the user clicks on the track it will be split at this point.
@@ -100,6 +100,7 @@ export class Drawing {
     }
 
     constructor(map: Map, track?: Track) {
+        console.log(map)
         this.#map = map;
         this.#track = track ?? { coordinates: [] }
 
@@ -111,50 +112,6 @@ export class Drawing {
         console.log(this.features)
         console.log(this)
 
-        this.addListener(drawing => this.source.setData(drawing.features))
-
-        // Add hover state handlers:
-        addHoverState(this.#map, ['hit-test-lines', 'hit-test-points'])
-
-        // Add interaction handlers:
-        // When the mouse hovers over a line, we find the closest point on the line and store it:
-        this.#map.on('mousemove', 'hit-test-lines', e => {
-            const feature = e.features?.[0]
-            if (!feature) return
-
-            if (feature.geometry.type !== 'LineString') return
-
-            const start = feature.geometry.coordinates.at(0)!
-            const end = feature.geometry.coordinates.at(-1)!
-
-            const mouse = e.lngLat.toArray() as [number, number]
-            const closest = getClosestPoint(start as [number, number], end as [number, number], mouse)
-            this.#closestPoint = closest
-
-            this.notifyListeners()
-        })
-
-        // When the mouse leaves the hit-test-lines layer, we clear the closest point:
-        this.#map.on('mouseleave', 'hit-test-lines', () => {
-            this.#closestPoint = undefined
-            this.notifyListeners()
-        })
-
-        this.#map.on('click', 'lines', e => {
-            if (e.defaultPrevented) return
-            if (this.#closestPoint) {
-                // TODO: Split the line at the closest point
-                return
-            }
-
-            const point = e.lngLat.toArray() as [number, number]
-            this.updateTrack(track => ({ coordinates: [...track.coordinates, point] }))
-        })
-
-        setTimeout(() => this.initialize(), 1000)
-    }
-
-    initialize() {
         // Render the track:
         this.#map.addLayer({
             id: 'lines',
@@ -196,7 +153,7 @@ export class Drawing {
                 "circle-color": 'rgba(0, 0, 255, 1)',
                 "circle-stroke-color": "white",
                 "circle-stroke-width": 1,
-                "circle-radius": 6,
+                "circle-radius": 5,
                 "circle-opacity": [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
@@ -206,7 +163,7 @@ export class Drawing {
             }
         })
 
-        // // Add hit testing layers:
+        // Add hit testing layers:
         this.#map.addLayer({
             id: 'hit-test-lines',
             type: 'line',
@@ -238,22 +195,44 @@ export class Drawing {
             }
         })
 
-        this.#map.addLayer({
-            id: "split-points",
-            source: this.#sourceId,
-            type: "circle",
-            layout: {
-                visibility: 'visible'
-            },
-            filter: [
-                '==', 'class', 'split-point'
-            ],
-            paint: {
-                "circle-color": 'rgba(100, 100, 255, 1)',
-                "circle-stroke-color": "white",
-                "circle-stroke-width": 1,
-                "circle-radius": 5,
+        this.addListener(drawing => this.source.setData(drawing.features))
+
+        // Add hover state handlers:
+        addHoverState(this.#map, ['hit-test-lines', 'hit-test-points'])
+
+        // Add interaction handlers:
+        // When the mouse hovers over a line, we find the closest point on the line and store it:
+        this.#map.on('mouseover', 'hit-test-lines', e => {
+            const feature = e.features?.[0]
+            if (!feature) return
+
+            if (feature.geometry.type !== 'LineString') return
+
+            const start = feature.geometry.coordinates.at(0)!
+            const end = feature.geometry.coordinates.at(-1)!
+
+            const mouse = e.lngLat.toArray() as [number, number]
+            const closest = getClosestPoint(start as [number, number], end as [number, number], mouse)
+            this.#closestPoint = closest
+
+            this.notifyListeners()
+        })
+
+        // When the mouse leaves the hit-test-lines layer, we clear the closest point:
+        this.#map.on('mouseleave', 'hit-test-lines', () => {
+            this.#closestPoint = undefined
+            this.notifyListeners()
+        })
+
+        this.#map.on('click', 'lines', e => {
+            if (e.defaultPrevented) return
+            if (this.#closestPoint) {
+                // TODO: Split the line at the closest point
+                return
             }
+
+            const point = e.lngLat.toArray() as [number, number]
+            this.updateTrack(track => ({ coordinates: [...track.coordinates, point] }))
         })
     }
 
