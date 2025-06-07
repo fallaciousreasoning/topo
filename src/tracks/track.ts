@@ -1,7 +1,9 @@
 export interface Track {
-    coordinates: [number, number][]
-    elevations?: {
-        percent: number,
-        elevation: number
-    }[]
+  id?: number;
+  name?: string;
+  coordinates: [number, number][];
+  elevations?: {
+    percent: number;
+    elevation: number;
+  }[];
 }

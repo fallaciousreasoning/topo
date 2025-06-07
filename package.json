@@ -32,6 +32,7 @@
   "dependencies": {
     "@vitejs/plugin-react": "4.2.1",
     "dexie": "3.2.4",
+    "dexie-react-hooks": "^1.1.7",
     "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
     "localforage": "1.10.0",
