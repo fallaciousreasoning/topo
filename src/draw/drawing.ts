@@ -1,4 +1,5 @@
 import {
+  Feature,
   GeoJSONFeature,
   GeoJSONSource,
   LngLat,
@@ -6,12 +7,12 @@ import {
   MapGeoJSONFeature,
   MapMouseEvent,
   MapTouchEvent,
-  Subscription,
-  LngLatBounds,
+  Point,
 } from "maplibre-gl";
 import { Track } from "../tracks/track";
 import { range } from "../utils/array";
 import { getClosestPoint } from "../utils/vector";
+import { MapEvent } from "ol";
 
 type Listener = (drawing: Drawing) => void;
 
@@ -168,18 +169,9 @@ export class Drawing {
   #closestPoint: { coord: [number, number]; pointIndex: number } | undefined;
 
   #listeners: Listener[] = [];
-  #track: Track;
-  get track() {
-    return this.#track;
-  }
-
-  get bounds(): LngLatBounds {
-    const bounds = new LngLatBounds();
-    for (const point of this.#track.coordinates) {
-      bounds.extend(point);
-    }
-    return bounds;
-  }
+  #track: Track = {
+    coordinates: [],
+  };
 
   #undoStack: Track[] = [];
   #redoStack: Track[] = [];
@@ -200,18 +192,9 @@ export class Drawing {
     return this.#map.getSource(this.#sourceId) as GeoJSONSource;
   }
 
-  #subscriptions: Subscription[] = [];
-  #layers = [
-    "hit-test-lines",
-    "hit-test-points",
-    "lines",
-    "points",
-    "split-points",
-  ];
-
-  constructor(map: Map, track: Track) {
+  constructor(map: Map, track?: Track) {
     this.#map = map;
-    this.#track = track;
+    this.#track = track ?? { coordinates: [] };
 
     this.#map.addSource(this.#sourceId, {
       type: "geojson",
@@ -252,24 +235,19 @@ export class Drawing {
 
     // Add interaction handlers:
     // When the mouse hovers over a line, we find the closest point on the line and store it:
-    this.#subscriptions.push(
-      this.#map.on("mousemove", "hit-test-lines", updateClosestPoint),
-      this.#map.on("touchstart", "hit-test-lines", updateClosestPoint),
-    );
+    this.#map.on("mousemove", "hit-test-lines", updateClosestPoint);
+    this.#map.on("touchstart", "hit-test-lines", updateClosestPoint);
 
     // When the mouse leaves the hit-test-lines layer, we clear the closest point:
     const handleEndClosestPoint = () => {
       this.#closestPoint = undefined;
       this.notifyListeners();
     };
+    this.#map.on("mouseleave", "hit-test-lines", handleEndClosestPoint);
+    this.#map.on("touchend", "hit-test-lines", handleEndClosestPoint);
 
-    this.#subscriptions.push(
-      this.#map.on("mouseleave", "hit-test-lines", handleEndClosestPoint),
-      this.#map.on("touchend", "hit-test-lines", handleEndClosestPoint),
-
-      // When the mouse is over a join, we shouldn't show the split point.
-      this.#map.on("mousemove", "hit-test-points", handleEndClosestPoint),
-    );
+    // When the mouse is over a join, we shouldn't show the split point.
+    this.#map.on("mousemove", "hit-test-points", handleEndClosestPoint);
 
     const handleCreatePointDragger = (
       e: (MapMouseEvent | MapTouchEvent) & {
@@ -280,10 +258,8 @@ export class Drawing {
       createDragger(this.#map, e, this);
     };
 
-    this.#subscriptions.push(
-      this.#map.on("mousedown", "hit-test-points", handleCreatePointDragger),
-      this.#map.on("touchstart", "hit-test-points", handleCreatePointDragger),
-    );
+    this.#map.on("mousedown", "hit-test-points", handleCreatePointDragger);
+    this.#map.on("touchstart", "hit-test-points", handleCreatePointDragger);
 
     const handleCreatePointAndDrag = (
       e: (MapMouseEvent | MapTouchEvent) & {
@@ -325,19 +301,16 @@ export class Drawing {
         this,
       );
     };
+    this.#map.on("touchstart", "hit-test-lines", handleCreatePointAndDrag);
+    this.#map.on("mousedown", "hit-test-lines", handleCreatePointAndDrag);
 
-    this.#subscriptions.push(
-      this.#map.on("touchstart", "hit-test-lines", handleCreatePointAndDrag),
-      this.#map.on("mousedown", "hit-test-lines", handleCreatePointAndDrag),
-
-      this.#map.on("click", (e) => {
-        if (e.defaultPrevented) return;
-        this.updateTrack((t) => ({
-          ...t,
-          coordinates: [...t.coordinates, e.lngLat.toArray()],
-        }));
-      }),
-    );
+    this.#map.on("click", (e) => {
+      if (e.defaultPrevented) return;
+      this.updateTrack((t) => ({
+        ...t,
+        coordinates: [...t.coordinates, e.lngLat.toArray()],
+      }));
+    });
 
     setTimeout(() => this.initialize(), 1000);
   }
@@ -431,14 +404,13 @@ export class Drawing {
     });
   }
 
-  updateTrack(change: Partial<Track> | ((track: Track) => Track)) {
+  updateTrack(change: Track | ((track: Track) => Track)) {
     const newValue =
       typeof change === "function"
         ? change(this.#track)
         : { ...this.#track, ...change };
 
     this.#undoStack.push(this.#track);
-    newValue.id = this.#track.id;
     this.#track = newValue;
 
     this.notifyListeners();
@@ -461,7 +433,7 @@ export class Drawing {
   }
 
   clear() {
-    this.#track = { ...this.#track, coordinates: [], elevations: undefined };
+    this.#track = { coordinates: [] };
     this.#undoStack = [];
     this.#redoStack = [];
     this.notifyListeners();
@@ -480,17 +452,5 @@ export class Drawing {
 
   removeListener(listener: Listener) {
     this.#listeners = this.#listeners.filter((l) => l !== listener);
-  }
-
-  destroy() {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    for (const layer of this.#layers) {
-      this.#map.removeLayer(layer);
-    }
-
-    this.#map.removeSource(this.#sourceId);
   }
 }
