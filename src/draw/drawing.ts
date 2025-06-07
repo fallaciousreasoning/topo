@@ -59,7 +59,7 @@ export class Drawing {
                 id: points.length + lines.length + 1,
                 geometry: {
                     type: 'Point',
-                    coordinates: this.#closestPoint.coord
+                    coordinates: this.#closestPoint
                 }
             })]
             : []
@@ -77,7 +77,7 @@ export class Drawing {
     #map: Map;
 
     // The closest point on the track to the mouse. When the user clicks on the track it will be split at this point.
-    #closestPoint: { coord: [number, number], pointIndex: number } | undefined;
+    #closestPoint: [number, number] | undefined;
 
     #listeners: Listener[] = [];
     #track: Track = {
@@ -108,6 +108,9 @@ export class Drawing {
             data: this.features
         })
 
+        console.log(this.features)
+        console.log(this)
+
         this.addListener(drawing => this.source.setData(drawing.features))
 
         // Add hover state handlers:
@@ -126,11 +129,7 @@ export class Drawing {
 
             const mouse = e.lngLat.toArray() as [number, number]
             const closest = getClosestPoint(start as [number, number], end as [number, number], mouse)
-            this.#closestPoint = {
-                coord: closest,
-                pointIndex: feature.properties.pointIndex
-            }
-            console.log(this.#closestPoint)
+            this.#closestPoint = closest
 
             this.notifyListeners()
         })
@@ -141,24 +140,12 @@ export class Drawing {
             this.notifyListeners()
         })
 
-        // When the mouse is over a join, we shouldn't show the split point.
-        this.#map.on('mousemove', 'hit-test-points', e => {
-            this.#closestPoint = undefined
-            this.notifyListeners()
-        })
-
-        this.#map.on('click', 'hit-test-lines', e => {
+        this.#map.on('click', 'lines', e => {
             if (e.defaultPrevented) return
-            if (!this.#closestPoint) {
+            if (this.#closestPoint) {
+                // TODO: Split the line at the closest point
                 return
             }
-
-            e.preventDefault()
-
-            console.log(this.#closestPoint)
-            const insertAfter = this.#closestPoint.pointIndex
-            const clone = [...this.#track.coordinates]
-            clone.splice(insertAfter + 1, 0, this.#closestPoint.coord)
 
             const point = e.lngLat.toArray() as [number, number]
             this.updateTrack(track => ({ coordinates: [...track.coordinates, point] }))
