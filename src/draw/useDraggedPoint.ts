@@ -2,6 +2,30 @@ import { useEffect, useRef, useState } from "react";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { useMap } from "../map/Map";
 
+// export function useDrag() {
+//     const mapRef = useMap()
+//     const map = mapRef.current!
+
+//     const [draggedPos, setDraggedPos] = useState<[number, number]>()
+//     const [offset, setOffset] = useState<[number, number] | undefined>()
+
+//     useEffect(() => {
+//         if (!offset) return
+
+//         const handler = () => {
+
+//         }
+//         map.on('mousemove', handler)
+
+//         return () => {
+//             map.off('ha')
+//         }
+//     }, [offset])
+
+//     return {
+//     }
+// }
+
 export const useMakeLayerDraggable = (layerId: string, updateFeature: (geom?: GeoJSON.Feature<GeoJSON.Point>) => void) => {
     const {map} = useMap()
     const dragging = useRef<GeoJSON.Feature>()
