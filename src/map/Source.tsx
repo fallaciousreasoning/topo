@@ -1,4 +1,4 @@
-import { CanvasSourceSpecification, GeoJSONSource, GeoJSONSourceSpecification, SourceSpecification, VectorSourceSpecification } from "maplibre-gl";
+import { CanvasSourceSpecification, GeoJSONSourceSpecification, SourceSpecification, VectorSourceSpecification } from "maplibre-gl";
 import { useEffect } from "react";
 import { useMap } from "./Map";
 import React from "react";
@@ -39,13 +39,6 @@ export default function Source({ id, spec, children }: React.PropsWithChildren<{
             }
         }
     }, [id])
-
-    useEffect(() => {
-        if (!('data' in spec)) return
-
-        const source = map.getSource(id) as GeoJSONSource
-        source.setData(spec.data)
-    }, [spec['data']])
 
     return loaded ? children : null
 }
