@@ -1,50 +1,46 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { Layer, Source, useMap } from "react-map-gl"
 import { range } from "../utils/array"
 import { useDrawContext } from "./DrawContext"
 import { useLayerHandler } from "../hooks/useLayerClickHandler"
 import { useMakeLayerDraggable } from "./useDraggedPoint"
 import { getClosestPoint } from "../utils/vector"
-import { MapLayerMouseEvent, MapMouseEvent } from "maplibre-gl"
-import { useMap } from "../map/Map"
-import Source from "../map/Source"
-import Layer from "../map/Layer"
 
 const sourceId = 'drawing-source'
 const linesId = 'lines-source'
 const pointsId = 'points-source'
 
 const useHoverState = (layerIds: string[]) => {
-    const { map } = useMap()
-
+    const map = useMap()
     useEffect(() => {
-        const handler = (e: MapLayerMouseEvent) => {
-            if (!e.features || !map) return
+        const handler = (e: mapboxgl.MapLayerEventType['mousemove']) => {
+            if (!e.features || !map.current) return
             if (e.features.length > 0) {
-                map.removeFeatureState({ source: sourceId })
+                map.current.removeFeatureState({ source: sourceId })
                 const id = e.features[0].id!
-                map.setFeatureState({ source: sourceId, id }, { hover: true })
+                map.current?.setFeatureState({ source: sourceId, id }, { hover: true })
             }
         }
 
         const leaveHandler = e => {
-            map.removeFeatureState({ source: sourceId })
+            map.current?.removeFeatureState({ source: sourceId })
         }
 
         for (const layerId of layerIds) {
-            map.on('mousemove', layerId, handler)
-            map.on('mouseleave', layerId, leaveHandler)
+            map.current?.on('mousemove', layerId, handler)
+            map.current?.on('mouseleave', layerId, leaveHandler)
         }
         return () => {
             for (const layerId of layerIds) {
-                map.off('mousemove', layerId, handler)
-                map.off('mouseleave', layerId, leaveHandler)
+                map.current?.off('mousemove', layerId, handler)
+                map.current?.off('mouseleave', layerId, leaveHandler)
             }
         }
     }, [])
 }
 
 export default function () {
-    const { map } = useMap()
+    const map = useMap()
     const draw = useDrawContext()
     const [overrideFeature, setOverrideFeature] = useState<GeoJSON.Feature<GeoJSON.Point>>()
     const [closestPoint, setClosestPoint] = useState<[number, number]>()
@@ -118,7 +114,7 @@ export default function () {
 
     // Clicking a line should create a new point in the line, rather than at the end
     useLayerHandler('click', `fat-${linesId}`, e => {
-        if (!e.features?.length) return
+        if (!e.features && !e.features.length) return
 
         e.preventDefault()
 
@@ -140,62 +136,62 @@ export default function () {
         const feature = e.features?.[0]
         if (!feature) return
 
-        if (feature.geometry.type !== 'LineString') return;
-
-        const start = feature.geometry.coordinates.at(0)!
-        const end = feature.geometry.coordinates.at(-1)!
+        const start = feature.geometry.coordinates.at(0)
+        const end = feature.geometry.coordinates.at(-1)
 
         const mouse = e.lngLat.toArray() as [number, number]
-        const closest = getClosestPoint(start as [number, number], end as [number, number], mouse)
+        const closest = getClosestPoint(start, end, mouse)
 
         setClosestPoint(closest)
     })
 
     useEffect(() => {
-        const handler = (e: MapMouseEvent) => {
+        const handler = (e: mapboxgl.MapLayerEventType['click']) => {
             if (e.defaultPrevented) return
 
             const point = e.lngLat.toArray() as [number, number]
             const current = draw.track?.coordinates ?? []
             draw.updateTrack({ coordinates: [...current, point] })
         }
-        map.on('click', handler)
+        map.current?.on('click', handler)
 
         return () => {
-            map.off('click', handler)
+            map.current?.off('click', handler)
         }
     }, [map, draw.track])
 
     // Handler for hiding the closes point for adding a split point on the line
     useEffect(() => {
-        const handler = (e: MapMouseEvent) => {
+        const handler = (e: mapboxgl.MapLayerEventType['mouseleave']) => {
             setClosestPoint(undefined)
         }
-        map.on('mouseleave', `fat-${linesId}`, handler)
+        map.current?.on('mouseleave', `fat-${linesId}`, handler)
 
         return () => {
-            map.off('mouseleave', `fat-${linesId}`, handler)
+            map.current?.off('mouseleave', `fat-${linesId}`, handler)
         }
     }, [])
 
     useEffect(() => {
-        const handler = (e: MapLayerMouseEvent) => {
+        const handler = (e: mapboxgl.MapLayerEventType['click']) => {
             const feature = e.features?.[0]
 
+            console.log(feature, closestPoint)
             if (!feature) return
             if (!closestPoint) return
 
             const index = feature.properties!.pointIndex as number
+            console.log(index)
             draw.updateTrack(t => {
                 const updated = { coordinates: [...t.coordinates] }
                 updated.coordinates.splice(index + 1, 0, closestPoint)
                 return updated
             })
         }
-        map.on('click', `fat-${linesId}`, handler)
+        map.current?.on('click', `fat-${linesId}`, handler)
 
         return () => {
-            map.off('click', `fat-${linesId}`, handler)
+            map.current?.off('click', `fat-${linesId}`, handler)
         }
     }, [closestPoint])
 
@@ -220,21 +216,19 @@ export default function () {
         setOverrideFeature(feature)
     })
 
-    return <Source id={sourceId} spec={{ type: "geojson", data: data as any }}>
-        <Layer layer={{
-            id: linesId, type: "line",
-            source: sourceId,
-            filter: [
+    return <Source id={sourceId} type="geojson" data={data}>
+        <Layer id={linesId} type="line"
+            filter={[
                 '==',
                 'class',
                 'segment'
-            ],
-            layout: {
+            ]}
+            layout={{
                 "visibility": "visible",
                 "line-cap": "butt",
                 "line-join": "bevel"
-            },
-            paint: {
+            }}
+            paint={{
                 "line-width": 5,
                 "line-color": 'rgb(0, 0, 255)',
                 'line-opacity': [
@@ -243,33 +237,28 @@ export default function () {
                     1,
                     0.5
                 ]
-            }
-        }} />
+            }} />
         {/* For hit testing */}
-        < Layer layer={{
-            id: `fat-${linesId}`, type: "line",
-            source: sourceId,
-            filter: [
+        <Layer id={`fat-${linesId}`} type="line"
+            filter={[
                 '==',
                 'class',
                 'segment'
-            ],
-            paint: {
+            ]}
+            paint={{
                 "line-width": 20,
                 'line-opacity': 0
-            }
-        }} />
+            }} />
 
 
-        <Layer layer={{
-            id: pointsId, source: sourceId, type: "circle",
-            layout: {
+        <Layer id={pointsId} type="circle"
+            layout={{
                 visibility: 'visible'
-            },
-            filter: [
+            }}
+            filter={[
                 '==', 'class', 'point'
-            ],
-            paint: {
+            ]}
+            paint={{
                 "circle-color": 'rgba(0, 0, 255, 1)',
                 "circle-stroke-color": "white",
                 "circle-stroke-width": 1,
@@ -280,39 +269,34 @@ export default function () {
                     1,
                     0.5
                 ]
-            }
-        }} />
+            }} />
 
         {/* For hit testing */}
-        <Layer layer={{
-            id: `fat-${pointsId}`, source: sourceId, type: "circle",
-            layout: {
+        <Layer id={`fat-${pointsId}`} type="circle"
+            layout={{
                 visibility: 'visible'
-            },
-            filter: [
+            }}
+            filter={[
                 '==', 'class', 'point'
-            ],
-            paint: {
+            ]}
+            paint={{
                 "circle-radius": 10,
                 "circle-opacity": 0
-            }
-        }} />
+            }} />
 
 
-        <Layer layer={{
-            id: "split-points", source: sourceId, type: "circle",
-            layout: {
+        <Layer id="split-points" type="circle"
+            layout={{
                 visibility: 'visible'
-            },
-            filter: [
+            }}
+            filter={[
                 '==', 'class', 'split-point'
-            ],
-            paint: {
+            ]}
+            paint={{
                 "circle-color": 'rgba(100, 100, 255, 1)',
                 "circle-stroke-color": "white",
                 "circle-stroke-width": 1,
                 "circle-radius": 5,
-            }
-        }} />
+            }} />
     </Source>
 }
