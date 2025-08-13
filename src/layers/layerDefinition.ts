@@ -7,6 +7,7 @@ import linzVector from "./linzVector";
 import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
+import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import tracks from "./tracks";
 
@@ -27,6 +28,7 @@ export const baseLayers: BaseLayerDefinition[] = [
 export const overlays: OverlayDefinition[] = [
     hillshade,
     contours,
+    slopeAngle,
     huts,
     mountains,
     tracks
