@@ -171,10 +171,14 @@ class SlopeAngleTileSource {
             
             const slopeImageData = this.ctx.createImageData(256, 256)
             
+            // Calculate ground resolution based on zoom level
+            // At zoom level z, each pixel represents about (40075000 / (256 * 2^z)) meters
+            const groundResolution = 40075000 / (256 * Math.pow(2, z))
+            
             // Calculate slope angles for each pixel
             for (let py = 0; py < 256; py++) {
                 for (let px = 0; px < 256; px++) {
-                    const slope = calculateSlopeAngleWithNeighbors(imageData, neighbors, px, py, 1)
+                    const slope = calculateSlopeAngleWithNeighbors(imageData, neighbors, px, py, groundResolution)
                     
                     // Convert slope angle to color gradient
                     const idx = (py * 256 + px) * 4
@@ -185,20 +189,42 @@ class SlopeAngleTileSource {
                         slopeImageData.data[idx + 1] = 0 // G  
                         slopeImageData.data[idx + 2] = 0 // B
                         slopeImageData.data[idx + 3] = 0 // Alpha (fully transparent)
-                    } else if (slope <= 45) {
-                        // Transparent to orange (15° to 45°)
-                        const t = (slope - 15) / (45 - 15) // 0 to 1
-                        slopeImageData.data[idx] = 255     // R (orange)
-                        slopeImageData.data[idx + 1] = Math.round(165 * t) // G (orange)
+                    } else if (slope <= 20) {
+                        // Yellow (15° to 20°)
+                        slopeImageData.data[idx] = 255     // R (yellow)
+                        slopeImageData.data[idx + 1] = 255 // G (yellow)
                         slopeImageData.data[idx + 2] = 0   // B
-                        slopeImageData.data[idx + 3] = Math.round(255 * t) // Alpha (fade in)
+                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
+                    } else if (slope <= 30) {
+                        // Orange (20° to 30°)
+                        slopeImageData.data[idx] = 255     // R (orange)
+                        slopeImageData.data[idx + 1] = 165 // G (orange)
+                        slopeImageData.data[idx + 2] = 0   // B
+                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
+                    } else if (slope <= 40) {
+                        // Red (30° to 40°)
+                        slopeImageData.data[idx] = 255     // R (red)
+                        slopeImageData.data[idx + 1] = 0   // G
+                        slopeImageData.data[idx + 2] = 0   // B
+                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
+                    } else if (slope <= 50) {
+                        // Purple (40° to 50°)
+                        slopeImageData.data[idx] = 128     // R (purple)
+                        slopeImageData.data[idx + 1] = 0   // G
+                        slopeImageData.data[idx + 2] = 128 // B (purple)
+                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
+                    } else if (slope <= 60) {
+                        // Black (50° to 60°)
+                        slopeImageData.data[idx] = 0       // R (black)
+                        slopeImageData.data[idx + 1] = 0   // G (black)
+                        slopeImageData.data[idx + 2] = 0   // B (black)
+                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
                     } else {
-                        // Orange to red (45° to 90°)
-                        const t = Math.min((slope - 45) / (90 - 45), 1) // 0 to 1
-                        slopeImageData.data[idx] = 255                   // R (stays red)
-                        slopeImageData.data[idx + 1] = Math.round(165 * (1 - t)) // G (fade to 0)
-                        slopeImageData.data[idx + 2] = 0                 // B
-                        slopeImageData.data[idx + 3] = 255               // Alpha (fully opaque)
+                        // Black (60°+)
+                        slopeImageData.data[idx] = 0       // R (black)
+                        slopeImageData.data[idx + 1] = 0   // G (black)
+                        slopeImageData.data[idx + 2] = 0   // B (black)
+                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
                     }
                 }
             }
