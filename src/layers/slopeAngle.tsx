@@ -78,11 +78,99 @@ class SlopeAngleTileSource {
     private canvas: HTMLCanvasElement
     private ctx: CanvasRenderingContext2D
     
+    // Color stops for slope angles
+    private colorStops = [
+        { angle: 0, color: { r: 0, g: 0, b: 0, a: 0 } },        // Transparent
+        { angle: 15, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
+        { angle: 20, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
+        { angle: 30, color: { r: 255, g: 165, b: 0, a: 255 } }, // Orange
+        { angle: 40, color: { r: 255, g: 0, b: 0, a: 255 } },   // Red
+        { angle: 50, color: { r: 128, g: 0, b: 128, a: 255 } }, // Purple
+        { angle: 60, color: { r: 0, g: 0, b: 0, a: 255 } }      // Black
+    ]
+    
     constructor() {
         this.canvas = document.createElement('canvas')
         this.canvas.width = 256
         this.canvas.height = 256
         this.ctx = this.canvas.getContext('2d')!
+    }
+    
+    private lerp(a: number, b: number, t: number): number {
+        return a + (b - a) * t
+    }
+    
+    private getSlopeColor(slope: number): { r: number, g: number, b: number, a: number } {
+        // Below minimum threshold
+        if (slope < this.colorStops[0].angle) {
+            return { r: 0, g: 0, b: 0, a: 0 } // Transparent
+        }
+        
+        // Above maximum threshold
+        if (slope >= this.colorStops[this.colorStops.length - 1].angle) {
+            return this.colorStops[this.colorStops.length - 1].color
+        }
+        
+        // Find the two color stops to interpolate between
+        for (let i = 0; i < this.colorStops.length - 1; i++) {
+            const lower = this.colorStops[i]
+            const upper = this.colorStops[i + 1]
+            
+            if (slope >= lower.angle && slope <= upper.angle) {
+                const t = (slope - lower.angle) / (upper.angle - lower.angle)
+                return {
+                    r: Math.round(this.lerp(lower.color.r, upper.color.r, t)),
+                    g: Math.round(this.lerp(lower.color.g, upper.color.g, t)),
+                    b: Math.round(this.lerp(lower.color.b, upper.color.b, t)),
+                    a: Math.round(this.lerp(lower.color.a, upper.color.a, t))
+                }
+            }
+        }
+        
+        // Fallback (shouldn't reach here)
+        return { r: 0, g: 0, b: 0, a: 0 }
+    }
+    
+    private applyBlur(imageData: ImageData): ImageData {
+        const width = imageData.width
+        const height = imageData.height
+        const blurred = this.ctx.createImageData(width, height)
+        
+        // 3x3 box blur kernel (equal weights)
+        const kernel = [
+            1/9, 1/9, 1/9,
+            1/9, 1/9, 1/9,
+            1/9, 1/9, 1/9
+        ]
+        
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let r = 0, g = 0, b = 0, a = 0
+                
+                // Apply kernel
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const px = Math.max(0, Math.min(width - 1, x + kx))
+                        const py = Math.max(0, Math.min(height - 1, y + ky))
+                        const idx = (py * width + px) * 4
+                        const weight = kernel[(ky + 1) * 3 + (kx + 1)]
+                        
+                        r += imageData.data[idx] * weight
+                        g += imageData.data[idx + 1] * weight
+                        b += imageData.data[idx + 2] * weight
+                        a += imageData.data[idx + 3] * weight
+                    }
+                }
+                
+                const outputIdx = (y * width + x) * 4
+                blurred.data[outputIdx] = Math.round(r)
+                blurred.data[outputIdx + 1] = Math.round(g)
+                blurred.data[outputIdx + 2] = Math.round(b)
+                blurred.data[outputIdx + 3] = Math.round(a)
+            }
+        }
+        
+        return blurred
     }
     
     private getElevationTileUrl(x: number, y: number, z: number): string {
@@ -180,56 +268,23 @@ class SlopeAngleTileSource {
                 for (let px = 0; px < 256; px++) {
                     const slope = calculateSlopeAngleWithNeighbors(imageData, neighbors, px, py, groundResolution)
                     
-                    // Convert slope angle to color gradient
+                    // Convert slope angle to color using gradient
+                    const color = this.getSlopeColor(slope)
                     const idx = (py * 256 + px) * 4
                     
-                    if (slope < 15) {
-                        // Transparent for slopes less than 15°
-                        slopeImageData.data[idx] = 0     // R
-                        slopeImageData.data[idx + 1] = 0 // G  
-                        slopeImageData.data[idx + 2] = 0 // B
-                        slopeImageData.data[idx + 3] = 0 // Alpha (fully transparent)
-                    } else if (slope <= 20) {
-                        // Yellow (15° to 20°)
-                        slopeImageData.data[idx] = 255     // R (yellow)
-                        slopeImageData.data[idx + 1] = 255 // G (yellow)
-                        slopeImageData.data[idx + 2] = 0   // B
-                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
-                    } else if (slope <= 30) {
-                        // Orange (20° to 30°)
-                        slopeImageData.data[idx] = 255     // R (orange)
-                        slopeImageData.data[idx + 1] = 165 // G (orange)
-                        slopeImageData.data[idx + 2] = 0   // B
-                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
-                    } else if (slope <= 40) {
-                        // Red (30° to 40°)
-                        slopeImageData.data[idx] = 255     // R (red)
-                        slopeImageData.data[idx + 1] = 0   // G
-                        slopeImageData.data[idx + 2] = 0   // B
-                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
-                    } else if (slope <= 50) {
-                        // Purple (40° to 50°)
-                        slopeImageData.data[idx] = 128     // R (purple)
-                        slopeImageData.data[idx + 1] = 0   // G
-                        slopeImageData.data[idx + 2] = 128 // B (purple)
-                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
-                    } else if (slope <= 60) {
-                        // Black (50° to 60°)
-                        slopeImageData.data[idx] = 0       // R (black)
-                        slopeImageData.data[idx + 1] = 0   // G (black)
-                        slopeImageData.data[idx + 2] = 0   // B (black)
-                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
-                    } else {
-                        // Black (60°+)
-                        slopeImageData.data[idx] = 0       // R (black)
-                        slopeImageData.data[idx + 1] = 0   // G (black)
-                        slopeImageData.data[idx + 2] = 0   // B (black)
-                        slopeImageData.data[idx + 3] = 255 // Alpha (fully opaque)
-                    }
+                    slopeImageData.data[idx] = color.r
+                    slopeImageData.data[idx + 1] = color.g
+                    slopeImageData.data[idx + 2] = color.b
+                    slopeImageData.data[idx + 3] = color.a
                 }
             }
             
             this.ctx.putImageData(slopeImageData, 0, 0)
+            
+            // Apply 3x3 blur kernel
+            const blurredImageData = this.applyBlur(slopeImageData)
+            this.ctx.putImageData(blurredImageData, 0, 0)
+            
             return this.canvas.toDataURL()
         } catch (error) {
             console.warn('Failed to generate slope tile:', error)
