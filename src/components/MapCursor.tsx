@@ -164,10 +164,16 @@ export default function MapCursor() {
             normalizedDy = dy / length
         }
 
+        // Get the actual map container dimensions
+        const container = map.getContainer()
+        const rect = container.getBoundingClientRect()
+        const centerX = rect.left + rect.width / 2
+        const centerY = rect.top + rect.height / 2
+        
         // Position label at fixed screen distance from center (opposite direction from user)
         const labelOffsetDistance = 20 // pixels from center
-        const labelScreenX = window.innerWidth / 2 + normalizedDx * labelOffsetDistance
-        const labelScreenY = window.innerHeight / 2 + normalizedDy * labelOffsetDistance
+        const labelScreenX = centerX + normalizedDx * labelOffsetDistance
+        const labelScreenY = centerY + normalizedDy * labelOffsetDistance
 
         // Calculate rotation angle (in degrees) from the direction vector
         let rotationAngle = Math.atan2(normalizedDy, normalizedDx) * (180 / Math.PI)
@@ -197,6 +203,17 @@ export default function MapCursor() {
             lineSource.setData(lineData)
         }
     }, [map, lineData])
+
+    // Calculate the actual center of the map container
+    const mapCenter = React.useMemo(() => {
+        if (!map) return { x: 0, y: 0 }
+        const container = map.getContainer()
+        const rect = container.getBoundingClientRect()
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+        }
+    }, [map, labelPosition]) // Recalculate when labelPosition updates (which happens on map moves)
 
     // Determine if cursor should be visible
     const shouldShowCursor = React.useMemo(() => {
@@ -257,11 +274,14 @@ export default function MapCursor() {
             {/* Target cursor in center of screen */}
             {shouldShowCursor && (
                 <div 
-                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
-                style={{ 
-                    width: '24px', 
-                    height: '24px'
-                }}
+                    className="fixed pointer-events-none z-10"
+                    style={{
+                        left: mapCenter.x,
+                        top: mapCenter.y,
+                        transform: 'translate(-50%, -50%)',
+                        width: '24px', 
+                        height: '24px'
+                    }}
             >
                 {/* Outer circle */}
                 <div 
