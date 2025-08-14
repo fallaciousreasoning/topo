@@ -8,12 +8,16 @@ import openTopo from "../layers/openTopo"
 
 const SETTINGS_LOCAL_STORAGE_KEY = 'topos-settings'
 
+export type CursorMode = 'always' | 'never' | 'automatic'
+
 interface Settings {
     cacheLayers: string[]
+    cursorMode: CursorMode
 }
 
 const defaultSettings: Settings = {
-    cacheLayers: [linzAerial.id, linzVector.id, topoRaster.id, osm.id, openTopo.id, demOverlaySource.id]
+    cacheLayers: [linzAerial.id, linzVector.id, topoRaster.id, osm.id, openTopo.id, demOverlaySource.id],
+    cursorMode: 'automatic'
 }
 
 let cachedValue: Settings | undefined
