@@ -18,6 +18,7 @@ import MountainsSection from "./sections/MountainsSection";
 import SearchSection from "./sections/SearchSection";
 import SettingsSection from "./sections/SettingsSection";
 import MapLabel from "./components/MapLabel";
+import MapCursor from "./components/MapCursor";
 import LongPressLookup from "./controls/LongPressLookup";
 import { BaseLayerDefinition } from "./layers/config";
 import Drawing from "./draw/Drawing";
@@ -100,6 +101,7 @@ export default function TopoMap() {
       <SearchControl />
 
       <MapLabel />
+      <MapCursor />
       <LongPressLookup />
 
       {sources}
