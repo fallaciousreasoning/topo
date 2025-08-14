@@ -1,80 +1,12 @@
 import React from "react"
-import { OverlayDefinition } from "./config"
-import Source from '../map/Source'
+import { addProtocol, getData, getProtocol } from '../caches/protocols'
 import Layer from '../map/Layer'
-import { demSource, elevationEncoding, elevationScheme, maxContourZoom } from "./demSource"
-import { addProtocol, getProtocol, getData } from '../caches/protocols'
-
-// Slope angle calculation utilities with neighbor tile support
-function calculateSlopeAngleWithNeighbors(
-    centerTile: ImageData, 
-    neighbors: { [key: string]: ImageData | null },
-    x: number, 
-    y: number, 
-    resolution: number = 1
-): number {
-    const width = centerTile.width
-    const height = centerTile.height
-    
-    // Get elevation from any tile (including neighbors)
-    const getElevation = (px: number, py: number): number => {
-        let sourceData = centerTile
-        let sourcePx = px
-        let sourcePy = py
-        
-        // Check if we need to look in neighbor tiles
-        if (px < 0 && neighbors.left) {
-            sourceData = neighbors.left
-            sourcePx = width + px // px is negative, so this gives us the right edge
-        } else if (px >= width && neighbors.right) {
-            sourceData = neighbors.right
-            sourcePx = px - width
-        } else if (py < 0 && neighbors.top) {
-            sourceData = neighbors.top
-            sourcePy = height + py // py is negative
-        } else if (py >= height && neighbors.bottom) {
-            sourceData = neighbors.bottom
-            sourcePy = py - height
-        } else if (px < 0 || px >= width || py < 0 || py >= height) {
-            // No neighbor available, return current pixel elevation
-            const currentIdx = (y * width + x) * 4
-            const r = centerTile.data[currentIdx]
-            const g = centerTile.data[currentIdx + 1]  
-            const b = centerTile.data[currentIdx + 2]
-            
-            if (elevationEncoding === 'mapbox') {
-                return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
-            } else if (elevationEncoding === 'terrarium') {
-                return (r * 256 + g + b / 256) - 32768
-            }
-            return 0
-        }
-        
-        const idx = (sourcePy * width + sourcePx) * 4
-        const r = sourceData.data[idx]
-        const g = sourceData.data[idx + 1]  
-        const b = sourceData.data[idx + 2]
-        
-        // Decode elevation based on encoding type
-        if (elevationEncoding === 'mapbox') {
-            return -10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
-        } else if (elevationEncoding === 'terrarium') {
-            return (r * 256 + g + b / 256) - 32768
-        }
-        return 0
-    }
-    
-    // Calculate gradients using finite differences
-    const dzdx = (getElevation(x + 1, y) - getElevation(x - 1, y)) / (2 * resolution)
-    const dzdy = (getElevation(x, y + 1) - getElevation(x, y - 1)) / (2 * resolution)
-    
-    // Calculate slope angle in degrees
-    const slopeRadians = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy))
-    return slopeRadians * (180 / Math.PI)
-}
+import Source from '../map/Source'
+import { OverlayDefinition } from "./config"
+import { demSource } from "./demSource"
 
 // Import worker types
-import type { WorkerMessage, MainMessage, ElevationRequest, ElevationResponse, ProcessTileRequest, TileResponse } from './slopeWorker'
+import type { ElevationRequest, ElevationResponse, MainMessage, ProcessTileRequest, TileResponse } from './slopeWorker'
 
 // Custom tile generator for slope angles using web worker
 class SlopeAngleTileSource {
@@ -404,7 +336,7 @@ export default {
     description: 'Shows terrain slope angles as colored raster tiles',
     type: 'overlay',
     cacheable: false,
-    defaultOpacity: 0.7,
+    defaultOpacity: 0.6,
     source: (
         <>
             <Source 
