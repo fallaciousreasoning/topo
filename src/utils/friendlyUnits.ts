@@ -8,7 +8,7 @@ export const friendlyize = (amount: number, units: string[], chunkSize: number, 
     }
 
     amount = round(amount, dps);
-    let result = `${amount}${units[size]}`
+    let result = `${amount.toFixed(dps)}${units[size]}`
 
     if (pluralize && amount !== 1)
         result += 's';
