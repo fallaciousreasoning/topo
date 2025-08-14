@@ -12,7 +12,7 @@ export default function LayersControl() {
     const { map } = useMap()
 
     const [open, setOpen] = React.useState(false)
-    const [opacityDialog, setOpacityDialog] = React.useState<{ layerId: string, layerName: string } | null>(null)
+    const [opacityDialog, setOpacityDialog] = React.useState<{ layerId: string, layerName: string, defaultOpacity: number } | null>(null)
     const toggleOverlay = (overlayId: string, checked: boolean) => {
         if (checked) {
             updateParams({
@@ -39,8 +39,8 @@ export default function LayersControl() {
         }
     }
 
-    const openOpacityDialog = (layerId: string, layerName: string) => {
-        setOpacityDialog({ layerId, layerName })
+    const openOpacityDialog = (layerId: string, layerName: string, defaultOpacity: number) => {
+        setOpacityDialog({ layerId, layerName, defaultOpacity })
         setOpen(false) // Close the layers menu when opening opacity dialog
     }
 
@@ -54,8 +54,8 @@ export default function LayersControl() {
         
         const applyStoredOpacities = () => {
             overlays.forEach(overlay => {
-                if (overlay.configurableOpacity && routeParams.overlays.includes(overlay.id)) {
-                    const opacity = getOpacity(overlay.id)
+                if (overlay.defaultOpacity !== undefined && routeParams.overlays.includes(overlay.id)) {
+                    const opacity = getOpacity(overlay.id, overlay.defaultOpacity)
                     handleOpacityChange(overlay.id, opacity)
                 }
             })
@@ -104,13 +104,13 @@ export default function LayersControl() {
                                 <input type="checkbox" checked={routeParams.overlays.includes(m.id)} onChange={e => toggleOverlay(m.id, e.target.checked)} />
                                 {m.name}
                             </label>
-                            {m.configurableOpacity && routeParams.overlays.includes(m.id) && (
+                            {m.defaultOpacity !== undefined && routeParams.overlays.includes(m.id) && (
                                 <button
-                                    onClick={() => openOpacityDialog(m.id, m.name)}
+                                    onClick={() => openOpacityDialog(m.id, m.name, m.defaultOpacity!)}
                                     className="text-blue-600 hover:text-blue-800 hover:underline text-xs cursor-pointer !bg-transparent !p-0 !h-auto"
                                     title={`Adjust ${m.name} opacity`}
                                 >
-                                    {Math.round(getOpacity(m.id) * 100)}%
+                                    {Math.round(getOpacity(m.id, m.defaultOpacity) * 100)}%
                                 </button>
                             )}
                         </li>)}
@@ -129,6 +129,7 @@ export default function LayersControl() {
             <OpacityDialog
                 layerId={opacityDialog.layerId}
                 layerName={opacityDialog.layerName}
+                defaultOpacity={opacityDialog.defaultOpacity}
                 isOpen={true}
                 onClose={closeOpacityDialog}
                 onOpacityChange={(opacity) => handleOpacityChange(opacityDialog.layerId, opacity)}
