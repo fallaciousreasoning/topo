@@ -3,12 +3,15 @@ import { useMap } from '../map/Map'
 import Source from '../map/Source'
 import Layer from '../map/Layer'
 import { friendlyDistance } from '../utils/friendlyUnits'
+import { useSetting } from '../utils/settings'
 
 export default function MapCursor() {
     const { map } = useMap()
+    const cursorMode = useSetting('cursorMode')
     const [userLocation, setUserLocation] = React.useState<[number, number] | null>(null)
     const [centerLocation, setCenterLocation] = React.useState<[number, number] | null>(null)
     const [labelPosition, setLabelPosition] = React.useState<{ x: number, y: number, distance: string, rotation: number, flipped: boolean } | null>(null)
+    const [isInteracting, setIsInteracting] = React.useState(false)
 
     React.useEffect(() => {
         if (!map) return
@@ -49,6 +52,51 @@ export default function MapCursor() {
             map.off('move', updateCenterLocation)
         }
     }, [map])
+
+    // Handle automatic mode interaction detection
+    React.useEffect(() => {
+        if (!map || cursorMode !== 'automatic') {
+            setIsInteracting(false)
+            return
+        }
+
+        const handleInteractionStart = () => {
+            setIsInteracting(true)
+        }
+
+        const handleInteractionEnd = () => {
+            setIsInteracting(false)
+        }
+
+        // Map interaction events - show on start, hide on end
+        map.on('mousedown', handleInteractionStart)
+        map.on('touchstart', handleInteractionStart)
+        map.on('dragstart', handleInteractionStart)
+        map.on('movestart', handleInteractionStart)
+        map.on('zoomstart', handleInteractionStart)
+        map.on('wheel', handleInteractionStart)
+
+        map.on('mouseup', handleInteractionEnd)
+        map.on('touchend', handleInteractionEnd)
+        map.on('dragend', handleInteractionEnd)
+        map.on('moveend', handleInteractionEnd)
+        map.on('zoomend', handleInteractionEnd)
+
+        return () => {
+            map.off('mousedown', handleInteractionStart)
+            map.off('touchstart', handleInteractionStart)
+            map.off('dragstart', handleInteractionStart)
+            map.off('movestart', handleInteractionStart)
+            map.off('zoomstart', handleInteractionStart)
+            map.off('wheel', handleInteractionStart)
+
+            map.off('mouseup', handleInteractionEnd)
+            map.off('touchend', handleInteractionEnd)
+            map.off('dragend', handleInteractionEnd)
+            map.off('moveend', handleInteractionEnd)
+            map.off('zoomend', handleInteractionEnd)
+        }
+    }, [map, cursorMode])
 
     // Create GeoJSON data for the line only
     const lineData = React.useMemo(() => {
@@ -150,10 +198,24 @@ export default function MapCursor() {
         }
     }, [map, lineData])
 
+    // Determine if cursor should be visible
+    const shouldShowCursor = React.useMemo(() => {
+        switch (cursorMode) {
+            case 'always':
+                return true
+            case 'never':
+                return false
+            case 'automatic':
+                return isInteracting
+            default:
+                return false
+        }
+    }, [cursorMode, isInteracting])
+
     return (
         <>
             {/* MapLibre Source and Layer for the line */}
-            {userLocation && centerLocation && (
+            {shouldShowCursor && userLocation && centerLocation && (
                 <>
                     <Source 
                         id="cursor-line-source" 
@@ -178,7 +240,7 @@ export default function MapCursor() {
             )}
 
             {/* DOM-based distance label */}
-            {labelPosition && (
+            {shouldShowCursor && labelPosition && (
                 <div 
                     className="fixed pointer-events-none z-20 px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded"
                     style={{
@@ -193,8 +255,9 @@ export default function MapCursor() {
             )}
             
             {/* Target cursor in center of screen */}
-            <div 
-                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
+            {shouldShowCursor && (
+                <div 
+                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
                 style={{ 
                     width: '24px', 
                     height: '24px'
@@ -251,7 +314,8 @@ export default function MapCursor() {
                         marginBottom: '-2px'
                     }}
                 />
-            </div>
+                </div>
+            )}
         </>
     )
 }
