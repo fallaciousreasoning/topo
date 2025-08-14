@@ -349,8 +349,8 @@ export default {
                     type: 'raster',
                     tiles: [`slope-angle://{z}/{x}/{y}`],
                     tileSize: 256,
-                    minzoom: 6,
-                    maxzoom: maxContourZoom
+                    minzoom: 7,
+                    maxzoom: 17
                 }}
             />
             <Layer 
