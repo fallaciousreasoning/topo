@@ -42,12 +42,12 @@ type MainMessage = ElevationResponse | TileResponse
 // Color stops for slope angles
 const colorStops = [
     { angle: 0, color: { r: 0, g: 0, b: 0, a: 0 } },        // Transparent
-    { angle: 15, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
-    { angle: 20, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
-    { angle: 30, color: { r: 255, g: 165, b: 0, a: 255 } }, // Orange
-    { angle: 40, color: { r: 255, g: 0, b: 0, a: 255 } },   // Red
-    { angle: 50, color: { r: 128, g: 0, b: 128, a: 255 } }, // Purple
-    { angle: 60, color: { r: 0, g: 0, b: 0, a: 255 } }      // Black
+    { angle: 20, color: { r: 0, g: 0, b: 0, a: 0 } },        // Transparent
+    { angle: 30, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
+    { angle: 40, color: { r: 255, g: 165, b: 0, a: 255 } }, // Orange
+    { angle: 50, color: { r: 255, g: 0, b: 0, a: 255 } },   // Red
+    { angle: 60, color: { r: 128, g: 0, b: 128, a: 255 } }, // Purple
+    { angle: 70, color: { r: 0, g: 0, b: 0, a: 255 } }      // Black
 ]
 
 // Pending tile requests waiting for elevation data
@@ -152,11 +152,11 @@ function applyBlur(imageData: ImageData): ImageData {
     const height = imageData.height
     const blurred = new ImageData(width, height)
     
-    // 3x3 box blur kernel (equal weights)
+    // 3x3 kernel giving each pixel the average of its neighbors
     const kernel = [
-        1/9, 1/9, 1/9,
-        1/9, 1/9, 1/9,
-        1/9, 1/9, 1/9
+        1/8, 1/8, 1/8,
+        1/8, 0, 1/8,
+        1/8, 1/8, 1/8
     ]
     
     for (let y = 0; y < height; y++) {
