@@ -67,7 +67,15 @@ function Layers() {
       {overlays
         .filter((e) => routeParams.overlays.includes(e.id))
         .map((o) =>
-          typeof o.source === "function" ? <o.source key={o.id} /> : o.source,
+          typeof o.source === "function" ? (
+            <React.Fragment key={o.id}>
+              <o.source />
+            </React.Fragment>
+          ) : (
+            <React.Fragment key={o.id}>
+              {o.source}
+            </React.Fragment>
+          ),
         )}
     </>
   );
