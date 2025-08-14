@@ -37,7 +37,7 @@ export default {
     description: 'Elevation data for the terrain. Used to render contours, hillshade and 3d maps',
     type: 'overlay',
     cacheable: false,
-    configurableOpacity: true,
+    defaultOpacity: 1,
     source: <React.Fragment key='contour-source'>
         <Source id='contour-source' spec={{
             type: 'vector',

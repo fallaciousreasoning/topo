@@ -404,7 +404,7 @@ export default {
     description: 'Shows terrain slope angles as colored raster tiles',
     type: 'overlay',
     cacheable: false,
-    configurableOpacity: true,
+    defaultOpacity: 0.7,
     source: (
         <>
             <Source 

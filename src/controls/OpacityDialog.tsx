@@ -2,9 +2,9 @@ import * as React from 'react'
 import { createPortal } from 'react-dom'
 
 // Local storage for opacity values
-export const getOpacity = (layerId: string): number => {
+export const getOpacity = (layerId: string, defaultOpacity: number = 0.7): number => {
     const stored = localStorage.getItem(`layer-opacity-${layerId}`)
-    return stored ? parseFloat(stored) : 0.7 // default opacity
+    return stored ? parseFloat(stored) : defaultOpacity
 }
 
 export const setOpacity = (layerId: string, opacity: number) => {
@@ -14,13 +14,14 @@ export const setOpacity = (layerId: string, opacity: number) => {
 interface OpacityDialogProps {
     layerId: string
     layerName: string
+    defaultOpacity: number
     isOpen: boolean
     onClose: () => void
     onOpacityChange: (opacity: number) => void
 }
 
-export default function OpacityDialog({ layerId, layerName, isOpen, onClose, onOpacityChange }: OpacityDialogProps) {
-    const [opacity, setOpacityState] = React.useState(() => getOpacity(layerId))
+export default function OpacityDialog({ layerId, layerName, defaultOpacity, isOpen, onClose, onOpacityChange }: OpacityDialogProps) {
+    const [opacity, setOpacityState] = React.useState(() => getOpacity(layerId, defaultOpacity))
     const dialogRef = React.useRef<HTMLDialogElement>(null)
     
     React.useEffect(() => {
