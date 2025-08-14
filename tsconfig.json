@@ -11,7 +11,9 @@
   ],
   "compilerOptions": {
     "lib": [
-      "ESNext"
+      "ESNext",
+      "DOM",
+      "WebWorker"
     ],
     "jsx": "react",
     "sourceMap": true,
