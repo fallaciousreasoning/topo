@@ -21,7 +21,7 @@ export const contourTiles = demSource.contourProtocolUrl({
 })
 
 const abortController = new AbortController()
-export const getElevation = (latlng: [number, number], controller = abortController): Promise<number> => demSource.manager.getElevation(latlng, elevationScheme, abortController)
+export const getElevation = (latlng: [number, number], controller = abortController): Promise<number> => demSource.manager.getElevation(latlng, elevationScheme, controller)
 
 export const demOverlaySource = {
     id: 'dem',

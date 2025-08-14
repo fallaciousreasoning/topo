@@ -36,8 +36,8 @@ interface TileResponse {
     error?: string
 }
 
-type WorkerMessage = ElevationRequest | ProcessTileRequest
-type MainMessage = ElevationResponse | TileResponse
+type WorkerMessage = ElevationResponse | ProcessTileRequest
+type MainMessage = ElevationRequest | TileResponse
 
 // Color stops for slope angles
 const colorStops = [
@@ -188,10 +188,10 @@ function applyBlur(imageData: ImageData): ImageData {
     return blurred
 }
 
-function processTileData(centerTile: ImageData, neighbors: any, x: number, y: number, z: number): string {
+async function processTileData(centerTile: ImageData, neighbors: any, x: number, y: number, z: number): Promise<string> {
     try {
         if (!centerTile) {
-            return generateEmptyTile()
+            return await generateEmptyTile()
         }
         
         const slopeImageData = new ImageData(256, 256)
@@ -223,29 +223,27 @@ function processTileData(centerTile: ImageData, neighbors: any, x: number, y: nu
         const ctx = canvas.getContext('2d')!
         ctx.putImageData(blurredImageData, 0, 0)
         
-        return canvas.convertToBlob().then(blob => {
-            return new Promise<string>((resolve) => {
-                const reader = new FileReader()
-                reader.onload = () => resolve(reader.result as string)
-                reader.readAsDataURL(blob)
-            })
-        })
-    } catch (error) {
-        console.warn('Failed to process tile in worker:', error)
-        return generateEmptyTile()
-    }
-}
-
-function generateEmptyTile(): string {
-    const canvas = new OffscreenCanvas(256, 256)
-    const ctx = canvas.getContext('2d')!
-    ctx.clearRect(0, 0, 256, 256)
-    return canvas.convertToBlob().then(blob => {
+        const blob = await canvas.convertToBlob()
         return new Promise<string>((resolve) => {
             const reader = new FileReader()
             reader.onload = () => resolve(reader.result as string)
             reader.readAsDataURL(blob)
         })
+    } catch (error) {
+        console.warn('Failed to process tile in worker:', error)
+        return await generateEmptyTile()
+    }
+}
+
+async function generateEmptyTile(): Promise<string> {
+    const canvas = new OffscreenCanvas(256, 256)
+    const ctx = canvas.getContext('2d')!
+    ctx.clearRect(0, 0, 256, 256)
+    const blob = await canvas.convertToBlob()
+    return new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.readAsDataURL(blob)
     })
 }
 
@@ -276,7 +274,7 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
             pendingRequests.delete(id)
             
             try {
-                const dataUrl = await processTileData(centerTile, neighbors, request.x, request.y, request.z)
+                const dataUrl = await processTileData(centerTile!, neighbors, request.x, request.y, request.z)
                 
                 const response: TileResponse = {
                     type: 'TILE_COMPLETE',

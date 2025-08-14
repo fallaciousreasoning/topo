@@ -20,7 +20,6 @@ import SettingsSection from "./sections/SettingsSection";
 import MapLabel from "./components/MapLabel";
 import LongPressLookup from "./controls/LongPressLookup";
 import { BaseLayerDefinition } from "./layers/config";
-import TrackLayer from "./draw/TrackLayer";
 import Drawing from "./draw/Drawing";
 import TracksSection from "./sections/TracksSection";
 import Mountains from "./layers/mountains";
