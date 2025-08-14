@@ -73,7 +73,12 @@ class SlopeAngleTileSource {
                 type: 'ELEVATION_DATA',
                 id: request.id,
                 centerTile: center,
-                neighbors
+                neighbors: {
+                    top: neighbors.top,
+                    bottom: neighbors.bottom,
+                    left: neighbors.left,
+                    right: neighbors.right
+                }
             }
             
             this.worker.postMessage(response)
