@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { createPortal } from 'react-dom'
 
 // Local storage for opacity values
 export const getOpacity = (layerId: string, defaultOpacity: number = 0.7): number => {
@@ -48,7 +47,7 @@ export default function OpacityDialog({ layerId, layerName, defaultOpacity, isOp
         }
     }
     
-    return createPortal(
+    return (
         <dialog 
             ref={dialogRef}
             onClick={handleDialogClick}
@@ -74,7 +73,6 @@ export default function OpacityDialog({ layerId, layerName, defaultOpacity, isOp
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
             </div>
-        </dialog>,
-        document.body
+        </dialog>
     )
 }
