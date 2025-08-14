@@ -73,104 +73,99 @@ function calculateSlopeAngleWithNeighbors(
     return slopeRadians * (180 / Math.PI)
 }
 
-// Custom tile generator for slope angles
+// Import worker types
+import type { WorkerMessage, MainMessage, ElevationRequest, ElevationResponse, ProcessTileRequest, TileResponse } from './slopeWorker'
+
+// Custom tile generator for slope angles using web worker
 class SlopeAngleTileSource {
     private canvas: HTMLCanvasElement
     private ctx: CanvasRenderingContext2D
-    
-    // Color stops for slope angles
-    private colorStops = [
-        { angle: 0, color: { r: 0, g: 0, b: 0, a: 0 } },        // Transparent
-        { angle: 15, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
-        { angle: 20, color: { r: 255, g: 255, b: 0, a: 255 } }, // Yellow
-        { angle: 30, color: { r: 255, g: 165, b: 0, a: 255 } }, // Orange
-        { angle: 40, color: { r: 255, g: 0, b: 0, a: 255 } },   // Red
-        { angle: 50, color: { r: 128, g: 0, b: 128, a: 255 } }, // Purple
-        { angle: 60, color: { r: 0, g: 0, b: 0, a: 255 } }      // Black
-    ]
+    private worker: Worker
+    private pendingTiles = new Map<string, { 
+        resolve: (dataUrl: string) => void, 
+        reject: (error: Error) => void,
+        abortController: AbortController 
+    }>()
     
     constructor() {
         this.canvas = document.createElement('canvas')
         this.canvas.width = 256
         this.canvas.height = 256
         this.ctx = this.canvas.getContext('2d')!
+        
+        // Create worker
+        this.worker = new Worker(new URL('./slopeWorker.ts', import.meta.url), { type: 'module' })
+        this.worker.addEventListener('message', this.handleWorkerMessage.bind(this))
     }
     
-    private lerp(a: number, b: number, t: number): number {
-        return a + (b - a) * t
-    }
-    
-    private getSlopeColor(slope: number): { r: number, g: number, b: number, a: number } {
-        // Below minimum threshold
-        if (slope < this.colorStops[0].angle) {
-            return { r: 0, g: 0, b: 0, a: 0 } // Transparent
-        }
+    private handleWorkerMessage(event: MessageEvent<MainMessage>) {
+        const message = event.data
         
-        // Above maximum threshold
-        if (slope >= this.colorStops[this.colorStops.length - 1].angle) {
-            return this.colorStops[this.colorStops.length - 1].color
-        }
-        
-        // Find the two color stops to interpolate between
-        for (let i = 0; i < this.colorStops.length - 1; i++) {
-            const lower = this.colorStops[i]
-            const upper = this.colorStops[i + 1]
+        if (message.type === 'REQUEST_ELEVATION_DATA') {
+            // Worker is asking for elevation data
+            this.provideElevationData(message as ElevationRequest)
+        } else if (message.type === 'TILE_COMPLETE') {
+            // Worker has finished processing a tile
+            const tileMessage = message as TileResponse
+            const pending = this.pendingTiles.get(tileMessage.id)
             
-            if (slope >= lower.angle && slope <= upper.angle) {
-                const t = (slope - lower.angle) / (upper.angle - lower.angle)
-                return {
-                    r: Math.round(this.lerp(lower.color.r, upper.color.r, t)),
-                    g: Math.round(this.lerp(lower.color.g, upper.color.g, t)),
-                    b: Math.round(this.lerp(lower.color.b, upper.color.b, t)),
-                    a: Math.round(this.lerp(lower.color.a, upper.color.a, t))
+            if (pending && !pending.abortController.signal.aborted) {
+                this.pendingTiles.delete(tileMessage.id)
+                
+                if (tileMessage.error) {
+                    pending.reject(new Error(tileMessage.error))
+                } else {
+                    pending.resolve(tileMessage.dataUrl)
                 }
             }
         }
-        
-        // Fallback (shouldn't reach here)
-        return { r: 0, g: 0, b: 0, a: 0 }
     }
     
-    private applyBlur(imageData: ImageData): ImageData {
-        const width = imageData.width
-        const height = imageData.height
-        const blurred = this.ctx.createImageData(width, height)
-        
-        // 3x3 box blur kernel (equal weights)
-        const kernel = [
-            1/9, 1/9, 1/9,
-            1/9, 1/9, 1/9,
-            1/9, 1/9, 1/9
-        ]
-        
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                let r = 0, g = 0, b = 0, a = 0
-                
-                // Apply kernel
-                for (let ky = -1; ky <= 1; ky++) {
-                    for (let kx = -1; kx <= 1; kx++) {
-                        const px = Math.max(0, Math.min(width - 1, x + kx))
-                        const py = Math.max(0, Math.min(height - 1, y + ky))
-                        const idx = (py * width + px) * 4
-                        const weight = kernel[(ky + 1) * 3 + (kx + 1)]
-                        
-                        r += imageData.data[idx] * weight
-                        g += imageData.data[idx + 1] * weight
-                        b += imageData.data[idx + 2] * weight
-                        a += imageData.data[idx + 3] * weight
-                    }
-                }
-                
-                const outputIdx = (y * width + x) * 4
-                blurred.data[outputIdx] = Math.round(r)
-                blurred.data[outputIdx + 1] = Math.round(g)
-                blurred.data[outputIdx + 2] = Math.round(b)
-                blurred.data[outputIdx + 3] = Math.round(a)
-            }
+    private async provideElevationData(request: ElevationRequest) {
+        // Check if the request is still pending (not aborted)
+        const pending = this.pendingTiles.get(request.id)
+        if (!pending || pending.abortController.signal.aborted) {
+            return // Don't fetch data for cancelled requests
         }
         
-        return blurred
+        try {
+            // Fetch elevation data for center tile and neighbors
+            const { center, neighbors } = await this.fetchNeighborTiles(request.x, request.y, request.z, pending.abortController)
+            
+            // Check again if still pending after async fetch
+            if (pending.abortController.signal.aborted) {
+                return
+            }
+            
+            const response: ElevationResponse = {
+                type: 'ELEVATION_DATA',
+                id: request.id,
+                centerTile: center,
+                neighbors
+            }
+            
+            this.worker.postMessage(response)
+        } catch (error) {
+            // Check if error is due to abortion
+            if (pending.abortController.signal.aborted) {
+                return
+            }
+            
+            // Send null data if fetch fails
+            const response: ElevationResponse = {
+                type: 'ELEVATION_DATA',
+                id: request.id,
+                centerTile: null,
+                neighbors: {
+                    top: null,
+                    bottom: null,
+                    left: null,
+                    right: null
+                }
+            }
+            
+            this.worker.postMessage(response)
+        }
     }
     
     private getElevationTileUrl(x: number, y: number, z: number): string {
@@ -178,11 +173,10 @@ class SlopeAngleTileSource {
         return demSource.sharedDemProtocolUrl.replace('{z}', z.toString()).replace('{x}', x.toString()).replace('{y}', y.toString())
     }
     
-    private async fetchNeighborTiles(x: number, y: number, z: number): Promise<{
+    private async fetchNeighborTiles(x: number, y: number, z: number, abortController: AbortController): Promise<{
         center: ImageData,
         neighbors: { [key: string]: ImageData | null }
     }> {
-        const abortController = new AbortController()
         const tiles: { [key: string]: ImageData | null } = {
             center: null,
             top: null,
@@ -200,6 +194,11 @@ class SlopeAngleTileSource {
             { key: 'right', tx: x + 1, ty: y }
         ].map(async ({ key, tx, ty }) => {
             try {
+                // Check for abort before starting
+                if (abortController.signal.aborted) {
+                    return { key, imageData: null }
+                }
+                
                 // Skip tiles that are outside valid range
                 if (tx < 0 || ty < 0 || tx >= Math.pow(2, z) || ty >= Math.pow(2, z)) {
                     return { key, imageData: null }
@@ -207,6 +206,12 @@ class SlopeAngleTileSource {
                 
                 const url = this.getElevationTileUrl(tx, ty, z)
                 const response = await getData({ url } as any, abortController)
+                
+                // Check for abort after getData
+                if (abortController.signal.aborted) {
+                    return { key, imageData: null }
+                }
+                
                 const blob = new Blob([response.data])
                 const tileUrl = URL.createObjectURL(blob)
                 
@@ -214,15 +219,38 @@ class SlopeAngleTileSource {
                 img.crossOrigin = 'anonymous'
                 
                 return new Promise<{ key: string, imageData: ImageData | null }>((resolve) => {
+                    const cleanup = () => {
+                        URL.revokeObjectURL(tileUrl)
+                    }
+                    
+                    // Handle abort during image loading
+                    const onAbort = () => {
+                        cleanup()
+                        resolve({ key, imageData: null })
+                    }
+                    
+                    if (abortController.signal.aborted) {
+                        onAbort()
+                        return
+                    }
+                    
+                    abortController.signal.addEventListener('abort', onAbort)
+                    
                     img.onload = () => {
+                        if (abortController.signal.aborted) {
+                            cleanup()
+                            resolve({ key, imageData: null })
+                            return
+                        }
+                        
                         this.ctx.clearRect(0, 0, 256, 256)
                         this.ctx.drawImage(img, 0, 0, 256, 256)
                         const imageData = this.ctx.getImageData(0, 0, 256, 256)
-                        URL.revokeObjectURL(tileUrl)
+                        cleanup()
                         resolve({ key, imageData })
                     }
                     img.onerror = () => {
-                        URL.revokeObjectURL(tileUrl)
+                        cleanup()
                         resolve({ key, imageData: null })
                     }
                     img.src = tileUrl
@@ -233,6 +261,12 @@ class SlopeAngleTileSource {
         })
         
         const results = await Promise.all(tilePromises)
+        
+        // Check for abort before processing results
+        if (abortController.signal.aborted) {
+            throw new Error('Fetch aborted')
+        }
+        
         results.forEach(({ key, imageData }) => {
             tiles[key] = imageData
         })
@@ -248,47 +282,76 @@ class SlopeAngleTileSource {
         }
     }
     
-    async generateSlopeTile(x: number, y: number, z: number): Promise<string> {
-        try {
-            // Fetch center tile and neighbors
-            const { center: imageData, neighbors } = await this.fetchNeighborTiles(x, y, z)
+    async generateSlopeTile(x: number, y: number, z: number, abortSignal?: AbortSignal): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const id = `${x}-${y}-${z}-${Date.now()}`
+            const abortController = new AbortController()
             
-            if (!imageData) {
-                return this.generateEmptyTile()
+            // Check if already aborted
+            if (abortSignal?.aborted) {
+                reject(new Error('Tile generation aborted'))
+                return
             }
             
-            const slopeImageData = this.ctx.createImageData(256, 256)
+            // Store the promise resolvers and abort controller
+            this.pendingTiles.set(id, { resolve, reject, abortController })
             
-            // Calculate ground resolution based on zoom level
-            // At zoom level z, each pixel represents about (40075000 / (256 * 2^z)) meters
-            const groundResolution = 40075000 / (256 * Math.pow(2, z))
+            // Handle external abort signal
+            if (abortSignal) {
+                abortSignal.addEventListener('abort', () => {
+                    if (this.pendingTiles.has(id)) {
+                        this.pendingTiles.delete(id)
+                        abortController.abort()
+                        reject(new Error('Tile generation aborted'))
+                    }
+                })
+            }
             
-            // Calculate slope angles for each pixel
-            for (let py = 0; py < 256; py++) {
-                for (let px = 0; px < 256; px++) {
-                    const slope = calculateSlopeAngleWithNeighbors(imageData, neighbors, px, py, groundResolution)
-                    
-                    // Convert slope angle to color using gradient
-                    const color = this.getSlopeColor(slope)
-                    const idx = (py * 256 + px) * 4
-                    
-                    slopeImageData.data[idx] = color.r
-                    slopeImageData.data[idx + 1] = color.g
-                    slopeImageData.data[idx + 2] = color.b
-                    slopeImageData.data[idx + 3] = color.a
+            // Handle timeout
+            const timeoutId = setTimeout(() => {
+                if (this.pendingTiles.has(id)) {
+                    this.pendingTiles.delete(id)
+                    abortController.abort()
+                    reject(new Error('Tile generation timeout'))
                 }
+            }, 30000) // 30 second timeout
+            
+            // Clean up timeout when request completes
+            abortController.signal.addEventListener('abort', () => {
+                clearTimeout(timeoutId)
+            })
+            
+            // Send processing request to worker
+            const request: ProcessTileRequest = {
+                type: 'PROCESS_TILE',
+                id,
+                x,
+                y,
+                z
             }
             
-            this.ctx.putImageData(slopeImageData, 0, 0)
-            
-            // Apply 3x3 blur kernel
-            const blurredImageData = this.applyBlur(slopeImageData)
-            this.ctx.putImageData(blurredImageData, 0, 0)
-            
-            return this.canvas.toDataURL()
-        } catch (error) {
-            console.warn('Failed to generate slope tile:', error)
-            return this.generateEmptyTile()
+            this.worker.postMessage(request)
+        })
+    }
+    
+    // Method to cancel all pending tiles
+    cancelAllPendingTiles() {
+        for (const [id, pending] of this.pendingTiles.entries()) {
+            pending.abortController.abort()
+            pending.reject(new Error('Tile generation cancelled'))
+        }
+        this.pendingTiles.clear()
+    }
+    
+    // Method to cancel a specific tile
+    cancelTile(x: number, y: number, z: number) {
+        for (const [id, pending] of this.pendingTiles.entries()) {
+            if (id.startsWith(`${x}-${y}-${z}-`)) {
+                this.pendingTiles.delete(id)
+                pending.abortController.abort()
+                pending.reject(new Error('Tile generation cancelled'))
+                break
+            }
         }
     }
     
