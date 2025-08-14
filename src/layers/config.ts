@@ -17,5 +17,6 @@ export type BaseLayerDefinition = {
 
 export interface OverlayDefinition extends LayerShared {
     type: 'overlay',
-    source: React.ReactNode | (() => React.ReactNode)
+    source: React.ReactNode | (() => React.ReactNode),
+    configurableOpacity?: boolean
 }
