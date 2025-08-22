@@ -9,6 +9,14 @@ interface ElevationRequest {
     z: number
 }
 
+interface PointElevationRequest {
+    type: 'REQUEST_POINT_ELEVATION_DATA'
+    id: string
+    lat: number
+    lng: number
+    offset: number
+}
+
 interface ElevationResponse {
     type: 'ELEVATION_DATA'
     id: string
@@ -21,12 +29,38 @@ interface ElevationResponse {
     }
 }
 
+interface PointElevationResponse {
+    type: 'POINT_ELEVATION_DATA'
+    id: string
+    elevations: {
+        center: number | null
+        east: number | null
+        west: number | null
+        north: number | null
+        south: number | null
+    }
+}
+
 interface ProcessTileRequest {
     type: 'PROCESS_TILE'
     id: string
     x: number
     y: number
     z: number
+}
+
+interface CalculatePointSlopeRequest {
+    type: 'CALCULATE_POINT_SLOPE'
+    id: string
+    lat: number
+    lng: number
+}
+
+interface PointSlopeResponse {
+    type: 'POINT_SLOPE_COMPLETE'
+    id: string
+    slopeAngle: number | null
+    error?: string
 }
 
 interface TileResponse {
@@ -36,8 +70,8 @@ interface TileResponse {
     error?: string
 }
 
-type WorkerMessage = ElevationResponse | ProcessTileRequest
-type MainMessage = ElevationRequest | TileResponse
+type WorkerMessage = ElevationResponse | ProcessTileRequest | CalculatePointSlopeRequest | PointElevationResponse
+type MainMessage = ElevationRequest | TileResponse | PointSlopeResponse | PointElevationRequest
 
 // Color stops for slope angles
 const colorStops = [
@@ -51,6 +85,7 @@ const colorStops = [
 
 // Pending tile requests waiting for elevation data
 const pendingRequests = new Map<string, { x: number, y: number, z: number }>()
+const pendingSlopeRequests = new Map<string, { lat: number, lng: number }>()
 
 // Slope angle calculation with neighbor tile support
 function calculateSlopeAngleWithNeighbors(
@@ -247,6 +282,24 @@ async function generateEmptyTile(): Promise<string> {
     })
 }
 
+// Calculate slope angle for a specific lat/lng point using elevation samples
+function calculateSlopeFromElevations(elevations: PointElevationResponse['elevations'], offset: number): number | null {
+    const { center, east, west, north, south } = elevations
+
+    if (center === null || east === null || west === null || north === null || south === null) {
+        return null
+    }
+
+    // Calculate gradients using finite differences (same as tile processing)
+    const distance = offset * 111320 // Convert degrees to meters (rough approximation)
+    const dzdx = (east - west) / (2 * distance)
+    const dzdy = (north - south) / (2 * distance)
+
+    // Calculate slope angle in degrees (same formula as tile processing)
+    const slopeRadians = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy))
+    return slopeRadians * (180 / Math.PI)
+}
+
 // Worker message handler
 self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
     const message = event.data
@@ -266,22 +319,37 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         }
         
         self.postMessage(elevationRequest)
+    } else if (message.type === 'CALCULATE_POINT_SLOPE') {
+        const { id, lat, lng } = message
+
+        // Store the request and ask main thread for elevation data
+        pendingSlopeRequests.set(id, { lat, lng })
+
+        const elevationRequest: PointElevationRequest = {
+            type: 'REQUEST_POINT_ELEVATION_DATA',
+            id,
+            lat,
+            lng,
+            offset: 0.0001 // approximately 10 meters
+        }
+
+        self.postMessage(elevationRequest)
     } else if (message.type === 'ELEVATION_DATA') {
         const { id, centerTile, neighbors } = message as ElevationResponse
         const request = pendingRequests.get(id)
-        
+
         if (request) {
             pendingRequests.delete(id)
-            
+
             try {
                 const dataUrl = await processTileData(centerTile!, neighbors, request.x, request.y, request.z)
-                
+
                 const response: TileResponse = {
                     type: 'TILE_COMPLETE',
                     id,
                     dataUrl
                 }
-                
+
                 self.postMessage(response)
             } catch (error) {
                 const response: TileResponse = {
@@ -290,11 +358,39 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
                     dataUrl: await generateEmptyTile(),
                     error: error instanceof Error ? error.message : 'Unknown error'
                 }
-                
+
+                self.postMessage(response)
+            }
+        }
+    } else if (message.type === 'POINT_ELEVATION_DATA') {
+        const { id, elevations } = message as PointElevationResponse
+        const request = pendingSlopeRequests.get(id)
+
+        if (request) {
+            pendingSlopeRequests.delete(id)
+
+            try {
+                const slopeAngle = calculateSlopeFromElevations(elevations, 0.0001)
+
+                const response: PointSlopeResponse = {
+                    type: 'POINT_SLOPE_COMPLETE',
+                    id,
+                    slopeAngle
+                }
+
+                self.postMessage(response)
+            } catch (error) {
+                const response: PointSlopeResponse = {
+                    type: 'POINT_SLOPE_COMPLETE',
+                    id,
+                    slopeAngle: null,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                }
+
                 self.postMessage(response)
             }
         }
     }
 })
 
-export type { WorkerMessage, MainMessage, ElevationRequest, ElevationResponse, ProcessTileRequest, TileResponse }
+export type { WorkerMessage, MainMessage, ElevationRequest, ElevationResponse, ProcessTileRequest, TileResponse, CalculatePointSlopeRequest, PointSlopeResponse, PointElevationRequest, PointElevationResponse }
