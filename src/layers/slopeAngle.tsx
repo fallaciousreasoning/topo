@@ -6,7 +6,8 @@ import { OverlayDefinition } from "./config"
 import { demSource } from "./demSource"
 
 // Import worker types
-import type { ElevationRequest, ElevationResponse, MainMessage, ProcessTileRequest, TileResponse } from './slopeWorker'
+import type { ElevationRequest, ElevationResponse, MainMessage, ProcessTileRequest, TileResponse, CalculatePointSlopeRequest, PointSlopeResponse, PointElevationRequest, PointElevationResponse } from './slopeWorker'
+import { getElevation } from './contours'
 
 // Custom tile generator for slope angles using web worker
 class SlopeAngleTileSource {
@@ -17,6 +18,10 @@ class SlopeAngleTileSource {
         resolve: (dataUrl: string) => void, 
         reject: (error: Error) => void,
         abortController: AbortController 
+    }>()
+    private pendingSlopes = new Map<string, { 
+        resolve: (angle: number | null) => void, 
+        reject: (error: Error) => void 
     }>()
     
     constructor() {
@@ -36,6 +41,9 @@ class SlopeAngleTileSource {
         if (message.type === 'REQUEST_ELEVATION_DATA') {
             // Worker is asking for elevation data
             this.provideElevationData(message as ElevationRequest)
+        } else if (message.type === 'REQUEST_POINT_ELEVATION_DATA') {
+            // Worker is asking for point elevation data
+            this.providePointElevationData(message as PointElevationRequest)
         } else if (message.type === 'TILE_COMPLETE') {
             // Worker has finished processing a tile
             const tileMessage = message as TileResponse
@@ -48,6 +56,20 @@ class SlopeAngleTileSource {
                     pending.reject(new Error(tileMessage.error))
                 } else {
                     pending.resolve(tileMessage.dataUrl)
+                }
+            }
+        } else if (message.type === 'POINT_SLOPE_COMPLETE') {
+            // Worker has finished calculating point slope
+            const slopeMessage = message as PointSlopeResponse
+            const pending = this.pendingSlopes.get(slopeMessage.id)
+            
+            if (pending) {
+                this.pendingSlopes.delete(slopeMessage.id)
+                
+                if (slopeMessage.error) {
+                    pending.reject(new Error(slopeMessage.error))
+                } else {
+                    pending.resolve(slopeMessage.slopeAngle)
                 }
             }
         }
@@ -104,7 +126,52 @@ class SlopeAngleTileSource {
             this.worker.postMessage(response)
         }
     }
-    
+
+    private async providePointElevationData(request: PointElevationRequest) {
+        try {
+            const { id, lat, lng, offset } = request
+            const abortController = new AbortController()
+            
+            // Get elevations at center point and nearby points
+            const [center, east, west, north, south] = await Promise.all([
+                getElevation([lat, lng], abortController).catch(() => null),
+                getElevation([lat, lng + offset], abortController).catch(() => null),
+                getElevation([lat, lng - offset], abortController).catch(() => null),
+                getElevation([lat + offset, lng], abortController).catch(() => null),
+                getElevation([lat - offset, lng], abortController).catch(() => null)
+            ])
+            
+            const response: PointElevationResponse = {
+                type: 'POINT_ELEVATION_DATA',
+                id,
+                elevations: {
+                    center,
+                    east,
+                    west,
+                    north,
+                    south
+                }
+            }
+            
+            this.worker.postMessage(response)
+        } catch (error) {
+            // Send null data if fetch fails
+            const response: PointElevationResponse = {
+                type: 'POINT_ELEVATION_DATA',
+                id: request.id,
+                elevations: {
+                    center: null,
+                    east: null,
+                    west: null,
+                    north: null,
+                    south: null
+                }
+            }
+            
+            this.worker.postMessage(response)
+        }
+    }
+
     private getElevationTileUrl(x: number, y: number, z: number): string {
         // Use the same URL pattern as the DEM source
         return demSource.sharedDemProtocolUrl.replace('{z}', z.toString()).replace('{x}', x.toString()).replace('{y}', y.toString())
@@ -302,10 +369,56 @@ class SlopeAngleTileSource {
         // In practice, we'd need to set up a custom protocol or tile server
         return `slope-angle://${z}/${x}/${y}`
     }
+
+    async calculatePointSlope(lat: number, lng: number): Promise<number | null> {
+        return new Promise((resolve, reject) => {
+            const id = `slope-${lat}-${lng}-${Date.now()}`
+            
+            // Store the promise resolvers
+            this.pendingSlopes.set(id, { resolve, reject })
+            
+            // Handle timeout
+            const timeoutId = setTimeout(() => {
+                if (this.pendingSlopes.has(id)) {
+                    this.pendingSlopes.delete(id)
+                    reject(new Error('Slope calculation timeout'))
+                }
+            }, 10000) // 10 second timeout
+
+            // Clean up timeout when request completes
+            const cleanup = () => clearTimeout(timeoutId)
+            const originalResolve = resolve
+            const originalReject = reject
+
+            this.pendingSlopes.set(id, { 
+                resolve: (angle) => {
+                    cleanup()
+                    originalResolve(angle)
+                },
+                reject: (error) => {
+                    cleanup()
+                    originalReject(error)
+                }
+            })
+
+            // Send request to worker
+            const request: CalculatePointSlopeRequest = {
+                type: 'CALCULATE_POINT_SLOPE',
+                id,
+                lat,
+                lng
+            }
+
+            this.worker.postMessage(request)
+        })
+    }
 }
 
 // Create slope angle tile source instance
 const slopeAngleSource = new SlopeAngleTileSource()
+
+// Export the instance for use in other components
+export { slopeAngleSource }
 
 // Register custom protocol handler
 const protocol = 'slope-angle'
