@@ -138,7 +138,7 @@ export default function StatusBarControl() {
     const shouldShow = isTouchDevice || position
 
     return shouldShow ? (
-        <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-20">
+        <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-10">
             <div className="bg-white bg-opacity-90 text-black text-xs px-3 py-2 rounded">
                 {placeName && (
                     <div className="font-semibold whitespace-nowrap text-center mb-1">
