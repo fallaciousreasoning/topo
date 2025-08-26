@@ -14,6 +14,7 @@ interface PointElevationRequest {
     id: string
     lat: number
     lng: number
+    zoom: number
     offset: number
 }
 
@@ -54,6 +55,7 @@ interface CalculatePointSlopeRequest {
     id: string
     lat: number
     lng: number
+    zoom: number
 }
 
 interface PointSlopeResponse {
@@ -320,7 +322,7 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         
         self.postMessage(elevationRequest)
     } else if (message.type === 'CALCULATE_POINT_SLOPE') {
-        const { id, lat, lng } = message
+        const { id, lat, lng, zoom } = message
 
         // Store the request and ask main thread for elevation data
         pendingSlopeRequests.set(id, { lat, lng })
@@ -330,6 +332,7 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
             id,
             lat,
             lng,
+            zoom,
             offset: 0.0001 // approximately 10 meters
         }
 

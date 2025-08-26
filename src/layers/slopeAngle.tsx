@@ -134,11 +134,11 @@ class SlopeAngleTileSource {
             
             // Get elevations at center point and nearby points
             const [center, east, west, north, south] = await Promise.all([
-                getElevation([lat, lng], abortController).catch(() => null),
-                getElevation([lat, lng + offset], abortController).catch(() => null),
-                getElevation([lat, lng - offset], abortController).catch(() => null),
-                getElevation([lat + offset, lng], abortController).catch(() => null),
-                getElevation([lat - offset, lng], abortController).catch(() => null)
+                getElevation([lat, lng], request.zoom, abortController).catch(() => null),
+                getElevation([lat, lng + offset], request.zoom, abortController).catch(() => null),
+                getElevation([lat, lng - offset], request.zoom, abortController).catch(() => null),
+                getElevation([lat + offset, lng], request.zoom, abortController).catch(() => null),
+                getElevation([lat - offset, lng], request.zoom, abortController).catch(() => null)
             ])
             
             const response: PointElevationResponse = {
@@ -370,7 +370,7 @@ class SlopeAngleTileSource {
         return `slope-angle://${z}/${x}/${y}`
     }
 
-    async calculatePointSlope(lat: number, lng: number): Promise<number | null> {
+    async calculatePointSlope(lat: number, lng: number, zoom: number): Promise<number | null> {
         return new Promise((resolve, reject) => {
             const id = `slope-${lat}-${lng}-${Date.now()}`
             
@@ -406,7 +406,8 @@ class SlopeAngleTileSource {
                 type: 'CALCULATE_POINT_SLOPE',
                 id,
                 lat,
-                lng
+                lng,
+                zoom
             }
 
             this.worker.postMessage(request)

@@ -104,14 +104,14 @@ export default function StatusBarControl() {
             lastFetchTimeRef.current = Date.now()
             
             const abortController = new AbortController()
-            
+            const zoom = map.getZoom()
             // Fetch elevation, place name, and slope angle concurrently
             Promise.all([
-                getElevation([position.lat, position.lng], abortController)
+                getElevation([position.lat, position.lng], zoom, abortController)
                     .catch(() => null),
                 findPlace(position.lat, position.lng)
                     .catch(() => null),
-                slopeAngleSource.calculatePointSlope(position.lat, position.lng)
+                slopeAngleSource.calculatePointSlope(position.lat, position.lng, zoom)
                     .catch(() => null)
             ]).then(([elevationValue, placeData, slope]) => {
                 if (!abortController.signal.aborted) {
