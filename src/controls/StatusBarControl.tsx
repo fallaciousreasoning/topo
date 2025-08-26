@@ -5,12 +5,14 @@ import { getElevation } from '../layers/contours'
 import { findPlace } from '../search/nearest'
 import { slopeAngleSource } from '../layers/slopeAngle'
 import round from '../utils/round'
+import { useRouteUpdater } from '../routing/router'
 
 export default function StatusBarControl() {
     const { map } = useMap()
+    const updateRoute = useRouteUpdater()
     const [position, setPosition] = React.useState<{ lng: number, lat: number } | null>(null)
     const [elevation, setElevation] = React.useState<number | null>(null)
-    const [placeName, setPlaceName] = React.useState<string | null>(null)
+    const [place, setPlace] = React.useState<any | null>(null)
     const [slopeAngle, setSlopeAngle] = React.useState<number | null>(null)
     const [isTouchDevice, setIsTouchDevice] = React.useState(false)
 
@@ -83,7 +85,7 @@ export default function StatusBarControl() {
     React.useEffect(() => {
         if (!position) {
             setElevation(null)
-            setPlaceName(null)
+            setPlace(null)
             setSlopeAngle(null)
             return
         }
@@ -111,17 +113,17 @@ export default function StatusBarControl() {
                     .catch(() => null),
                 slopeAngleSource.calculatePointSlope(position.lat, position.lng)
                     .catch(() => null)
-            ]).then(([elevationValue, place, slope]) => {
+            ]).then(([elevationValue, placeData, slope]) => {
                 if (!abortController.signal.aborted) {
                     setElevation(elevationValue)
-                    setPlaceName(place?.name || null)
+                    setPlace(placeData)
                     setSlopeAngle(slope)
                 }
             }).catch(() => {
                 // Fallback in case Promise.all fails entirely
                 if (!abortController.signal.aborted) {
                     setElevation(null)
-                    setPlaceName(null)
+                    setPlace(null)
                     setSlopeAngle(null)
                 }
             })
@@ -137,12 +139,31 @@ export default function StatusBarControl() {
     // Only show on touch devices or when mouse is over map on desktop
     const shouldShow = isTouchDevice || position
 
+    const isMountain = place?.type === 'peak' && place?.href
+
+    const handlePlaceClick = () => {
+        if (isMountain && place?.href) {
+            updateRoute({
+                page: `mountain/${encodeURIComponent(place.href)}`
+            })
+        }
+    }
+
     return shouldShow ? (
         <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-10">
             <div className="bg-white bg-opacity-90 text-black text-xs px-3 py-2 rounded">
-                {placeName && (
+                {place?.name && (
                     <div className="font-semibold whitespace-nowrap text-center mb-1">
-                        {placeName}
+                        {isMountain ? (
+                            <button
+                                className="text-blue-600 hover:text-blue-800 underline pointer-events-auto"
+                                onClick={handlePlaceClick}
+                            >
+                                {place.name}
+                            </button>
+                        ) : (
+                            place.name
+                        )}
                     </div>
                 )}
                 <div className="flex items-center space-x-3 min-w-0">
