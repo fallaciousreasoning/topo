@@ -29,7 +29,7 @@ export default function LongPressLookup() {
 
             const closestPoint = await findPlace(lat, lon)
 
-            const elevation = round(await getElevation([lat, lon]), 0)
+            const elevation = round(await getElevation([lat, lon], map.getZoom()), 0)
 
             const update = {
                 lla: parseFloat(closestPoint?.lat ?? '') || lat,

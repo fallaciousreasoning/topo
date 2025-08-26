@@ -19,7 +19,7 @@ export default function SearchSection() {
     const { map } = useMap()
 
     const selectResult = async (r: Place) => {
-        const elevationPromise = getElevation([parseFloat(r.lat), parseFloat(r.lon)]).then(e => ` (${round(e, 0)}m)`).catch(() => '')
+        const elevationPromise = getElevation([parseFloat(r.lat), parseFloat(r.lon)], map.getZoom()).then(e => ` (${round(e, 0)}m)`).catch(() => '')
         updateRoute({
             lla: parseFloat(r.lat),
             llo: parseFloat(r.lon),
