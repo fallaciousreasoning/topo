@@ -2,19 +2,82 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Track } from '../tracks/track';
 import { getElevation } from '../layers/contours';
 import { useDrawing } from '../draw/Drawing';
+import { getDistance } from '../utils/distance';
+
+const SAMPLE_INTERVAL = 20; // meters
+const ELEVATION_ZOOM_LEVEL = 12;
 
 interface ElevationProfileProps {
   onClose: () => void;
 }
 
-export default function ElevationProfile({ onClose }: ElevationProfileProps) {
-  const drawing = useDrawing();
-  const [elevations, setElevations] = useState<{ distance: number; elevation: number }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState<Track>(drawing.track);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+// Generate sample points along the track at regular intervals
+function generateSamplePoints(coordinates: [number, number][]): { coord: [number, number]; distance: number }[] {
+  if (coordinates.length === 0) return [];
 
-  // Listen to track changes from the drawing
+  // Calculate total distance and create segments
+  const segments: { start: [number, number]; end: [number, number]; startDistance: number; endDistance: number }[] = [];
+  let totalDistance = 0;
+
+  for (let i = 1; i < coordinates.length; i++) {
+    const start = coordinates[i - 1];
+    const end = coordinates[i];
+    const segmentDistance = getDistance(start[1], start[0], end[1], end[0]) * 1000; // Convert km to meters
+    
+    segments.push({
+      start: [start[0], start[1]],
+      end: [end[0], end[1]],
+      startDistance: totalDistance,
+      endDistance: totalDistance + segmentDistance
+    });
+    
+    totalDistance += segmentDistance;
+  }
+
+  const samplePoints: { coord: [number, number]; distance: number }[] = [];
+  
+  // Always include the first point
+  samplePoints.push({
+    coord: [coordinates[0][0], coordinates[0][1]],
+    distance: 0
+  });
+
+  // Sample at regular intervals
+  for (let distance = SAMPLE_INTERVAL; distance < totalDistance; distance += SAMPLE_INTERVAL) {
+    // Find which segment this distance falls into
+    const segment = segments.find(s => distance >= s.startDistance && distance <= s.endDistance);
+    if (!segment) continue;
+
+    // Interpolate position within the segment
+    const segmentLength = segment.endDistance - segment.startDistance;
+    const segmentProgress = (distance - segment.startDistance) / segmentLength;
+    
+    const interpolatedLng = segment.start[0] + (segment.end[0] - segment.start[0]) * segmentProgress;
+    const interpolatedLat = segment.start[1] + (segment.end[1] - segment.start[1]) * segmentProgress;
+    
+    samplePoints.push({
+      coord: [interpolatedLng, interpolatedLat],
+      distance: distance
+    });
+  }
+
+  // Always include the last point
+  if (coordinates.length > 1) {
+    const lastCoord = coordinates[coordinates.length - 1];
+    samplePoints.push({
+      coord: [lastCoord[0], lastCoord[1]],
+      distance: totalDistance
+    });
+  }
+
+  return samplePoints;
+}
+
+// Hook to listen to track changes from drawing
+function useTrackListener() {
+  const drawing = useDrawing();
+  const [currentTrack, setCurrentTrack] = useState<Track>(drawing.track);
+
   useEffect(() => {
     const unsubscribe = drawing.addListener((drawingInstance) => {
       setCurrentTrack({ ...drawingInstance.track });
@@ -22,91 +85,29 @@ export default function ElevationProfile({ onClose }: ElevationProfileProps) {
     return unsubscribe;
   }, [drawing]);
 
-  // Only fetch elevations when coordinates actually change
+  return currentTrack;
+}
+
+// Hook to fetch elevation data for track coordinates
+function useElevationData(track: Track) {
+  const [elevations, setElevations] = useState<{ distance: number; elevation: number }[]>([]);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    if (!currentTrack.coordinates.length) {
+    if (!track.coordinates.length) {
       setElevations([]);
       return;
     }
 
     setLoading(true);
     const fetchElevations = async () => {
+      const samplePoints = generateSamplePoints(track.coordinates);
       const points: { distance: number; elevation: number }[] = [];
-      
-      // Calculate total distance and create segments
-      const segments: { start: [number, number]; end: [number, number]; startDistance: number; endDistance: number }[] = [];
-      let totalDistance = 0;
-
-      for (let i = 1; i < currentTrack.coordinates.length; i++) {
-        const start = currentTrack.coordinates[i - 1];
-        const end = currentTrack.coordinates[i];
-        
-        // Calculate distance between points using Haversine formula
-        const lat1 = start[1] * Math.PI / 180;
-        const lat2 = end[1] * Math.PI / 180;
-        const deltaLat = (end[1] - start[1]) * Math.PI / 180;
-        const deltaLng = (end[0] - start[0]) * Math.PI / 180;
-
-        const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
-                Math.cos(lat1) * Math.cos(lat2) *
-                Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const segmentDistance = 6371000 * c; // Earth radius in meters
-        
-        segments.push({
-          start: [start[0], start[1]],
-          end: [end[0], end[1]],
-          startDistance: totalDistance,
-          endDistance: totalDistance + segmentDistance
-        });
-        
-        totalDistance += segmentDistance;
-      }
-
-      // Sample every 20 meters
-      const sampleInterval = 20; // meters
-      const samplePoints: { coord: [number, number]; distance: number }[] = [];
-      
-      // Always include the first point
-      if (currentTrack.coordinates.length > 0) {
-        samplePoints.push({
-          coord: [currentTrack.coordinates[0][0], currentTrack.coordinates[0][1]],
-          distance: 0
-        });
-      }
-
-      // Sample at regular intervals
-      for (let distance = sampleInterval; distance < totalDistance; distance += sampleInterval) {
-        // Find which segment this distance falls into
-        const segment = segments.find(s => distance >= s.startDistance && distance <= s.endDistance);
-        if (!segment) continue;
-
-        // Interpolate position within the segment
-        const segmentLength = segment.endDistance - segment.startDistance;
-        const segmentProgress = (distance - segment.startDistance) / segmentLength;
-        
-        const interpolatedLng = segment.start[0] + (segment.end[0] - segment.start[0]) * segmentProgress;
-        const interpolatedLat = segment.start[1] + (segment.end[1] - segment.start[1]) * segmentProgress;
-        
-        samplePoints.push({
-          coord: [interpolatedLng, interpolatedLat],
-          distance: distance
-        });
-      }
-
-      // Always include the last point
-      if (currentTrack.coordinates.length > 1) {
-        const lastCoord = currentTrack.coordinates[currentTrack.coordinates.length - 1];
-        samplePoints.push({
-          coord: [lastCoord[0], lastCoord[1]],
-          distance: totalDistance
-        });
-      }
 
       // Fetch elevations for all sample points
       for (const samplePoint of samplePoints) {
         try {
-          const elevation = await getElevation([samplePoint.coord[1], samplePoint.coord[0]], 12);
+          const elevation = await getElevation([samplePoint.coord[1], samplePoint.coord[0]], ELEVATION_ZOOM_LEVEL);
           points.push({ distance: samplePoint.distance, elevation });
         } catch (error) {
           console.warn(`Failed to get elevation for sample point:`, error);
@@ -119,7 +120,15 @@ export default function ElevationProfile({ onClose }: ElevationProfileProps) {
     };
 
     fetchElevations();
-  }, [currentTrack.coordinates]);
+  }, [track.coordinates]);
+
+  return { elevations, loading };
+}
+
+export default function ElevationProfile({ onClose }: ElevationProfileProps) {
+  const currentTrack = useTrackListener();
+  const { elevations, loading } = useElevationData(currentTrack);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!elevations.length || !canvasRef.current) return;
@@ -256,7 +265,7 @@ export default function ElevationProfile({ onClose }: ElevationProfileProps) {
             className="w-full h-48 border border-gray-200"
           />
           <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
-            <span>Distance: {(Math.max(...elevations.map(p => p.distance)) / 1000).toFixed(1)} km</span>
+            <span>Distance: {(Math.max(...elevations.map(p => p.distance)) / 1000).toFixed(2)} km</span>
             <span className="text-center">
               Elevation: {Math.round(Math.min(...elevations.map(p => p.elevation)))}m - {Math.round(Math.max(...elevations.map(p => p.elevation)))}m
             </span>
