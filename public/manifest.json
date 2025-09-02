@@ -1,6 +1,7 @@
 {
     "name": "NZ Topo",
     "short_name": "NZ Topo",
+    "id": "/",
     "icons": [
         {
             "src": "/maskable.png",
