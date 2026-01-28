@@ -5,13 +5,13 @@ import { BaseLayerDefinition, LINZ_BASEMAPS_KEY } from "./config";
 const hillshadeUrl = `https://basemaps.linz.govt.nz/v1/tiles/geographx-nz-dem-2012-8m/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}`;
 const hillshade50 = createCompositeLayer(
   "color-burn",
-  `maybe-cache://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50767/EPSG:3857/{z}/{x}/{y}.png#topo-raster`,
+  `maybe-cache://tiles-cdn.koordinates.com/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=52343/EPSG:3857/{z}/{x}/{y}.png#topo-raster`,
   hillshadeUrl,
 );
 
 const hillshade250 = createCompositeLayer(
   "color-burn",
-  `maybe-cache://tiles-a.data-cdn.linz.govt.nz/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=50798/EPSG:3857/{z}/{x}/{y}.png#topo-raster`,
+  `maybe-cache://tiles-cdn.koordinates.com/services;key=d0772bed2204423f87157f7fb1223389/tiles/v4/layer=52324/EPSG:3857/{z}/{x}/{y}.png#topo-raster`,
   hillshadeUrl,
 );
 

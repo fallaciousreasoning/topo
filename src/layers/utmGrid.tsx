@@ -142,8 +142,7 @@ function UTMGridComponent() {
                 source: 'utm-grid-lines',
                 paint: {
                     "line-color": "#0066cc",
-                    "line-width": 1,
-                    "line-opacity": 0.5
+                    "line-width": 1.5,
                 }
             }} />
         </Source>
