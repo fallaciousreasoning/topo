@@ -2,6 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import round from "../utils/round";
 import * as React from "react";
 import { linzVectorId } from "../layers/config";
+import topoRaster from "../layers/topoRaster";
+import utmGrid from "../layers/utmGrid";
+import mountains from "../layers/mountains";
+import huts from "../layers/huts";
 
 const localStorageKey = "map-view-info";
 
@@ -29,8 +33,8 @@ const defaultRouteParams: RouteParams = {
   zoom: 14,
   rotation: 0,
   pitch: 0,
-  basemap: linzVectorId,
-  overlays: [],
+  basemap: topoRaster.id,
+  overlays: [mountains.id, huts.id, utmGrid.id],
   page: null,
 
   editingFeature: null,
