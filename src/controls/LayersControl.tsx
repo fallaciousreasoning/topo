@@ -27,7 +27,7 @@ export default function LayersControl() {
 
     const handleOpacityChange = (layerId: string, opacity: number) => {
         if (!map) return
-        
+
         // Update different layer types based on the layer ID
         if (layerId === 'hillshade') {
             map.setPaintProperty('hillshade', 'hillshade-opacity', opacity)
@@ -36,6 +36,9 @@ export default function LayersControl() {
             map.setPaintProperty('contour-labels', 'text-opacity', opacity)
         } else if (layerId === 'slope-angle') {
             map.setPaintProperty('slope-angle', 'raster-opacity', opacity)
+        } else if (layerId === 'utm-grid') {
+            map.setPaintProperty('utm-grid-lines', 'line-opacity', opacity)
+            map.setPaintProperty('utm-grid-labels', 'text-opacity', opacity)
         }
     }
 

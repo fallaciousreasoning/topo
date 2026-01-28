@@ -10,6 +10,7 @@ import osm from "./osm";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import tracks from "./tracks";
+import utmGrid from "./utmGrid";
 
 export const extraData = {
     version: 8,
@@ -28,6 +29,7 @@ export const baseLayers: BaseLayerDefinition[] = [
 export const overlays: OverlayDefinition[] = [
     hillshade,
     contours,
+    utmGrid,
     slopeAngle,
     huts,
     mountains,
