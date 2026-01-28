@@ -5,16 +5,13 @@ import Layer from '../map/Layer'
 import Source from '../map/Source'
 import { useMap } from "../map/Map";
 import proj4 from 'proj4'
-import type { FeatureCollection, Feature, LineString, Point } from 'geojson'
+import type { FeatureCollection, Feature, LineString } from 'geojson'
 
-const minZoom = 8
+const minZoom = 9
 const bigGridZoom = 11.5
 
 // Function to generate grid lines for the current viewport
-function generateGridGeoJSON(bounds: [[number, number], [number, number]], zoom: number): {
-    lines: FeatureCollection<LineString>,
-    labels: FeatureCollection<Point>
-} {
+function generateGridGeoJSON(bounds: [[number, number], [number, number]], zoom: number): FeatureCollection<LineString> {
     const [[west, south], [east, north]] = bounds;
 
     // Determine grid interval based on zoom level
@@ -33,7 +30,6 @@ function generateGridGeoJSON(bounds: [[number, number], [number, number]], zoom:
     const gridYMax = Math.ceil(yMax / gridInterval) * gridInterval;
 
     const lineFeatures: Feature<LineString>[] = [];
-    const labelFeatures: Feature<Point>[] = [];
 
     // Generate vertical lines (constant easting)
     for (let x = gridXMin; x <= gridXMax; x += gridInterval) {
@@ -51,21 +47,6 @@ function generateGridGeoJSON(bounds: [[number, number], [number, number]], zoom:
                 value: x
             }
         });
-
-        // Add label at bottom of line
-        if (zoom >= bigGridZoom) {
-            labelFeatures.push({
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [startLng, startLat]
-                },
-                properties: {
-                    label: `${(x / 1000).toFixed(0)}E`,
-                    value: x
-                }
-            });
-        }
     }
 
     // Generate horizontal lines (constant northing)
@@ -84,32 +65,11 @@ function generateGridGeoJSON(bounds: [[number, number], [number, number]], zoom:
                 value: y
             }
         });
-
-        // Add label at left of line
-        if (zoom >= bigGridZoom) {
-            labelFeatures.push({
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [startLng, startLat]
-                },
-                properties: {
-                    label: `${(y / 1000).toFixed(0)}N`,
-                    value: y
-                }
-            });
-        }
     }
 
     return {
-        lines: {
-            type: 'FeatureCollection',
-            features: lineFeatures
-        },
-        labels: {
-            type: 'FeatureCollection',
-            features: labelFeatures
-        }
+        type: 'FeatureCollection',
+        features: lineFeatures
     };
 }
 
@@ -143,20 +103,15 @@ function UTMGridComponent() {
 
             // Update the source data directly
             const linesSource = map.getSource('utm-grid-lines');
-            const labelsSource = map.getSource('utm-grid-labels');
 
             if (linesSource && linesSource.type === 'geojson') {
-                linesSource.setData(newGridData.lines);
-            }
-
-            if (labelsSource && labelsSource.type === 'geojson') {
-                labelsSource.setData(newGridData.labels);
+                linesSource.setData(newGridData);
             }
         };
 
         // Wait for sources to be added
         const onStyleData = () => {
-            if (map.getSource('utm-grid-lines') && map.getSource('utm-grid-labels')) {
+            if (map.getSource('utm-grid-lines')) {
                 updateGrid();
             }
         };
@@ -177,47 +132,21 @@ function UTMGridComponent() {
     if (!isVisible) return null;
 
     return (
-        <React.Fragment key='utm-grid'>
-            <Source id='utm-grid-lines' spec={{
-                type: 'geojson',
-                data: { type: 'FeatureCollection', features: [] }
-            }}>
-                <Layer layer={{
-                    id: 'utm-grid-lines',
-                    type: 'line',
-                    source: 'utm-grid-lines',
-                    paint: {
-                        "line-color": "#0066cc",
-                        "line-width": 1,
-                        "line-opacity": 0.5
-                    }
-                }} />
-            </Source>
-
-            <Source id='utm-grid-labels' spec={{
-                type: 'geojson',
-                data: { type: 'FeatureCollection', features: [] }
-            }}>
-                <Layer layer={{
-                    id: 'utm-grid-labels',
-                    type: 'symbol',
-                    source: 'utm-grid-labels',
-                    layout: {
-                        "text-field": ["get", "label"],
-                        "text-size": 10,
-                        "text-font": ["Open Sans Regular"],
-                        "text-offset": [0, -0.5],
-                        "text-anchor": "bottom"
-                    },
-                    paint: {
-                        "text-color": "#0066cc",
-                        "text-halo-color": "white",
-                        "text-halo-width": 1,
-                        "text-opacity": 0.8
-                    }
-                }} />
-            </Source>
-        </React.Fragment>
+        <Source id='utm-grid-lines' spec={{
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+        }}>
+            <Layer layer={{
+                id: 'utm-grid-lines',
+                type: 'line',
+                source: 'utm-grid-lines',
+                paint: {
+                    "line-color": "#0066cc",
+                    "line-width": 1,
+                    "line-opacity": 0.5
+                }
+            }} />
+        </Source>
     );
 }
 

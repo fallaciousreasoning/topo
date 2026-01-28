@@ -38,7 +38,6 @@ export default function LayersControl() {
             map.setPaintProperty('slope-angle', 'raster-opacity', opacity)
         } else if (layerId === 'utm-grid') {
             map.setPaintProperty('utm-grid-lines', 'line-opacity', opacity)
-            map.setPaintProperty('utm-grid-labels', 'text-opacity', opacity)
         }
     }
 
