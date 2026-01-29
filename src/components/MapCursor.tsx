@@ -215,8 +215,10 @@ export default function MapCursor() {
         }
     }, [map, labelPosition]) // Recalculate when labelPosition updates (which happens on map moves)
 
-    // Determine if cursor should be visible
+    // Determine if cursor should be visible - only when location tracking is active
     const shouldShowCursor = React.useMemo(() => {
+        if (!userLocation) return false
+
         switch (cursorMode) {
             case 'always':
                 return true
@@ -227,7 +229,7 @@ export default function MapCursor() {
             default:
                 return false
         }
-    }, [cursorMode, isInteracting])
+    }, [cursorMode, isInteracting, userLocation])
 
     return (
         <>

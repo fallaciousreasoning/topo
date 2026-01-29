@@ -6,6 +6,8 @@ import { findPlace } from '../search/nearest'
 import { slopeAngleSource } from '../layers/slopeAngle'
 import round from '../utils/round'
 import { useRouteUpdater } from '../routing/router'
+import db from '../caches/indexeddb'
+import { Point } from '../tracks/point'
 
 export default function StatusBarControl() {
     const { map } = useMap()
@@ -15,6 +17,7 @@ export default function StatusBarControl() {
     const [place, setPlace] = React.useState<any | null>(null)
     const [slopeAngle, setSlopeAngle] = React.useState<number | null>(null)
     const [isTouchDevice, setIsTouchDevice] = React.useState(false)
+    const [existingPoint, setExistingPoint] = React.useState<Point | null>(null)
 
     // Detect touch device
     React.useEffect(() => {
@@ -87,6 +90,7 @@ export default function StatusBarControl() {
             setElevation(null)
             setPlace(null)
             setSlopeAngle(null)
+            setExistingPoint(null)
             return
         }
 
@@ -102,22 +106,25 @@ export default function StatusBarControl() {
 
         fetchTimeoutRef.current = setTimeout(() => {
             lastFetchTimeRef.current = Date.now()
-            
+
             const abortController = new AbortController()
             const zoom = map.getZoom()
-            // Fetch elevation, place name, and slope angle concurrently
+            // Fetch elevation, place name, slope angle, and check for existing point concurrently
             Promise.all([
                 getElevation([position.lat, position.lng], zoom, abortController)
                     .catch(() => null),
                 findPlace(position.lat, position.lng)
                     .catch(() => null),
                 slopeAngleSource.calculatePointSlope(position.lat, position.lng, zoom)
+                    .catch(() => null),
+                db.findPointByCoordinates(position.lng, position.lat)
                     .catch(() => null)
-            ]).then(([elevationValue, placeData, slope]) => {
+            ]).then(([elevationValue, placeData, slope, point]) => {
                 if (!abortController.signal.aborted) {
                     setElevation(elevationValue)
                     setPlace(placeData)
                     setSlopeAngle(slope)
+                    setExistingPoint(point)
                 }
             }).catch(() => {
                 // Fallback in case Promise.all fails entirely
@@ -125,6 +132,7 @@ export default function StatusBarControl() {
                     setElevation(null)
                     setPlace(null)
                     setSlopeAngle(null)
+                    setExistingPoint(null)
                 }
             })
         }, delay)
@@ -149,11 +157,46 @@ export default function StatusBarControl() {
         }
     }
 
+    const handleSavePoint = async () => {
+        if (!position) return
+
+        const placeName = place?.name
+            ? `${place.name} (${round(elevation || 0, 0)}m)`
+            : `${round(position.lat, 6)}, ${round(position.lng, 6)}`
+
+        const point = await db.updatePoint({
+            coordinates: [position.lng, position.lat],
+            tags: [],
+            name: placeName,
+            color: "#3b82f6",
+        })
+
+        setExistingPoint(point)
+        updateRoute({
+            page: `point/${point.id}`,
+        })
+    }
+
+    const handleEditPoint = () => {
+        if (!existingPoint) return
+
+        updateRoute({
+            page: `point/${existingPoint.id}`,
+        })
+    }
+
+    const handleRemovePoint = async () => {
+        if (!existingPoint) return
+
+        await db.deletePoint(existingPoint)
+        setExistingPoint(null)
+    }
+
     return shouldShow ? (
         <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-10">
             <div className="bg-white bg-opacity-90 text-black text-xs px-3 py-2 rounded">
                 {place?.name && (
-                    <div className="font-semibold whitespace-nowrap text-center mb-1">
+                    <div className="font-semibold whitespace-nowrap text-center mb-1 flex items-center justify-center gap-2">
                         {isMountain ? (
                             <button
                                 className="text-blue-600 hover:text-blue-800 underline pointer-events-auto"
@@ -162,8 +205,37 @@ export default function StatusBarControl() {
                                 {place.name}
                             </button>
                         ) : (
-                            place.name
+                            <span>{place.name}</span>
                         )}
+                        <div className="flex gap-1 pointer-events-auto">
+                            {existingPoint && (
+                                <button
+                                    onClick={handleEditPoint}
+                                    className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
+                                    title="Edit point"
+                                >
+                                    ✏️
+                                </button>
+                            )}
+                            {existingPoint ? (
+                                <button
+                                    onClick={handleRemovePoint}
+                                    className="text-xs border rounded px-1 py-0.5 hover:bg-yellow-50 transition-colors"
+                                    style={{ color: '#fbbf24' }}
+                                    title="Remove saved point"
+                                >
+                                    ★
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleSavePoint}
+                                    className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
+                                    title="Save point"
+                                >
+                                    ☆
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
                 <div className="flex items-center space-x-3 min-w-0">
