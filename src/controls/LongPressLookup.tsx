@@ -10,6 +10,10 @@ const LONG_PRESS_THRESHOLD = 500;
 
 window['demSource'] = demSource.manager
 
+// Track if a long press just occurred to prevent other click handlers from firing
+let lastLongPressTime = 0;
+export const isRecentLongPress = () => Date.now() - lastLongPressTime < 100;
+
 export default function LongPressLookup() {
     const { map } = useMap()
     const updateRoute = useRouteUpdater()
@@ -50,6 +54,9 @@ export default function LongPressLookup() {
 
             const elapsed = Date.now() - pressStartTime
             if (elapsed < LONG_PRESS_THRESHOLD && !hasTriggered) return
+
+            // Mark that a long press just occurred
+            lastLongPressTime = Date.now()
 
             const lat = e.lngLat.lat
             const lon = e.lngLat.lng

@@ -21,7 +21,7 @@ export default function () {
     if (!show) return null
 
     const handleSavePoint = async () => {
-        await db.updatePoint({
+        const point = await db.updatePoint({
             coordinates: [params.llo!, params.lla!],
             tags: [],
             name: params.lab,
@@ -32,7 +32,7 @@ export default function () {
             lla: null,
             llo: null,
             lab: null,
-            page: "points",
+            page: `point/${point.id}`,
         })
     }
 
@@ -48,13 +48,15 @@ export default function () {
         }
     }
 
-    const handleOpenPoint = () => {
-        updateRoute({
-            lla: null,
-            llo: null,
-            lab: null,
-            page: "points",
-        })
+    const handleEditPoint = () => {
+        if (existingPoint) {
+            updateRoute({
+                lla: null,
+                llo: null,
+                lab: null,
+                page: `point/${existingPoint.id}`,
+            })
+        }
     }
 
     return <Popup key={params.lab! + params.lla! + params.llo!} latitude={params.lla!} longitude={params.llo!} anchor="bottom" onClose={() => {
@@ -64,22 +66,37 @@ export default function () {
             lab: null
         })
     }}>
-        <div className="flex flex-col gap-2">
-            <div>{params.lab}</div>
-            {existingPoint ? (
-                <div className="flex gap-2">
-                    <Button onClick={handleOpenPoint}>
-                        Open in Points
-                    </Button>
-                    <Button onClick={handleRemovePoint}>
-                        Remove
-                    </Button>
-                </div>
-            ) : (
-                <Button onClick={handleSavePoint}>
-                    Save Point
-                </Button>
-            )}
+        <div className="flex items-center gap-2">
+            <div className="flex-1">{params.lab}</div>
+            <div className="flex gap-1">
+                {existingPoint && (
+                    <button
+                        onClick={handleEditPoint}
+                        className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
+                        title="Edit point"
+                    >
+                        ✏️
+                    </button>
+                )}
+                {existingPoint ? (
+                    <button
+                        onClick={handleRemovePoint}
+                        className="text-xs border rounded px-1 py-0.5 hover:bg-yellow-50 transition-colors"
+                        style={{ color: '#fbbf24' }}
+                        title="Remove saved point"
+                    >
+                        ★
+                    </button>
+                ) : (
+                    <button
+                        onClick={handleSavePoint}
+                        className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
+                        title="Save point"
+                    >
+                        ☆
+                    </button>
+                )}
+            </div>
         </div>
     </Popup>
 }

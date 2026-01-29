@@ -11,6 +11,8 @@ export default function PointSection() {
   const updateRoute = useRouteUpdater();
   const { map } = useMap();
   const [newTag, setNewTag] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   // Extract point ID from page parameter (e.g., "point/123")
   const pointId = params.page?.startsWith("point/")
@@ -21,6 +23,14 @@ export default function PointSection() {
     () => (pointId ? db.getPoint(pointId) : undefined),
     [pointId],
   );
+
+  // Initialize local state when point loads
+  useEffect(() => {
+    if (point) {
+      setName(point.name ?? "");
+      setDescription(point.description ?? "");
+    }
+  }, [point?.id]);
 
   // Focus the point on the map when the edit page opens
   useEffect(() => {
@@ -77,9 +87,10 @@ export default function PointSection() {
           <label className="text-sm text-gray-600 block mb-1">Name</label>
           <input
             className="w-full border rounded px-2 py-1"
-            value={point.name ?? ""}
+            value={name}
             placeholder={`Untitled Point ${point.id}`}
-            onChange={(e) => db.updatePoint({ ...point, name: e.target.value })}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={(e) => db.updatePoint({ ...point, name: e.target.value })}
           />
         </div>
 
@@ -90,10 +101,9 @@ export default function PointSection() {
           <textarea
             className="w-full border rounded p-2"
             placeholder="Add description..."
-            value={point.description ?? ""}
-            onChange={(e) =>
-              db.updatePoint({ ...point, description: e.target.value })
-            }
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            onBlur={(e) => db.updatePoint({ ...point, description: e.target.value })}
             rows={4}
           />
         </div>

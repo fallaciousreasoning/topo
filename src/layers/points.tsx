@@ -7,6 +7,7 @@ import Source from "../map/Source";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { useRouteUpdater } from "../routing/router";
 import { useMap } from "../map/Map";
+import { isRecentLongPress } from "../controls/LongPressLookup";
 
 export default {
   id: "points",
@@ -20,6 +21,9 @@ export default {
     const { map } = useMap();
 
     useLayerHandler("click", "points-circle", (e) => {
+      // Don't open edit page if this was a long press (which shows the popup instead)
+      if (isRecentLongPress()) return;
+
       const feature = e.features?.[0];
       if (!feature) return;
 
