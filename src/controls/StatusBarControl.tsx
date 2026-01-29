@@ -5,12 +5,13 @@ import { getElevation } from '../layers/contours'
 import { findPlace } from '../search/nearest'
 import { slopeAngleSource } from '../layers/slopeAngle'
 import round from '../utils/round'
-import { useRouteUpdater } from '../routing/router'
+import { useRouteUpdater, useParams } from '../routing/router'
 import db from '../caches/indexeddb'
 import { Point } from '../tracks/point'
 
 export default function StatusBarControl() {
     const { map } = useMap()
+    const params = useParams()
     const updateRoute = useRouteUpdater()
     const [position, setPosition] = React.useState<{ lng: number, lat: number } | null>(null)
     const [elevation, setElevation] = React.useState<number | null>(null)
@@ -32,6 +33,19 @@ export default function StatusBarControl() {
     // Track position based on device type
     React.useEffect(() => {
         if (!map) return
+
+        // Check if popup is open - always use popup coordinates
+        const hasPopup = params.lla && params.llo && params.lab
+        if (hasPopup) {
+            // Pin to popup location using functional setState to avoid infinite loops
+            setPosition(prev => {
+                if (prev?.lng === params.llo && prev?.lat === params.lla) {
+                    return prev
+                }
+                return { lng: params.llo!, lat: params.lla! }
+            })
+            return
+        }
 
         if (isTouchDevice) {
             // For touch devices, use center position
@@ -79,7 +93,7 @@ export default function StatusBarControl() {
                 container.removeEventListener('mouseleave', handleContainerMouseLeave)
             }
         }
-    }, [map, isTouchDevice])
+    }, [map, isTouchDevice, params.lla, params.llo, params.lab])
 
     // Throttled elevation fetching
     const lastFetchTimeRef = React.useRef(0)
@@ -109,22 +123,25 @@ export default function StatusBarControl() {
 
             const abortController = new AbortController()
             const zoom = map.getZoom()
-            // Fetch elevation, place name, slope angle, and check for existing point concurrently
+
+            // Always use findPlace to prefer saved points, fall back to popup label if available
+            const hasPopup = params.lla && params.llo && params.lab
+
+            // Fetch elevation, place name, and slope angle concurrently
             Promise.all([
                 getElevation([position.lat, position.lng], zoom, abortController)
                     .catch(() => null),
-                findPlace(position.lat, position.lng)
-                    .catch(() => null),
+                findPlace(position.lat, position.lng).catch(() => null),
                 slopeAngleSource.calculatePointSlope(position.lat, position.lng, zoom)
-                    .catch(() => null),
-                db.findPointByCoordinates(position.lng, position.lat)
                     .catch(() => null)
-            ]).then(([elevationValue, placeData, slope, point]) => {
+            ]).then(([elevationValue, placeData, slope]) => {
                 if (!abortController.signal.aborted) {
                     setElevation(elevationValue)
-                    setPlace(placeData)
+                    // If we have a popup but no place found, use the popup label
+                    setPlace(placeData ?? (hasPopup ? { name: params.lab } : null))
                     setSlopeAngle(slope)
-                    setExistingPoint(point)
+                    // Check if the place is a saved point based on its type
+                    setExistingPoint(placeData?.type === 'point' ? placeData : null)
                 }
             }).catch(() => {
                 // Fallback in case Promise.all fails entirely
@@ -142,7 +159,7 @@ export default function StatusBarControl() {
                 clearTimeout(fetchTimeoutRef.current)
             }
         }
-    }, [position])
+    }, [position, params.lab])
 
     // Only show on touch devices or when mouse is over map on desktop
     const shouldShow = isTouchDevice || position
@@ -177,19 +194,29 @@ export default function StatusBarControl() {
         })
     }
 
-    const handleEditPoint = () => {
-        if (!existingPoint) return
+    const handleEditPoint = async () => {
+        if (!existingPoint || !position) return
 
-        updateRoute({
-            page: `point/${existingPoint.id}`,
-        })
+        // Fetch the full point from the database
+        const point = await db.findPointByCoordinates(position.lng, position.lat)
+        if (point) {
+            updateRoute({
+                page: `point/${point.id}`,
+            })
+        }
     }
 
     const handleRemovePoint = async () => {
-        if (!existingPoint) return
+        if (!existingPoint || !position) return
 
-        await db.deletePoint(existingPoint)
-        setExistingPoint(null)
+        // Fetch the full point from the database
+        const point = await db.findPointByCoordinates(position.lng, position.lat)
+        if (point) {
+            await db.deletePoint(point)
+            setExistingPoint(null)
+            // Refresh the place to clear it
+            setPlace(null)
+        }
     }
 
     return shouldShow ? (
