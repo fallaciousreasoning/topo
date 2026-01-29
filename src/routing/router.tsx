@@ -4,6 +4,7 @@ import * as React from "react";
 import topoRaster from "../layers/topoRaster";
 import utmGrid from "../layers/utmGrid";
 import mountains from "../layers/mountains";
+import points from "../layers/points";
 
 const localStorageKey = "map-view-info";
 
@@ -32,7 +33,7 @@ const defaultRouteParams: RouteParams = {
   rotation: 0,
   pitch: 0,
   basemap: topoRaster.id,
-  overlays: [mountains.id, utmGrid.id],
+  overlays: [mountains.id, utmGrid.id, points.id],
   page: null,
 
   editingFeature: null,

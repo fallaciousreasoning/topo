@@ -8,6 +8,7 @@ import marine from "./marine";
 import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
+import points from "./points";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import tracks from "./tracks";
@@ -35,5 +36,6 @@ export const overlays: OverlayDefinition[] = [
     slopeAngle,
     huts,
     mountains,
-    tracks
+    tracks,
+    points
 ]

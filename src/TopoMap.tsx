@@ -22,6 +22,8 @@ import LongPressLookup from "./controls/LongPressLookup";
 import { BaseLayerDefinition } from "./layers/config";
 import Drawing from "./draw/Drawing";
 import TracksSection from "./sections/TracksSection";
+import PointsSection from "./sections/PointsSection";
+import PointSection from "./sections/PointSection";
 import Mountains from "./layers/mountains";
 
 const sources = baseLayers.flatMap((b) =>
@@ -88,6 +90,8 @@ export default function TopoMap() {
       <MountainSection />
       <SettingsSection />
       <TracksSection />
+      <PointsSection />
+      <PointSection />
 
       <PositionSyncer />
       <MenuSection />

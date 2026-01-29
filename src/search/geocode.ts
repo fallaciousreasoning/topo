@@ -1,5 +1,6 @@
 import { convertNZMGReferenceToLatLng } from '../utils/mapReference';
 import { getPlaces, type Place } from './places';
+import db from '../caches/indexeddb';
 
 const getMatch = (queryParts: string[], place: Place) => {
     const lowerName = place.name.toLowerCase();
@@ -50,7 +51,35 @@ const searchMapReferences = async (query: string): Promise<Place[]> => {
     }))
 }
 
-export default async (query: string, sources = [searchNzPlaces, searchMapReferences]): Promise<Place[]> => {
+const searchPoints = async (query: string, maxResults = 100): Promise<Place[]> => {
+    const lowerQuery = query.toLowerCase()
+    const lowerQueryParts = lowerQuery.split(' ').filter(p => p)
+
+    const points = await db.getPoints()
+
+    const results: Place[] = []
+    for (const point of points) {
+        const pointName = point.name ?? `Point ${point.id}`
+        const match = getMatch(lowerQueryParts, {
+            name: pointName,
+            lat: point.coordinates[1].toString(),
+            lon: point.coordinates[0].toString(),
+            type: 'point'
+        })
+        if (match === 0) continue
+
+        results.push({
+            name: pointName,
+            lat: point.coordinates[1].toString(),
+            lon: point.coordinates[0].toString(),
+            type: 'point'
+        })
+        if (results.length >= maxResults) break
+    }
+    return results
+}
+
+export default async (query: string, sources = [searchPoints, searchNzPlaces, searchMapReferences]): Promise<Place[]> => {
     const results = await Promise.all(sources.map(s => s(query)));
     return results.reduce((prev, next) => [...prev, ...next], [])
 }
