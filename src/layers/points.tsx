@@ -5,9 +5,10 @@ import { OverlayDefinition } from "./config";
 import Layer from "../map/Layer";
 import Source from "../map/Source";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
-import { useRouteUpdater } from "../routing/router";
+import { useRouteUpdater, useParams } from "../routing/router";
 import { useMap } from "../map/Map";
 import { isRecentLongPress } from "../controls/LongPressLookup";
+import mountains from "./mountains";
 
 export default {
   id: "points",
@@ -16,9 +17,16 @@ export default {
   type: "overlay",
   cacheable: false,
   source: () => {
-    const points = useLiveQuery(() => db.getPoints(), []) ?? [];
+    const allPoints = useLiveQuery(() => db.getPoints(), []) ?? [];
     const updateRoute = useRouteUpdater();
     const { map } = useMap();
+    const params = useParams();
+
+    // Filter out mountain points if mountains layer is showing
+    const mountainsLayerActive = params.overlays.includes(mountains.id);
+    const points = mountainsLayerActive
+      ? allPoints.filter((p) => !p.tags.includes("mountain"))
+      : allPoints;
 
     useLayerHandler("click", "points-circle", (e) => {
       // Don't open edit page if this was a long press (which shows the popup instead)
@@ -61,13 +69,13 @@ export default {
       })),
     };
 
-    // Update the source data when points change
+    // Update the source data when points or mountains layer state changes
     useEffect(() => {
       const source = map.getSource("points") as any;
       if (source && source.setData) {
         source.setData(geojson);
       }
-    }, [points, map]);
+    }, [allPoints, mountainsLayerActive, map, geojson]);
 
     if (points.length === 0) return null;
 
