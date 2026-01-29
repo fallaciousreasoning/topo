@@ -8,11 +8,13 @@ import round from '../utils/round'
 import { useRouteUpdater, useParams } from '../routing/router'
 import db from '../caches/indexeddb'
 import { Point } from '../tracks/point'
+import { useSetting } from '../utils/settings'
 
 export default function StatusBarControl() {
     const { map } = useMap()
     const params = useParams()
     const updateRoute = useRouteUpdater()
+    const statusBarMode = useSetting('statusBarMode')
     const [position, setPosition] = React.useState<{ lng: number, lat: number } | null>(null)
     const [elevation, setElevation] = React.useState<number | null>(null)
     const [place, setPlace] = React.useState<any | null>(null)
@@ -161,8 +163,11 @@ export default function StatusBarControl() {
         }
     }, [position, params.lab])
 
-    // Only show on touch devices or when mouse is over map on desktop
-    const shouldShow = isTouchDevice || position
+    // Check if status bar should show based on mode
+    const hasPopup = params.lla && params.llo && params.lab
+    const shouldShow = statusBarMode === 'always'
+        ? (isTouchDevice || position)
+        : hasPopup
 
     const isMountain = place?.type === 'peak' && place?.href
 
@@ -219,50 +224,71 @@ export default function StatusBarControl() {
         }
     }
 
+    const handleClose = () => {
+        updateRoute({
+            lla: null,
+            llo: null,
+            lab: null
+        })
+    }
+
     return shouldShow ? (
         <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-10">
-            <div className="bg-white bg-opacity-90 text-black text-xs px-3 py-2 rounded">
-                {place?.name && (
+            <div className="bg-white bg-opacity-90 text-black text-xs px-3 py-2 rounded relative">
+                {hasPopup && (
+                    <button
+                        onClick={handleClose}
+                        className="absolute top-1 right-1 text-xs rounded px-1 py-0.5 hover:bg-gray-100 transition-colors pointer-events-auto"
+                        title="Close"
+                    >
+                        ✕
+                    </button>
+                )}
+                {(place?.name || hasPopup) && (
                     <div className="font-semibold whitespace-nowrap text-center mb-1 flex items-center justify-center gap-2">
-                        {isMountain ? (
-                            <button
-                                className="text-blue-600 hover:text-blue-800 underline pointer-events-auto"
-                                onClick={handlePlaceClick}
-                            >
-                                {place.name}
-                            </button>
-                        ) : (
-                            <span>{place.name}</span>
-                        )}
-                        <div className="flex gap-1 pointer-events-auto">
-                            {existingPoint && (
+                        {place?.name && (
+                            isMountain ? (
                                 <button
-                                    onClick={handleEditPoint}
-                                    className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
-                                    title="Edit point"
+                                    className="text-blue-600 hover:text-blue-800 underline pointer-events-auto"
+                                    onClick={handlePlaceClick}
                                 >
-                                    ✏️
-                                </button>
-                            )}
-                            {existingPoint ? (
-                                <button
-                                    onClick={handleRemovePoint}
-                                    className="text-xs border rounded px-1 py-0.5 hover:bg-yellow-50 transition-colors"
-                                    style={{ color: '#fbbf24' }}
-                                    title="Remove saved point"
-                                >
-                                    ★
+                                    {place.name}
                                 </button>
                             ) : (
-                                <button
-                                    onClick={handleSavePoint}
-                                    className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
-                                    title="Save point"
-                                >
-                                    ☆
-                                </button>
-                            )}
-                        </div>
+                                <span>{place.name}</span>
+                            )
+                        )}
+                        {hasPopup && (
+                            <div className="flex gap-1 pointer-events-auto">
+                                {existingPoint && (
+                                    <button
+                                        onClick={handleEditPoint}
+                                        className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
+                                        title="Edit point"
+                                    >
+                                        ✏️
+                                    </button>
+                                )}
+                                {existingPoint ? (
+                                    <button
+                                        onClick={handleRemovePoint}
+                                        className="text-xs border rounded px-1 py-0.5 hover:bg-yellow-50 transition-colors"
+                                        style={{ color: '#fbbf24' }}
+                                        title="Remove saved point"
+                                    >
+                                        ★
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleSavePoint}
+                                        className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
+                                        title="Save point"
+                                    >
+                                        ☆
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
                 <div className="flex items-center space-x-3 min-w-0">

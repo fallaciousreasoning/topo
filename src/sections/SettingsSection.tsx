@@ -4,7 +4,7 @@ import Checkbox from "../components/Checkbox";
 import { friendlyBytes } from "../utils/bytes";
 import { baseLayers, overlays } from "../layers/layerDefinition";
 import Card from "../components/Card";
-import { updateSettings, useSetting, type CursorMode } from "../utils/settings";
+import { updateSettings, useSetting, type CursorMode, type StatusBarMode } from "../utils/settings";
 import { usePromise } from "../hooks/usePromise";
 import { cacherPromise } from "../caches/cachingProtocol";
 import { demOverlaySource } from "../layers/contours";
@@ -19,6 +19,7 @@ const cacheableLayers = [
 export default function SettingsSection() {
     const cacheLayers = useSetting('cacheLayers')
     const cursorMode = useSetting('cursorMode')
+    const statusBarMode = useSetting('statusBarMode')
     const { result: sizes = {} } = usePromise(() => cacherPromise.then(c => c.default.getLayerSizes()), [])
 
     return <Section page="settings" exact closable title="Settings">
@@ -71,6 +72,28 @@ export default function SettingsSection() {
                             />
                             <span className="capitalize">{mode}</span>
                             {mode === 'automatic' && <span className="text-gray-500 text-sm">(show when interacting with map)</span>}
+                        </label>
+                    ))}
+                </div>
+            </Card>
+
+            <h4 className="mt-4 font-semibold text-base">Status Bar</h4>
+            <Card>
+                <h5 className="font-semibold">Display Mode</h5>
+                <div className="text-gray-500 italic mb-2">Controls when the status bar at the bottom of the map is shown</div>
+                <div className="flex flex-col gap-2">
+                    {(['always', 'pinned'] as StatusBarMode[]).map(mode => (
+                        <label key={mode} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="statusBarMode"
+                                value={mode}
+                                checked={statusBarMode === mode}
+                                onChange={() => updateSettings({ statusBarMode: mode })}
+                                className="w-4 h-4"
+                            />
+                            <span className="capitalize">{mode}</span>
+                            {mode === 'pinned' && <span className="text-gray-500 text-sm">(only when long-press location is pinned)</span>}
                         </label>
                     ))}
                 </div>
