@@ -4,6 +4,7 @@ import hillshade from "./hillshade";
 import huts from "./huts";
 import linzAerial from "./linzAerial";
 import linzVector from "./linzVector";
+import marine from "./marine";
 import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
@@ -22,6 +23,7 @@ export const baseLayers: BaseLayerDefinition[] = [
     linzVector,
     topoRaster,
     linzAerial,
+    marine,
     openTopo,
     osm
 ]
