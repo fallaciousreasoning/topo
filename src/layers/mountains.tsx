@@ -144,10 +144,16 @@ export default {
             if (!mountainFeature) return
 
             const name = mountainFeature.properties?.name
+            const elevation = mountainFeature.properties?.elevation
             if (!name) return
 
+            const coords = mountainFeature.geometry.coordinates
+            const label = `${name} (${elevation}m)`
+
             updateRoute({
-                page: `mountain/${encodeURIComponent(mountainFeature.properties.id)}`
+                lla: coords[1],
+                llo: coords[0],
+                lab: label
             })
         })
         if (!result) return

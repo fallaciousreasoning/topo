@@ -24,22 +24,43 @@ export default {
 
     // Filter out mountain points if mountains layer is showing
     const mountainsLayerActive = params.overlays.includes(mountains.id);
-    const points = mountainsLayerActive
-      ? allPoints.filter((p) => !p.tags.includes("mountain"))
-      : allPoints;
+
+    // Also filter out the pinned point if one is active
+    const pinnedLat = params.lla;
+    const pinnedLon = params.llo;
+
+    const points = allPoints.filter((p) => {
+      // Filter out mountain points if mountains layer is active
+      if (mountainsLayerActive && p.tags.includes("mountain")) {
+        return false;
+      }
+
+      // Filter out the pinned point
+      if (pinnedLat !== null && pinnedLon !== null) {
+        const [pLon, pLat] = p.coordinates;
+        const tolerance = 0.0001; // ~10 meters
+        if (Math.abs(pLat - pinnedLat) < tolerance && Math.abs(pLon - pinnedLon) < tolerance) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     useLayerHandler("click", "points-circle", (e) => {
-      // Don't open edit page if this was a long press (which shows the popup instead)
+      // Don't pin if this was a long press (which already pins the location)
       if (isRecentLongPress()) return;
 
       const feature = e.features?.[0];
       if (!feature) return;
 
-      const pointId = feature.properties?.id;
-      if (!pointId) return;
+      const name = feature.properties?.name;
+      const coords = feature.geometry.coordinates;
 
       updateRoute({
-        page: `point/${pointId}`,
+        lla: coords[1],
+        llo: coords[0],
+        lab: name,
       });
     });
 

@@ -9,6 +9,8 @@ import { useRouteUpdater, useParams } from '../routing/router'
 import db from '../caches/indexeddb'
 import { Point } from '../tracks/point'
 import { useSetting } from '../utils/settings'
+import { shareLocation } from '../utils/share'
+import StatusBarButton from '../components/StatusBarButton'
 
 export default function StatusBarControl() {
     const { map } = useMap()
@@ -202,8 +204,11 @@ export default function StatusBarControl() {
     const handleSavePoint = async () => {
         if (!position) return
 
-        const placeName = place?.name
-            ? `${place.name} (${round(elevation || 0, 0)}m)`
+        // Remove any existing elevation from the place name (e.g., "Mt Cook (1234m)" -> "Mt Cook")
+        const baseNameFromPlace = place?.name?.replace(/\s*\(\d+m\)\s*$/, '') || null
+
+        const placeName = baseNameFromPlace
+            ? `${baseNameFromPlace} (${round(elevation || 0, 0)}m)`
             : `${round(position.lat, 6)}, ${round(position.lng, 6)}`
 
         const point = await db.updatePoint({
@@ -213,10 +218,7 @@ export default function StatusBarControl() {
             color: "#3b82f6",
         })
 
-        setExistingPoint(point)
-        updateRoute({
-            page: `point/${point.id}`,
-        })
+        setExistingPoint(place ? { ...place, type: 'point' } : { name: placeName, type: 'point' } as any)
     }
 
     const handleEditPoint = async () => {
@@ -253,17 +255,20 @@ export default function StatusBarControl() {
         })
     }
 
+    const handleShare = async () => {
+        const title = place?.name || 'Location'
+        await shareLocation(title)
+    }
+
     return shouldShow ? (
         <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-10">
             <div className="bg-white bg-opacity-90 text-black text-xs px-3 py-2 rounded relative">
                 {hasPopup && (
-                    <button
-                        onClick={handleClose}
-                        className="absolute top-1 right-1 text-xs rounded px-1 py-0.5 hover:bg-gray-100 transition-colors pointer-events-auto"
-                        title="Close"
-                    >
-                        ✕
-                    </button>
+                    <div className="absolute top-1 right-1">
+                        <StatusBarButton onClick={handleClose} title="Close" border={false}>
+                            ✕
+                        </StatusBarButton>
+                    </div>
                 )}
                 {(place?.name || hasPopup || isTouchDevice) && (
                     <div className="font-semibold whitespace-nowrap text-center mb-1 flex items-center justify-center gap-2">
@@ -279,33 +284,25 @@ export default function StatusBarControl() {
                         )}
                         {(hasPopup || isTouchDevice) && (
                             <div className="flex gap-1 pointer-events-auto">
+                                {isMountain && (
+                                    <StatusBarButton onClick={handlePlaceClick} title="View routes">
+                                        🧗 Routes
+                                    </StatusBarButton>
+                                )}
                                 {existingPoint && (
-                                    <button
-                                        onClick={handleEditPoint}
-                                        className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
-                                        title="Edit point"
-                                    >
+                                    <StatusBarButton onClick={handleEditPoint} title="Edit point">
                                         ✏️
-                                    </button>
+                                    </StatusBarButton>
                                 )}
-                                {existingPoint ? (
-                                    <button
-                                        onClick={handleRemovePoint}
-                                        className="text-xs border rounded px-1 py-0.5 hover:bg-yellow-50 transition-colors"
-                                        style={{ color: '#fbbf24' }}
-                                        title="Remove saved point"
-                                    >
-                                        ★
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={handleSavePoint}
-                                        className="text-xs border rounded px-1 py-0.5 hover:bg-gray-100 transition-colors"
-                                        title="Save point"
-                                    >
-                                        ☆
-                                    </button>
-                                )}
+                                <StatusBarButton
+                                    onClick={existingPoint ? handleRemovePoint : handleSavePoint}
+                                    title={existingPoint ? "Remove saved point" : "Save point"}
+                                >
+                                    {existingPoint ? <span style={{ color: '#fbbf24' }}>★</span> : '☆'}
+                                </StatusBarButton>
+                                <StatusBarButton onClick={handleShare} title="Share location">
+                                    🔗
+                                </StatusBarButton>
                             </div>
                         )}
                     </div>

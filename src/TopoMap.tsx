@@ -102,12 +102,12 @@ export default function TopoMap() {
       <SearchControl />
       <StatusBarControl />
 
-      <MapLabel />
       <MapCursor />
       <LongPressLookup />
 
       {sources}
       <Layers />
+      <MapLabel />
       <Drawing />
     </Map>
   );

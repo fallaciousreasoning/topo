@@ -7,6 +7,7 @@ import { repeatString } from "../utils/array";
 import db from "../caches/indexeddb";
 import { Point } from "../tracks/point";
 import Button from "../components/Button";
+import StatusBarButton from "../components/StatusBarButton";
 
 const joinBits = (bits: (string | number | boolean | null | undefined)[]) => bits
     .filter(b => b)
@@ -98,24 +99,13 @@ function PlaceInfo({ mountain, scrollToRoute }: { mountain: Mountain, scrollToRo
                 {mountain.name}{mountain.altitude && ` (${mountain.altitude})`}
             </span>
             {mountain.latlng && (
-                savedPoint ? (
-                    <button
-                        onClick={handleRemovePoint}
-                        className="text-xl border rounded px-2 py-1 hover:bg-yellow-50 transition-colors"
-                        style={{ color: '#fbbf24' }}
-                        title="Remove saved point"
-                    >
-                        ★
-                    </button>
-                ) : (
-                    <button
-                        onClick={handleSavePoint}
-                        className="text-xl border rounded px-2 py-1 hover:bg-gray-100 transition-colors"
-                        title="Save as point"
-                    >
-                        ☆
-                    </button>
-                )
+                <StatusBarButton
+                    onClick={savedPoint ? handleRemovePoint : handleSavePoint}
+                    title={savedPoint ? "Remove saved point" : "Save as point"}
+                    size="large"
+                >
+                    {savedPoint ? <span style={{ color: '#fbbf24' }}>★</span> : '☆'}
+                </StatusBarButton>
             )}
         </h2>
         {mountain.image && <a target="_blank" href={mountain.image} rel="noopener noreferrer">
