@@ -129,23 +129,43 @@ export default function StatusBarControl() {
             // Always use findPlace to prefer saved points, fall back to popup label if available
             const hasPopup = params.lla && params.llo && params.lab
 
-            // Fetch elevation, place name, and slope angle concurrently
-            Promise.all([
-                getElevation([position.lat, position.lng], zoom, abortController)
-                    .catch(() => null),
-                findPlace(position.lat, position.lng).catch(() => null),
-                slopeAngleSource.calculatePointSlope(position.lat, position.lng, zoom)
-                    .catch(() => null)
-            ]).then(([elevationValue, placeData, slope]) => {
-                if (!abortController.signal.aborted) {
-                    setElevation(elevationValue)
-                    // If we have a popup but no place found, use the popup label
-                    setPlace(placeData ?? (hasPopup ? { name: params.lab } : null))
-                    setSlopeAngle(slope)
-                    // Check if the place is a saved point based on its type
-                    setExistingPoint(placeData?.type === 'point' ? placeData : null)
-                }
-            }).catch(() => {
+            // First find the place, then use its coordinates for elevation/slope
+            findPlace(position.lat, position.lng)
+                .catch(() => null)
+                .then((placeData) => {
+                    // Use place coordinates if found, otherwise use position
+                    const lat = placeData ? parseFloat(placeData.lat) : position.lat
+                    const lng = placeData ? parseFloat(placeData.lon) : position.lng
+
+                    // Fetch elevation and slope angle at the place's location
+                    return Promise.all([
+                        getElevation([lat, lng], zoom, abortController)
+                            .catch(() => null),
+                        Promise.resolve(placeData),
+                        slopeAngleSource.calculatePointSlope(lat, lng, zoom)
+                            .catch(() => null),
+                        Promise.resolve({ lat, lng })
+                    ])
+                })
+                .then(([elevationValue, placeData, slope, coords]) => {
+                    if (!abortController.signal.aborted) {
+                        // Update position to match the place if we found one
+                        if (placeData && coords) {
+                            setPosition(prev => {
+                                if (prev?.lng === coords.lng && prev?.lat === coords.lat) {
+                                    return prev
+                                }
+                                return { lng: coords.lng, lat: coords.lat }
+                            })
+                        }
+                        setElevation(elevationValue)
+                        // If we have a popup but no place found, use the popup label
+                        setPlace(placeData ?? (hasPopup ? { name: params.lab } : null))
+                        setSlopeAngle(slope)
+                        // Check if the place is a saved point based on its type
+                        setExistingPoint(placeData?.type === 'point' ? placeData : null)
+                    }
+                }).catch(() => {
                 // Fallback in case Promise.all fails entirely
                 if (!abortController.signal.aborted) {
                     setElevation(null)
@@ -219,8 +239,9 @@ export default function StatusBarControl() {
         if (point) {
             await db.deletePoint(point)
             setExistingPoint(null)
-            // Refresh the place to clear it
-            setPlace(null)
+            // Re-fetch the place to find any underlying location (mountain, hut, etc.)
+            const underlyingPlace = await findPlace(position.lat, position.lng).catch(() => null)
+            setPlace(underlyingPlace)
         }
     }
 
@@ -244,21 +265,19 @@ export default function StatusBarControl() {
                         ✕
                     </button>
                 )}
-                {(place?.name || hasPopup) && (
+                {(place?.name || hasPopup || isTouchDevice) && (
                     <div className="font-semibold whitespace-nowrap text-center mb-1 flex items-center justify-center gap-2">
-                        {place?.name && (
-                            isMountain ? (
-                                <button
-                                    className="text-blue-600 hover:text-blue-800 underline pointer-events-auto"
-                                    onClick={handlePlaceClick}
-                                >
-                                    {place.name}
-                                </button>
-                            ) : (
-                                <span>{place.name}</span>
-                            )
+                        {isMountain ? (
+                            <button
+                                className="text-blue-600 hover:text-blue-800 underline pointer-events-auto"
+                                onClick={handlePlaceClick}
+                            >
+                                {place?.name ?? 'Unknown Point'}
+                            </button>
+                        ) : (
+                            <span>{place?.name ?? 'Unknown Point'}</span>
                         )}
-                        {hasPopup && (
+                        {(hasPopup || isTouchDevice) && (
                             <div className="flex gap-1 pointer-events-auto">
                                 {existingPoint && (
                                     <button

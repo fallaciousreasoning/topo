@@ -12,6 +12,17 @@ export default function MapCursor() {
     const [centerLocation, setCenterLocation] = React.useState<[number, number] | null>(null)
     const [labelPosition, setLabelPosition] = React.useState<{ x: number, y: number, distance: string, rotation: number, flipped: boolean } | null>(null)
     const [isInteracting, setIsInteracting] = React.useState(false)
+    const [isTouchDevice, setIsTouchDevice] = React.useState(false)
+
+    // Detect touch device
+    React.useEffect(() => {
+        const checkTouchDevice = () => {
+            setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
+        }
+        checkTouchDevice()
+        window.addEventListener('resize', checkTouchDevice)
+        return () => window.removeEventListener('resize', checkTouchDevice)
+    }, [])
 
     React.useEffect(() => {
         if (!map) return
@@ -215,9 +226,10 @@ export default function MapCursor() {
         }
     }, [map, labelPosition]) // Recalculate when labelPosition updates (which happens on map moves)
 
-    // Determine if cursor should be visible - only when location tracking is active
+    // Determine if cursor should be visible
     const shouldShowCursor = React.useMemo(() => {
-        if (!userLocation) return false
+        // On desktop, require user location to be active
+        if (!isTouchDevice && !userLocation) return false
 
         switch (cursorMode) {
             case 'always':
@@ -229,21 +241,24 @@ export default function MapCursor() {
             default:
                 return false
         }
-    }, [cursorMode, isInteracting, userLocation])
+    }, [cursorMode, isInteracting, userLocation, isTouchDevice])
+
+    // Show line only when we have both user location and cursor is visible
+    const shouldShowLine = shouldShowCursor && userLocation && centerLocation
 
     return (
         <>
             {/* MapLibre Source and Layer for the line */}
-            {shouldShowCursor && userLocation && centerLocation && (
+            {shouldShowLine && (
                 <>
-                    <Source 
-                        id="cursor-line-source" 
+                    <Source
+                        id="cursor-line-source"
                         spec={{
                             type: 'geojson',
                             data: lineData
                         }}
                     />
-                    <Layer 
+                    <Layer
                         layer={{
                             id: 'cursor-line',
                             type: 'line',
@@ -259,7 +274,7 @@ export default function MapCursor() {
             )}
 
             {/* DOM-based distance label */}
-            {shouldShowCursor && labelPosition && (
+            {shouldShowLine && labelPosition && (
                 <div 
                     className="fixed pointer-events-none z-20 px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded"
                     style={{

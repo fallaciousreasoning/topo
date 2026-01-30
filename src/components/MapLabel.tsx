@@ -34,9 +34,7 @@ export default function () {
         }
     }, [map])
 
-    if (!show) return null
-
-    const geojson = {
+    const geojson = React.useMemo(() => ({
         type: 'FeatureCollection' as const,
         features: [{
             type: 'Feature' as const,
@@ -46,7 +44,19 @@ export default function () {
             },
             properties: {}
         }]
-    }
+    }), [params.llo, params.lla])
+
+    // Update the source data when coordinates change
+    React.useEffect(() => {
+        if (!map || !show) return
+
+        const source = map.getSource('map-label-pin') as any
+        if (source && source.setData) {
+            source.setData(geojson)
+        }
+    }, [map, show, geojson])
+
+    if (!show) return null
 
     return (
         <>
