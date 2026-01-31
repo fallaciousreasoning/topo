@@ -158,10 +158,7 @@ export default function StatusBar() {
     }, [position])
 
     // Check if status bar should show based on mode
-    const hasPopup = params.lla && params.llo && params.lab
-    const shouldShow = statusBarMode === 'always'
-        ? (isTouchDevice || position)
-        : hasPopup
+    const shouldShow = statusBarMode === 'always' && (isTouchDevice || position)
 
     return shouldShow ? (
         <div className="fixed bottom-0 right-0 pointer-events-none z-10">

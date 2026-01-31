@@ -13,25 +13,17 @@ export default function TopoText({ text }: { text?: string }) {
         .map(p => ({ latlng: convertNZMGReferenceToLatLng(p), text: p }))
         .map((p, i) => <React.Fragment key={i}>
             {p.latlng
-                ? <a href={`#lla=${p.latlng[0]}&llo=${p.latlng[1]}&lab=${p.text}`} onClick={e => {
+                ? <a href={`#page=location/${p.latlng[0]}/${p.latlng[1]}/${encodeURIComponent(p.text)}`} onClick={e => {
                     e.preventDefault()
 
-                    const update: Partial<RouteParams> = {
-                        lla: p.latlng![0],
-                        llo: p.latlng![1],
-                        lab: p.text,
-                    }
-
-                    // On mobile, close the mountain view.
-                    if (isMobile) {
-                        update.page = undefined
-                    }
-                    updateRoute(update)
+                    updateRoute({
+                        page: `location/${p.latlng![0]}/${p.latlng![1]}/${encodeURIComponent(p.text)}`
+                    })
                 }}>
                     {p.text}
                 </a>
                 : p.text}
         </React.Fragment>
-        ), [isMobile, text])
+        ), [text])
     return parts
 }

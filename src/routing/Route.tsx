@@ -26,11 +26,11 @@ const parseMatch = (
 
     if (pathPart.startsWith(":")) {
       params[pathPart.replace(/(^:)|(\?$)/gi, "")] =
-        decodeURIComponent(pagePart);
+        pagePart ? decodeURIComponent(pagePart) : undefined;
 
       // We can't have empty path parts, unless the user has said they can be
       // empty.
-      if (!pathPart && !pagePart.endsWith("?")) return false;
+      if (!pagePart && !pathPart.endsWith("?")) return false;
       continue;
     }
 

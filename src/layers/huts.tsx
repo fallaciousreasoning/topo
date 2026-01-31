@@ -58,9 +58,7 @@ export default {
             const point = hutFeature.geometry as GeoJSON.Point
 
             updateRoute({
-                lla: point.coordinates[1],
-                llo: point.coordinates[0],
-                lab: hutName
+                page: `location/${point.coordinates[1]}/${point.coordinates[0]}/${encodeURIComponent(hutName)}`
             })
         })
 

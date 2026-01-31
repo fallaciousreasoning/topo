@@ -8,7 +8,12 @@ export default function () {
     const params = useParams()
     const { map } = useMap()
 
-    const show = params.lla && params.llo && params.lab
+    // Check if we're on a location page and extract coordinates
+    const isLocationPage = params.page?.startsWith('location/')
+    const locationMatch = isLocationPage ? params.page?.match(/^location\/([-\d.]+)\/([-\d.]+)/) : null
+    const lat = locationMatch ? parseFloat(locationMatch[1]) : null
+    const lng = locationMatch ? parseFloat(locationMatch[2]) : null
+    const show = lat !== null && lng !== null
 
     React.useEffect(() => {
         if (!map) return
@@ -40,11 +45,11 @@ export default function () {
             type: 'Feature' as const,
             geometry: {
                 type: 'Point' as const,
-                coordinates: [params.llo!, params.lla!]
+                coordinates: [lng!, lat!]
             },
             properties: {}
         }]
-    }), [params.llo, params.lla])
+    }), [lng, lat])
 
     // Update the source data when coordinates change
     React.useEffect(() => {

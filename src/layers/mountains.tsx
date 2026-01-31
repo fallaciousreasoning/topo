@@ -151,9 +151,7 @@ export default {
             const label = `${name} (${elevation}m)`
 
             updateRoute({
-                lla: coords[1],
-                llo: coords[0],
-                lab: label
+                page: `location/${coords[1]}/${coords[0]}/${encodeURIComponent(label)}`
             })
         })
         if (!result) return

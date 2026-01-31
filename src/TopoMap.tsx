@@ -98,8 +98,8 @@ export default function TopoMap() {
         <TracksSection />
         <PointsSection />
         <PointSection />
+        <LocationSection />
       </SectionContainer>
-      <LocationSection />
 
       <PositionSyncer />
       <LayersControl />

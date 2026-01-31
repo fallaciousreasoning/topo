@@ -25,9 +25,11 @@ export default {
     // Filter out mountain points if mountains layer is showing
     const mountainsLayerActive = params.overlays.includes(mountains.id);
 
-    // Also filter out the pinned point if one is active
-    const pinnedLat = params.lla;
-    const pinnedLon = params.llo;
+    // Extract location page coordinates if showing
+    const isLocationPage = params.page?.startsWith('location/');
+    const locationMatch = isLocationPage ? params.page?.match(/^location\/([-\d.]+)\/([-\d.]+)/) : null;
+    const pinnedLat = locationMatch ? parseFloat(locationMatch[1]) : null;
+    const pinnedLon = locationMatch ? parseFloat(locationMatch[2]) : null;
 
     const points = allPoints.filter((p) => {
       // Filter out mountain points if mountains layer is active
@@ -58,9 +60,9 @@ export default {
       const coords = feature.geometry.coordinates;
 
       updateRoute({
-        lla: coords[1],
-        llo: coords[0],
-        lab: name,
+        page: name
+          ? `location/${coords[1]}/${coords[0]}/${encodeURIComponent(name)}`
+          : `location/${coords[1]}/${coords[0]}`
       });
     });
 

@@ -19,11 +19,6 @@ export interface RouteParams {
   page: string | null;
 
   editingFeature: number | null;
-
-  // Label
-  lla: number | null;
-  llo: number | null;
-  lab: string | null;
 }
 
 const defaultRouteParams: RouteParams = {
@@ -37,10 +32,6 @@ const defaultRouteParams: RouteParams = {
   page: null,
 
   editingFeature: null,
-
-  lla: null,
-  llo: null,
-  lab: null,
 };
 
 interface RouterContext {
@@ -82,10 +73,6 @@ const parsers: {
   page: stringParser,
 
   editingFeature: intParser,
-
-  lla: floatParser,
-  llo: floatParser,
-  lab: stringParser,
 };
 
 const toTruncated =
@@ -104,9 +91,6 @@ const serializers: {
   overlays: (r) => r.join(","),
   page: (p) => p,
   editingFeature: (f) => (!f ? null : f.toString()),
-  lla: toTruncated(),
-  llo: toTruncated(),
-  lab: (p) => p,
 };
 
 const parseUrl = (includeStorage = true) => {

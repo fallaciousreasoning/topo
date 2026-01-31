@@ -4,12 +4,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import db from "../caches/indexeddb";
 import Button from "../components/Button";
 import { useParams, useRouteUpdater } from "../routing/router";
-import { useMap } from "../map/Map";
 
 export default function PointSection() {
   const params = useParams();
   const updateRoute = useRouteUpdater();
-  const { map } = useMap();
   const [newTag, setNewTag] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -31,18 +29,6 @@ export default function PointSection() {
       setDescription(point.description ?? "");
     }
   }, [point?.id]);
-
-  // Focus the point on the map when the edit page opens
-  useEffect(() => {
-    if (point) {
-      const [lng, lat] = point.coordinates;
-      map.flyTo({
-        center: [lng, lat],
-        zoom: Math.max(map.getZoom(), 14),
-        essential: true,
-      });
-    }
-  }, [point?.id, map]);
 
   if (!pointId || !point) return null;
 

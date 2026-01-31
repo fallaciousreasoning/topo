@@ -63,15 +63,15 @@ export default function LongPressLookup() {
 
             const closestPoint = await findPlace(lat, lon)
 
-            const elevation = round(await getElevation([lat, lon], map.getZoom()), 0)
+            const useLat = parseFloat(closestPoint?.lat ?? '') || lat
+            const useLon = parseFloat(closestPoint?.lon ?? '') || lon
+            const name = closestPoint?.name
 
-            const update = {
-                lla: parseFloat(closestPoint?.lat ?? '') || lat,
-                llo: parseFloat(closestPoint?.lon ?? '') || lon,
-                lab: (closestPoint?.name ?? `Lat/Lon: ${round(lon)}, ${round(lat)}`) + ` (${elevation}m)`
-            }
-
-            updateRoute(update)
+            updateRoute({
+                page: name
+                    ? `location/${useLat}/${useLon}/${encodeURIComponent(name)}`
+                    : `location/${useLat}/${useLon}`
+            })
         }
 
         const cancelHandler = () => {
