@@ -28,6 +28,7 @@ import TracksSection from "./sections/TracksSection";
 import PointsSection from "./sections/PointsSection";
 import PointSection from "./sections/PointSection";
 import Mountains from "./layers/mountains";
+import SectionContainer from "./sections/SectionContainer";
 
 const sources = baseLayers.flatMap((b) =>
   Object.entries(b.sources).map(([key, spec]) => (
@@ -88,17 +89,19 @@ function Layers() {
 export default function TopoMap() {
   return (
     <Map>
-      <SearchSection />
-      <MountainsSection />
-      <MountainSection />
-      <SettingsSection />
-      <TracksSection />
-      <PointsSection />
-      <PointSection />
+      <SectionContainer>
+        <MenuSection />
+        <SearchSection />
+        <MountainsSection />
+        <MountainSection />
+        <SettingsSection />
+        <TracksSection />
+        <PointsSection />
+        <PointSection />
+      </SectionContainer>
       <LocationSection />
 
       <PositionSyncer />
-      <MenuSection />
       <LayersControl />
       <MenuControl />
       <SearchControl />
