@@ -19,8 +19,8 @@ import SearchSection from "./sections/SearchSection";
 import SettingsSection from "./sections/SettingsSection";
 import MapLabel from "./components/MapLabel";
 import MapCursor from "./components/MapCursor";
-import InfoBox from "./controls/InfoBox";
 import StatusBar from "./controls/StatusBar";
+import LocationSection from "./sections/LocationSection";
 import LongPressLookup from "./controls/LongPressLookup";
 import { BaseLayerDefinition } from "./layers/config";
 import Drawing from "./draw/Drawing";
@@ -95,13 +95,13 @@ export default function TopoMap() {
       <TracksSection />
       <PointsSection />
       <PointSection />
+      <LocationSection />
 
       <PositionSyncer />
       <MenuSection />
       <LayersControl />
       <MenuControl />
       <SearchControl />
-      <InfoBox />
       <StatusBar />
 
       <MapCursor />
