@@ -57,7 +57,7 @@ export default function PointSection() {
   };
 
   return (
-    <Section closable page={`point/${pointId}`} title="Edit Point">
+    <Section backButton page={`point/${pointId}`} title="Edit Point">
       <div className="flex flex-col gap-4">
         <div>
           <label className="text-sm text-gray-600 block mb-1">Color</label>

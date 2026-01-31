@@ -6,6 +6,7 @@ interface Props {
   page: string;
   title?: string;
   closable?: boolean;
+  backButton?: boolean;
   exact?: boolean;
   escapeCloses?: boolean;
   children: React.ReactNode | ((props: any) => React.ReactNode);
@@ -49,7 +50,10 @@ export default function Section(props: Props) {
             </div>
           )}
           {props.title && (
-            <h2 className="font-semibold text-lg flex gap-1">
+            <h2 className="font-semibold text-lg flex items-center gap-1">
+              {props.backButton && (
+                <button onClick={(e) => window.history.back()} className="leading-none">←</button>
+              )}
               {props.closable && (
                 <button onClick={(e) => updateRoute({ page: null })}>☰</button>
               )}

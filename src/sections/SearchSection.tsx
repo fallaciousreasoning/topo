@@ -19,17 +19,18 @@ export default function SearchSection() {
     const { map } = useMap()
 
     const selectResult = async (r: Place) => {
-        const elevationPromise = getElevation([parseFloat(r.lat), parseFloat(r.lon)], map.getZoom()).then(e => ` (${round(e, 0)}m)`).catch(() => '')
+        const lat = parseFloat(r.lat)
+        const lon = parseFloat(r.lon)
+
         updateRoute({
-            lla: parseFloat(r.lat),
-            llo: parseFloat(r.lon),
-            lab: r.name + await elevationPromise,
-            page: isMobile ? null : 'search'
+            page: `location/${lat}/${lon}/${encodeURIComponent(r.name)}`,
+            lat,
+            lon
         })
 
         map.flyTo({
             animate: true,
-            center: [parseFloat(r.lon), parseFloat(r.lat)]
+            center: [lon, lat]
         })
     }
 
