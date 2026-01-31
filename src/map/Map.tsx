@@ -44,7 +44,8 @@ export default function MapContext(props: React.PropsWithChildren) {
       dragPan: true,
       dragRotate: true,
       touchPitch: true,
-      maxPitch: 75
+      maxPitch: 75,
+      attributionControl: false
     })
       .addControl(new ScaleControl({
         maxWidth: 150,
