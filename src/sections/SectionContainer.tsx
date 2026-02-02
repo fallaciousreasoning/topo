@@ -9,6 +9,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
   const updateRoute = useRouteUpdater();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const scrollPositionsRef = React.useRef<{ [page: string]: number }>({});
 
   // Detect small screen (mobile)
   React.useEffect(() => {
@@ -30,24 +31,28 @@ export default function SectionContainer({ children }: { children: React.ReactNo
   // Track previous page to detect when we're opening a new page vs navigating between pages
   const prevPageRef = React.useRef<string | null>(null);
 
-  // Reset prevPageRef when page is closed
+  // Reset prevPageRef and clear scroll positions when page is closed
   React.useEffect(() => {
     if (!hasActivePage) {
       prevPageRef.current = null;
+      scrollPositionsRef.current = {};
     }
   }, [hasActivePage]);
 
   // Scroll to initial position when section opens or when navigating to a maximized page
   React.useEffect(() => {
-    if (!isSheet || !containerRef.current) return;
+    if (!isSheet || !containerRef.current || !params.page) return;
 
     const isNewPage = prevPageRef.current !== params.page;
     const wasClosedBefore = prevPageRef.current === null;
+    const savedPosition = scrollPositionsRef.current[params.page];
 
-    // Only reset scroll position if:
-    // 1. Opening a page from closed state, OR
-    // 2. Navigating to a maximized page (not FROM a maximized page)
-    if (wasClosedBefore || (isNewPage && shouldStartMaximized)) {
+    // Restore saved scroll position if available
+    if (isNewPage && savedPosition !== undefined) {
+      containerRef.current.scrollTop = savedPosition;
+    }
+    // Otherwise, set initial position
+    else if (wasClosedBefore || (isNewPage && shouldStartMaximized)) {
       if (shouldStartMaximized) {
         // Scroll to expanded position (past off-screen + collapsed spacers + fixed spacer)
         containerRef.current.scrollTop = window.innerHeight + (window.innerHeight * 0.8 - 48);
@@ -59,6 +64,23 @@ export default function SectionContainer({ children }: { children: React.ReactNo
 
     prevPageRef.current = params.page;
   }, [hasActivePage, isSheet, shouldStartMaximized, params.page]);
+
+  // Save scroll position when scrolling
+  React.useEffect(() => {
+    if (!isSheet || !containerRef.current || !params.page) return;
+
+    const handleScroll = () => {
+      if (!containerRef.current || !params.page) return;
+      scrollPositionsRef.current[params.page] = containerRef.current.scrollTop;
+    };
+
+    const container = containerRef.current;
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [isSheet, params.page]);
 
   // Close when content is scrolled completely off screen (downward dismiss)
   React.useEffect(() => {
