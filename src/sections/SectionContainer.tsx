@@ -8,6 +8,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
   const params = useParams();
   const updateRoute = useRouteUpdater();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   // Detect small screen (mobile)
   React.useEffect(() => {
@@ -59,19 +60,36 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     prevPageRef.current = params.page;
   }, [hasActivePage, isSheet, shouldStartMaximized, params.page]);
 
-  // Close when scrolled completely off screen
+  // Close when content is scrolled completely off screen (downward dismiss)
   React.useEffect(() => {
-    if (!isSheet || !containerRef.current) return;
+    if (!isSheet || !contentRef.current || !containerRef.current) return;
 
-    const handleScroll = () => {
-      if (containerRef.current && containerRef.current.scrollTop < 50) {
-        updateRoute({ page: null });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const rootBounds = entry.rootBounds;
+
+        // Close only when the content is completely out of view AND below the viewport
+        // (dismissed downward, not when scrolling content up)
+        if (!entry.isIntersecting && entry.intersectionRatio === 0 && rootBounds) {
+          const rect = entry.boundingClientRect;
+          // Check if the content is below the viewport (dismissed downward)
+          if (rect.top > rootBounds.bottom) {
+            updateRoute({ page: null });
+          }
+        }
+      },
+      {
+        root: containerRef.current,
+        threshold: 0,
       }
-    };
+    );
 
-    const container = containerRef.current;
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
+    observer.observe(contentRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [isSheet, updateRoute]);
 
   const outerContainerStyle = isSheet ? {
@@ -88,7 +106,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
   const spacerOffScreenStyle = isSheet ? {
     minHeight: '100vh', // Allows content to scroll completely off screen
     flexShrink: 0,
-    scrollSnapAlign: 'start' as const,
+    scrollSnapAlign: 'none' as const,
     scrollSnapStop: 'always' as const,
     pointerEvents: 'none' as const
   } : {};
@@ -118,7 +136,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
       <div style={spacerOffScreenStyle} />
       <div style={spacerCollapsedStyle} />
       <div style={spacerFixedStyle} />
-      <div className="bg-white shadow rounded-t-lg pointer-events-auto" style={{ minHeight: `calc(100vh - 48px)` }}>
+      <div ref={contentRef} className="bg-white shadow rounded-t-lg pointer-events-auto" style={{ minHeight: `calc(100vh - 48px)`, 'scrollSnapAlign': 'none' }}>
         {children}
       </div>
     </div>
