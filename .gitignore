@@ -3,3 +3,6 @@
 /.vscode/
 .DS_Store
 .vercel
+/out
+__pycache__
+dist/

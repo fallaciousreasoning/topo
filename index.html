@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset='utf-8'>
 	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" />
 	<title>NZ Topo</title>
-	<meta name="description" content="Offline maps for the NZ backcountry! Integrates with mountains & routes from ClimbNZ, and includes basic tools for measuring distance and generating elevation profiles">
+	<meta name="description"
+		content="Offline maps for the NZ backcountry! Integrates with mountains & routes from ClimbNZ, and includes basic tools for measuring distance and generating elevation profiles">
 
 	<link rel='icon' type='text/svg+xml' href='/favicon.svg'>
 	<link rel="manifest" href="/manifest.json">
@@ -12,7 +14,7 @@
 	<link rel="stylesheet" href="/build/extra.css" />
 	<link rel="stylesheet" href="/build/tailwind.css" />
 
-	<script defer src='./src/main.ts' type="module"></script>
+	<script defer src='./src/App.tsx' type="module"></script>
 	<script defer>
 		if ('serviceWorker' in navigator)
 			navigator.serviceWorker.register('/serviceWorker.js');
@@ -21,4 +23,5 @@
 
 <body>
 </body>
+
 </html>
