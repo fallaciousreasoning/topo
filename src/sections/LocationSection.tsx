@@ -96,8 +96,15 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between">
+    <div className="flex flex-col gap-4 relative">
+      <button
+        onClick={() => updateRoute({ page: null })}
+        className="absolute w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700"
+        style={{ top: '-0.5rem', right: '-0.5rem' }}
+      >
+        ✕
+      </button>
+      <div className="flex items-start justify-between pr-8">
         <div className="flex flex-col">
           <h3 className="font-bold text-lg">{place?.name ?? "Location"}</h3>
           <div className="text-xs text-gray-500">
