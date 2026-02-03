@@ -3,6 +3,8 @@
     "name": "NZ Topo",
     "short_name": "NZ Topo",
     "description": "An offline topo maps app for the New Zealand backcountry",
+    "orientation": "any",
+    "categories": ["maps", "navigation", "utilities", "travel", "hiking", "outdoors", "topo"],
     "icons": [
         {
             "src": "/maskable.png",
@@ -24,7 +26,7 @@
         }
     ],
     "scope": ".",
-    "start_url": "/index.html",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#FFFFFF",
     "theme_color": "#25a33c"
