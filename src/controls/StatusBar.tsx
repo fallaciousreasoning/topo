@@ -16,6 +16,7 @@ export default function StatusBar() {
     const [place, setPlace] = React.useState<any | null>(null)
     const [slopeAngle, setSlopeAngle] = React.useState<number | null>(null)
     const [isTouchDevice, setIsTouchDevice] = React.useState(false)
+    const [isTouching, setIsTouching] = React.useState(false)
 
     // Detect touch device
     React.useEffect(() => {
@@ -26,6 +27,25 @@ export default function StatusBar() {
         window.addEventListener('resize', checkTouchDevice)
         return () => window.removeEventListener('resize', checkTouchDevice)
     }, [])
+
+    // Track touch interaction for mobile
+    React.useEffect(() => {
+        if (!isTouchDevice || !map) return
+
+        const handleTouchStart = () => setIsTouching(true)
+        const handleTouchEnd = () => setIsTouching(false)
+
+        const container = map.getContainer()
+        container.addEventListener('touchstart', handleTouchStart)
+        container.addEventListener('touchend', handleTouchEnd)
+        container.addEventListener('touchcancel', handleTouchEnd)
+
+        return () => {
+            container.removeEventListener('touchstart', handleTouchStart)
+            container.removeEventListener('touchend', handleTouchEnd)
+            container.removeEventListener('touchcancel', handleTouchEnd)
+        }
+    }, [map, isTouchDevice])
 
     // Track position based on device type
     React.useEffect(() => {
@@ -158,7 +178,18 @@ export default function StatusBar() {
     }, [position])
 
     // Check if status bar should show based on mode
-    const shouldShow = statusBarMode === 'always' && (isTouchDevice || position)
+    const shouldShow = React.useMemo(() => {
+        if (statusBarMode === 'never') return false
+        if (statusBarMode === 'always') return isTouchDevice || position !== null
+        if (statusBarMode === 'interacting') {
+            if (isTouchDevice) {
+                return isTouching
+            } else {
+                return position !== null
+            }
+        }
+        return false
+    }, [statusBarMode, isTouchDevice, isTouching, position])
 
     return shouldShow ? (
         <div className="fixed bottom-0 right-0 pointer-events-none z-10">
