@@ -13,7 +13,6 @@ import Map, { useMap } from "./map/Map";
 import Source from "./map/Source";
 import { useParams } from "./routing/router";
 import MenuSection from "./sections/MenuSection";
-import MountainSection from "./sections/MountainSection";
 import MountainsSection from "./sections/MountainsSection";
 import SearchSection from "./sections/SearchSection";
 import SettingsSection from "./sections/SettingsSection";
@@ -93,7 +92,6 @@ export default function TopoMap() {
         <MenuSection />
         <SearchSection />
         <MountainsSection />
-        <MountainSection />
         <SettingsSection />
         <TracksSection />
         <PointsSection />

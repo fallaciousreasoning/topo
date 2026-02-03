@@ -10,8 +10,33 @@ import StatusBarButton from "../components/StatusBarButton";
 import { shareLocation } from "../utils/share";
 import Section from "./Section";
 import { usePromise } from "../hooks/usePromise";
-import { getMountains, Mountain } from "../layers/mountains";
+import { getMountains, Mountain, MountainPitch } from "../layers/mountains";
 import TopoText from "../components/TopoText";
+import { repeatString } from "../utils/array";
+
+const joinBits = (bits: (string | number | boolean | null | undefined)[]) => bits
+    .filter(b => b)
+    .join(' ');
+
+function Pitches({ pitches }: { pitches: MountainPitch[] }) {
+  const isOnly = pitches.length === 1;
+  const className = !isOnly ? 'list-decimal ml-8' : '';
+  return <ol className={className}>
+    {pitches.map((p, i) => <li key={i}>
+      {!isOnly && joinBits([
+        p.ewbank,
+        p.alpine ?? p.mtcook,
+        p.commitment,
+        p.aid,
+        p.ice,
+        p.mixed,
+        p.length && `(${p.length})`,
+        p.bolts && `${p.bolts} bolts`,
+        ' '
+      ])}<TopoText text={p.description} />
+    </li>)}
+  </ol>;
+}
 
 function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: string }) {
   const updateRoute = useRouteUpdater();
@@ -137,50 +162,143 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
       )}
 
       {isMountain && mountain && (
-        <div>
-          {mountain.image && (
-            <a target="_blank" href={mountain.image} rel="noopener noreferrer">
-              <img className="h-64 w-full object-cover object-top" alt={mountain.name} src={mountain.image} />
-            </a>
-          )}
-          {mountain.access && (
-            <>
-              <span className="font-bold">Access</span>
-              <p>
-                <TopoText text={mountain.access} />
-              </p>
-            </>
-          )}
-          {mountain.description && (
-            <>
-              <span className="font-bold">Description</span>
-              <p>
-                <TopoText text={mountain.description} />
-              </p>
-            </>
-          )}
-          {!!mountain.routes.length && (
-            <>
-              <span className="font-bold">Routes</span>
-              {mountain.routes.map((r) => (
-                <div key={r.link} className="my-2">
-                  <div className="font-semibold">{r.name}</div>
-                  {r.grade && <div className="text-sm text-gray-600">{r.grade}</div>}
-                  {r.description && (
-                    <div className="text-sm">
-                      <TopoText text={r.description} />
+        <>
+          <div>
+            {mountain.image && (
+              <a target="_blank" href={mountain.image} rel="noopener noreferrer">
+                <img className="h-64 w-full object-cover object-top" alt={mountain.name} src={mountain.image} />
+              </a>
+            )}
+            {mountain.access && (
+              <>
+                <span className="font-bold">Access</span>
+                <p>
+                  <TopoText text={mountain.access} />
+                </p>
+              </>
+            )}
+            {mountain.description && (
+              <>
+                <span className="font-bold">Description</span>
+                <p>
+                  <TopoText text={mountain.description} />
+                </p>
+              </>
+            )}
+            {!!mountain.routes.length && (
+              <>
+                <span className="font-bold">Routes</span>
+                {mountain.routes.map((r) => (
+                  <React.Fragment key={r.link}>
+                    <hr className="my-1" />
+                    <div className="my-2">
+                      <div className="font-bold">
+                        {joinBits([
+                          r.name,
+                          r.grade && `(${r.grade})`,
+                          r.bolts && `${r.bolts} bolts`,
+                          r.natural_pro && 'trad',
+                          repeatString('★', r.quality)
+                        ])}
+                      </div>
+                      {r.image && (
+                        <a target="_blank" rel="noopener noreferrer" href={r.image}>
+                          <img
+                            className="h-64 w-full object-cover object-scale"
+                            alt={r.name}
+                            src={r.image}
+                          />
+                        </a>
+                      )}
+                      <div>
+                        <TopoText text={r.description ?? ''} />
+                      </div>
+                      <Pitches pitches={r.pitches} />
+                      {r.ascent && (
+                        <span className="italic">
+                          F.A. {r.ascent}
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
-            </>
-          )}
+                  </React.Fragment>
+                ))}
+              </>
+            )}
+          </div>
+          {mountain.places.map((place) => (
+            <React.Fragment key={place.link}>
+              <hr className="my-3" />
+              <div>
+                <h4 className="font-bold text-md">{place.name}{place.altitude && ` (${place.altitude})`}</h4>
+                {place.image && (
+                  <a target="_blank" href={place.image} rel="noopener noreferrer">
+                    <img className="h-64 w-full object-cover object-top" alt={place.name} src={place.image} />
+                  </a>
+                )}
+                {place.access && (
+                  <>
+                    <span className="font-bold">Access</span>
+                    <p>
+                      <TopoText text={place.access} />
+                    </p>
+                  </>
+                )}
+                {place.description && (
+                  <>
+                    <span className="font-bold">Description</span>
+                    <p>
+                      <TopoText text={place.description} />
+                    </p>
+                  </>
+                )}
+                {!!place.routes.length && (
+                  <>
+                    <span className="font-bold">Routes</span>
+                    {place.routes.map((r) => (
+                      <React.Fragment key={r.link}>
+                        <hr className="my-1" />
+                        <div className="my-2">
+                          <div className="font-bold">
+                            {joinBits([
+                              r.name,
+                              r.grade && `(${r.grade})`,
+                              r.bolts && `${r.bolts} bolts`,
+                              r.natural_pro && 'trad',
+                              repeatString('★', r.quality)
+                            ])}
+                          </div>
+                          {r.image && (
+                            <a target="_blank" rel="noopener noreferrer" href={r.image}>
+                              <img
+                                className="h-64 w-full object-cover object-scale"
+                                alt={r.name}
+                                src={r.image}
+                              />
+                            </a>
+                          )}
+                          <div>
+                            <TopoText text={r.description ?? ''} />
+                          </div>
+                          <Pitches pitches={r.pitches} />
+                          {r.ascent && (
+                            <span className="italic">
+                              F.A. {r.ascent}
+                            </span>
+                          )}
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </>
+                )}
+              </div>
+            </React.Fragment>
+          ))}
           <div>
             <a href={mountain.link} title={mountain.name} target="_blank" rel="noopener noreferrer">
               ClimbNZ
             </a>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
