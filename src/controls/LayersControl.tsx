@@ -30,14 +30,24 @@ export default function LayersControl() {
 
         // Update different layer types based on the layer ID
         if (layerId === 'hillshade') {
-            map.setPaintProperty('hillshade', 'hillshade-opacity', opacity)
+            if (map.getLayer('hillshade')) {
+                map.setPaintProperty('hillshade', 'hillshade-opacity', opacity)
+            }
         } else if (layerId === 'contour-source') {
-            map.setPaintProperty('contour-lines', 'line-opacity', opacity)
-            map.setPaintProperty('contour-labels', 'text-opacity', opacity)
+            if (map.getLayer('contour-lines')) {
+                map.setPaintProperty('contour-lines', 'line-opacity', opacity)
+            }
+            if (map.getLayer('contour-labels')) {
+                map.setPaintProperty('contour-labels', 'text-opacity', opacity)
+            }
         } else if (layerId === 'slope-angle') {
-            map.setPaintProperty('slope-angle', 'raster-opacity', opacity)
+            if (map.getLayer('slope-angle')) {
+                map.setPaintProperty('slope-angle', 'raster-opacity', opacity)
+            }
         } else if (layerId === 'utm-grid') {
-            map.setPaintProperty('utm-grid-lines', 'line-opacity', opacity)
+            if (map.getLayer('utm-grid-lines')) {
+                map.setPaintProperty('utm-grid-lines', 'line-opacity', opacity)
+            }
         }
     }
 
