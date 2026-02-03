@@ -8,15 +8,22 @@ import { OverlayDefinition } from "./config";
 import Source from "../map/Source";
 import Layer from "../map/Layer";
 
-const fetchData = async () => {
-    const url = "/data/huts.json"
-    const response = await fetch(url);
-    const data = await response.json() as any[];
-    for (const hut of data) {
-        hut.type = 'hut'
+let hutsPromise: Promise<Place[]>
+export const getHuts = () => {
+    if (!hutsPromise) {
+        hutsPromise = fetch('/data/huts.json').then(r => r.json() as Promise<any[]>)
+            .then(data => {
+                for (const hut of data) {
+                    hut.type = 'hut'
+                }
+                return data as Place[]
+            })
     }
+    return hutsPromise
+}
 
-    const huts = data as Place[]
+const getHutsGeoJson = async () => {
+    const huts = await getHuts()
     const geojson: GeoJSON.GeoJSON = {
         type: 'FeatureCollection',
         features: huts.map(h => ({
@@ -45,7 +52,7 @@ export default {
     type: 'overlay',
     cacheable: false,
     source: () => {
-        const { result } = usePromise(fetchData, [])
+        const { result } = usePromise(getHutsGeoJson, [])
         const updateRoute = useRouteUpdater()
 
         useLayerHandler('click', 'huts-unclustered-point', e => {
