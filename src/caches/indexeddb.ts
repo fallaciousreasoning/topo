@@ -14,11 +14,13 @@ class TileDb extends Dexie {
   points: Table<Point, number>;
 
   constructor() {
-    super("db");
+    super("database");
+
     this.version(4).stores({
       tiles: "id,layer",
       tracks: "++id",
-    });
+    })
+
     this.version(5).stores({
       tiles: "id,layer",
       tracks: "++id",

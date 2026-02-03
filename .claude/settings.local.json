@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm ls:*)",
+      "Bash(nvm ls:*)",
+      "Bash(source ~/.nvm/nvm.sh)"
     ],
     "deny": [],
     "ask": []
