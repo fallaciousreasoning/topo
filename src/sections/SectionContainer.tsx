@@ -126,7 +126,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
 
   // Three snap points: off-screen (0), collapsed (20vh), expanded (100vh - 48px)
   const spacerOffScreenStyle = isSheet ? {
-    minHeight: '100vh', // Allows content to scroll completely off screen
+    minHeight: '100dvh', // Allows content to scroll completely off screen
     flexShrink: 0,
     scrollSnapAlign: 'none' as const,
     scrollSnapStop: 'always' as const,
@@ -134,7 +134,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
   } : {};
 
   const spacerCollapsedStyle = isSheet ? {
-    minHeight: `calc(${100 - COLLAPSED_HEIGHT_VH}vh - 48px)`, // Creates collapsed snap point
+    minHeight: `calc(${100 - COLLAPSED_HEIGHT_VH}dvh - 48px)`, // Creates collapsed snap point
     flexShrink: 0,
     scrollSnapAlign: 'start' as const,
     scrollSnapStop: 'always' as const,
