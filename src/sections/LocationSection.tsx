@@ -12,6 +12,7 @@ import { shareLocation } from "../utils/share";
 import Section from "./Section";
 import { usePromise } from "../hooks/usePromise";
 import { getMountains, Mountain, MountainPitch } from "../layers/mountains";
+import { getHutByName, Hut } from "../layers/huts";
 import TopoText from "../components/TopoText";
 import { repeatString } from "../utils/array";
 
@@ -45,6 +46,7 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
   const [elevation, setElevation] = useState<number | null>(null);
   const [place, setPlace] = useState<any | null>(null);
   const [existingPoint, setExistingPoint] = useState<Point | null>(null);
+  const [hut, setHut] = useState<Hut | null>(null);
   const { result: mountains = {} } = usePromise(getMountains, []);
 
   // Fetch location info
@@ -73,6 +75,15 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
         setElevation(elevationValue);
         setPlace(placeData);
         setExistingPoint(point);
+
+        // Fetch full hut details if this is a hut
+        if (placeData?.type === "hut" && placeData?.name) {
+          getHutByName(placeData.name).then(hutData => {
+            setHut(hutData);
+          });
+        } else {
+          setHut(null);
+        }
       });
   }, [lat, lng, map, name]);
 
@@ -160,9 +171,129 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
         </div>
       </div>
 
-      {isHut && place?.description && (
+      {isHut && hut && (
         <div>
-          <TopoText text={place.description} />
+          {(hut.heroImage || hut.introductionThumbnail) && (
+            <img
+              className="h-64 w-full object-cover object-center mb-4"
+              alt={hut.name}
+              src={hut.heroImage || hut.introductionThumbnail}
+            />
+          )}
+          {(hut.webcamUrl || hut.webcamUrls) && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-2">
+                {hut.webcamUrls && hut.webcamUrls.length > 1 ? 'Live Webcams' : 'Live Webcam'}
+              </h5>
+              {hut.webcamUrl && (
+                <img
+                  className="w-full object-contain border border-gray-300"
+                  alt={`${hut.name} webcam`}
+                  src={hut.webcamUrl}
+                />
+              )}
+              {hut.webcamUrls && hut.webcamUrls.map((url, i) => (
+                <img
+                  key={i}
+                  className="w-full object-contain border border-gray-300 mt-2"
+                  alt={`${hut.name} webcam ${i + 1}`}
+                  src={url}
+                />
+              ))}
+            </div>
+          )}
+          {hut.introduction && (
+            <div className="mb-4">
+              <TopoText text={hut.introduction} />
+            </div>
+          )}
+          {hut.gallery && hut.gallery.length > 0 && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-2">Gallery</h5>
+              <div className="grid grid-cols-2 gap-2">
+                {hut.gallery.map((image, i) => {
+                  // Strip HTML tags and decode entities from caption
+                  const cleanCaption = image.caption
+                    ? image.caption
+                        .replace(/<[^>]*>/g, '') // Remove HTML tags
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)))
+                        .trim()
+                    : `${hut.name} photo ${i + 1}`;
+
+                  return (
+                    <div key={i}>
+                      <img
+                        className="w-full h-48 object-cover border border-gray-300"
+                        alt={cleanCaption}
+                        src={image.url}
+                      />
+                      {image.caption && (
+                        <div className="text-xs text-gray-600 mt-1">
+                          {cleanCaption}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {hut.hutCategory && (
+            <div className="mb-2">
+              <span className="font-bold">Category: </span>
+              <span>{hut.hutCategory}</span>
+            </div>
+          )}
+          {hut.numberOfBunks && (
+            <div className="mb-2">
+              <span className="font-bold">Bunks: </span>
+              <span>{hut.numberOfBunks}</span>
+            </div>
+          )}
+          {hut.bookable !== undefined && (
+            <div className="mb-2">
+              <span className="font-bold">Bookable: </span>
+              <span>{hut.bookable ? "Yes" : "No"}</span>
+            </div>
+          )}
+          {hut.proximityToRoadEnd && (
+            <div className="mb-2">
+              <span className="font-bold">Distance from road: </span>
+              <span>{hut.proximityToRoadEnd}</span>
+            </div>
+          )}
+          {hut.facilities && hut.facilities.length > 0 && (
+            <div className="mb-2">
+              <span className="font-bold">Facilities:</span>
+              <ul className="list-disc ml-6 mt-1">
+                {hut.facilities.map((facility, i) => (
+                  <li key={i}>{facility}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {hut.place && (
+            <div className="mb-2">
+              <span className="font-bold">Location: </span>
+              <span>{hut.place}</span>
+            </div>
+          )}
+          {hut.staticLink && (
+            <div className="mt-4">
+              <a
+                href={hut.staticLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                View on DOC website
+              </a>
+            </div>
+          )}
         </div>
       )}
 

@@ -6,3 +6,4 @@
 /out
 __pycache__
 dist/
+.cache/

@@ -8,18 +8,51 @@ import { OverlayDefinition } from "./config";
 import Source from "../map/Source";
 import Layer from "../map/Layer";
 
-let hutsPromise: Promise<Place[]>
+export interface HutGalleryImage {
+    url: string;
+    caption?: string;
+}
+
+export interface Hut {
+    assetId: number;
+    name: string;
+    status: string;
+    region?: string;
+    lat: number;
+    lon: number;
+    bookable?: boolean;
+    facilities?: string[];
+    numberOfBunks?: number;
+    hutCategory?: string;
+    proximityToRoadEnd?: string;
+    introduction?: string;
+    introductionThumbnail?: string;
+    heroImage?: string;
+    webcamUrl?: string;
+    webcamUrls?: string[];
+    gallery?: HutGalleryImage[];
+    staticLink?: string;
+    place?: string;
+    type?: string;
+}
+
+let hutsPromise: Promise<Hut[]>
 export const getHuts = () => {
     if (!hutsPromise) {
-        hutsPromise = fetch('/data/huts.json').then(r => r.json() as Promise<any[]>)
+        hutsPromise = fetch('/data/huts.json').then(r => r.json() as Promise<Hut[]>)
             .then(data => {
                 for (const hut of data) {
                     hut.type = 'hut'
                 }
-                return data as Place[]
+                return data
             })
     }
     return hutsPromise
+}
+
+export const getHutByName = async (name: string): Promise<Hut | null> => {
+    const huts = await getHuts()
+    return huts.find(h => h.name === name) ?? null
 }
 
 const getHutsGeoJson = async () => {
@@ -107,10 +140,8 @@ export default {
                 source: 'huts',
                 filter: ['!', ['has', 'point_count']],
                 paint: {
-                    'circle-color': '#11b4da',
+                    'circle-color': 'transparent',
                     'circle-radius': 15,
-                    'circle-stroke-width': 1,
-                    'circle-stroke-color': '#fff',
                 }
             }} />
             <Layer layer={{

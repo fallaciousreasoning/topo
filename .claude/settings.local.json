@@ -4,7 +4,9 @@
       "Bash(npx tsc:*)",
       "Bash(npm ls:*)",
       "Bash(nvm ls:*)",
-      "Bash(source ~/.nvm/nvm.sh)"
+      "Bash(source ~/.nvm/nvm.sh)",
+      "Bash(python3:*)",
+      "WebFetch(domain:www.doc.govt.nz)"
     ],
     "deny": [],
     "ask": []
