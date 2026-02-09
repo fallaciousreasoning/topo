@@ -10,6 +10,7 @@ export default defineConfig({
     server: {
         watch: {
             ignored: ['**/out/**']
-        }
+        },
+        historyApiFallback: true
     }
 });

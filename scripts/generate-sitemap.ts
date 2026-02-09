@@ -3,7 +3,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const SITE_URL = 'https://topos.nz';
+const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : 'https://topos.nz';
 const MAX_URLS_PER_SITEMAP = 50000;
 
 interface Mountain {
@@ -60,7 +62,7 @@ async function getMountains(): Promise<string[]> {
     const name = `${mountain.name} (${mountain.altitude})`;
     const encodedName = encodeURIComponent(name);
 
-    const url = `${SITE_URL}/?page=location/${lat}/${lng}/${encodedName}&lat=${lat}&lon=${lng}`;
+    const url = `${SITE_URL}/location/${lat}/${lng}/${encodedName}`;
     urls.push(url);
   }
 
@@ -81,7 +83,7 @@ async function getHuts(): Promise<string[]> {
     const { lat, lon, name } = hut;
     const encodedName = encodeURIComponent(name);
 
-    const url = `${SITE_URL}/?page=location/${lat}/${lon}/${encodedName}&lat=${lat}&lon=${lon}`;
+    const url = `${SITE_URL}/location/${lat}/${lon}/${encodedName}`;
     urls.push(url);
   }
 

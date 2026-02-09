@@ -3,7 +3,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const SITE_URL = 'https://topos.nz';
+const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : 'https://topos.nz';
 const OUTPUT_DIR = 'dist';
 
 interface Mountain {
@@ -28,11 +30,12 @@ interface PageMeta {
   title: string;
   description: string;
   url: string;
+  queryUrl: string;
   type: 'mountain' | 'hut';
 }
 
-function generateHTML(meta: PageMeta, indexHTML: string): string {
-  // Start with the base index.html and inject meta tags
+function generateHTML(meta: PageMeta, indexHTML: string, queryUrl: string): string {
+  // Start with the base index.html and inject meta tags + redirect
   let html = indexHTML;
 
   // Replace title
@@ -57,7 +60,9 @@ function generateHTML(meta: PageMeta, indexHTML: string): string {
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="${escapeHtml(meta.title)} - NZ Topo">
   <meta name="twitter:description" content="${escapeHtml(meta.description)}">
-  <link rel="canonical" href="${escapeHtml(meta.url)}">
+  <link rel="canonical" href="${escapeHtml(queryUrl)}">
+  <!-- Redirect to query string URL -->
+  <script>window.location.replace("${escapeHtml(queryUrl)}");</script>
 `;
 
   html = html.slice(0, headCloseIndex) + metaTags + html.slice(headCloseIndex);
@@ -93,10 +98,14 @@ async function getMountains(): Promise<PageMeta[]> {
       ? mountain.description.substring(0, 160)
       : `Climbing and route information for ${mountain.name}, ${mountain.altitude} in New Zealand.`;
 
+    const cleanUrl = `${SITE_URL}/location/${lat}/${lng}/${encodedName}`;
+    const queryUrl = `${SITE_URL}/?page=location/${lat}/${lng}/${encodedName}&lat=${lat}&lon=${lng}`;
+
     pages.push({
       title: name,
       description,
-      url: `${SITE_URL}/?page=location/${lat}/${lng}/${encodedName}&lat=${lat}&lon=${lng}`,
+      url: cleanUrl,
+      queryUrl,
       type: 'mountain',
     });
   }
@@ -126,10 +135,14 @@ async function getHuts(): Promise<PageMeta[]> {
       description += '...';
     }
 
+    const cleanUrl = `${SITE_URL}/location/${lat}/${lon}/${encodedName}`;
+    const queryUrl = `${SITE_URL}/?page=location/${lat}/${lon}/${encodedName}&lat=${lat}&lon=${lon}`;
+
     pages.push({
       title: name,
       description,
-      url: `${SITE_URL}/?page=location/${lat}/${lon}/${encodedName}&lat=${lat}&lon=${lon}`,
+      url: cleanUrl,
+      queryUrl,
       type: 'hut',
     });
   }
@@ -162,12 +175,12 @@ async function main() {
   const startTime = Date.now();
 
   for (const page of allPages) {
-    const html = generateHTML(page, indexHTML);
+    const html = generateHTML(page, indexHTML, page.queryUrl);
 
     // Create directory structure based on URL
-    // e.g., ?page=location/-43.59/170.14/Name -> location/-43.59/170.14/Name/index.html
-    const urlParams = new URLSearchParams(page.url.split('?')[1]);
-    const pagePath = urlParams.get('page');
+    // e.g., https://topos.nz/location/-43.59/170.14/Name -> location/-43.59/170.14/Name/index.html
+    const url = new URL(page.url);
+    const pagePath = url.pathname.substring(1); // Remove leading /
 
     if (!pagePath) continue;
 

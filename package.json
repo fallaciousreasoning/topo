@@ -5,7 +5,7 @@
     "watch:tailwind": "cross-env ROLLUP_WATCH=1 postcss src/tailwind.pcss -o public/build/tailwind.css -w",
     "build:tailwind": "postcss src/tailwind.pcss -o public/build/tailwind.css",
     "build": "npm run build:tailwind && vite build",
-    "build:prerender": "npm run build && tsx scripts/prerender.ts",
+    "build:prerender": "npm run build && tsx scripts/generate-sitemap.ts && tsx scripts/prerender.ts",
     "dev": "vite",
     "start": "sirv public",
     "validate": "svelte-check",
