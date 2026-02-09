@@ -94,8 +94,17 @@ const serializers: {
 };
 
 const parseUrl = (includeStorage = true) => {
-  const hash = location.hash;
-  const parsed = new URLSearchParams(hash.substring(1));
+  // Check for old hash-based URLs and redirect
+  if (location.hash && location.hash.startsWith('#')) {
+    const hashParams = location.hash.substring(1);
+    // Only redirect if it looks like our old format (has = signs)
+    if (hashParams.includes('=')) {
+      const newUrl = location.pathname + '?' + hashParams;
+      history.replaceState(null, '', newUrl);
+    }
+  }
+
+  const parsed = new URLSearchParams(location.search);
   const fromLocalStorage =
     includeStorage && JSON.parse(localStorage.getItem(localStorageKey)!);
 
@@ -121,7 +130,7 @@ const parseUrl = (includeStorage = true) => {
   return result;
 };
 
-const toHash = (routeParams: RouteParams) => {
+const toSearchParams = (routeParams: RouteParams) => {
   const searchParams = new URLSearchParams();
 
   for (const key in routeParams) {
@@ -131,9 +140,7 @@ const toHash = (routeParams: RouteParams) => {
     searchParams.set(key, serialized);
   }
 
-  return "#" + searchParams.toString();
-  // breaks, with url serialization
-  // .replaceAll('%2C', ',')
+  return "?" + searchParams.toString();
 };
 
 const persistParams = (params: RouteParams) => {
@@ -150,9 +157,14 @@ export const Context = (props: React.PropsWithChildren) => {
 
     persistParams(update);
 
-    const hashed = toHash(update);
-    if (hashed == location.hash) return;
-    window.location.hash = hashed;
+    const newSearch = toSearchParams(update);
+    if (newSearch == location.search) return;
+
+    const newUrl = location.pathname + newSearch;
+    history.pushState(null, '', newUrl);
+
+    // Manually trigger state update since pushState doesn't fire popstate
+    setParams(update);
   };
   useEffect(() => {
     const reparse = () => {
@@ -161,9 +173,9 @@ export const Context = (props: React.PropsWithChildren) => {
       persistParams(params);
     };
 
-    window.addEventListener("hashchange", reparse);
+    window.addEventListener("popstate", reparse);
     return () => {
-      window.removeEventListener("hashchange", reparse);
+      window.removeEventListener("popstate", reparse);
     };
   }, []);
   return (

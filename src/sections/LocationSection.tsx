@@ -133,7 +133,7 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
     const locationPath = place?.name
       ? `location/${lat}/${lng}/${encodeURIComponent(place.name)}`
       : `location/${lat}/${lng}`;
-    const url = `${window.location.origin}${window.location.pathname}#page=${locationPath}&lat=${lat}&lon=${lng}`;
+    const url = `${window.location.origin}${window.location.pathname}?page=${locationPath}&lat=${lat}&lon=${lng}`;
     await shareLocation(title, url);
   };
 

@@ -23,7 +23,7 @@ export default function MountainCard(props: { mountain: Mountain }) {
     };
 
     const href = props.mountain.latlng
-        ? `#page=location/${props.mountain.latlng[0]}/${props.mountain.latlng[1]}/${encodeURIComponent(`${props.mountain.name} (${props.mountain.altitude})`)}`
+        ? `?page=location/${props.mountain.latlng[0]}/${props.mountain.latlng[1]}/${encodeURIComponent(`${props.mountain.name} (${props.mountain.altitude})`)}`
         : '#';
 
     return <a className="text-black no-underline hover:shadow"

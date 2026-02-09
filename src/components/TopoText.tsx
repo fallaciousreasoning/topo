@@ -13,7 +13,7 @@ export default function TopoText({ text }: { text?: string }) {
         .map(p => ({ latlng: convertNZMGReferenceToLatLng(p), text: p }))
         .map((p, i) => <React.Fragment key={i}>
             {p.latlng
-                ? <a href={`#page=location/${p.latlng[0]}/${p.latlng[1]}/${encodeURIComponent(p.text)}`} onClick={e => {
+                ? <a href={`?page=location/${p.latlng[0]}/${p.latlng[1]}/${encodeURIComponent(p.text)}`} onClick={e => {
                     e.preventDefault()
 
                     updateRoute({
