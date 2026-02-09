@@ -6,7 +6,8 @@
       "Bash(nvm ls:*)",
       "Bash(source ~/.nvm/nvm.sh)",
       "Bash(python3:*)",
-      "WebFetch(domain:www.doc.govt.nz)"
+      "WebFetch(domain:www.doc.govt.nz)",
+      "Bash(npm run build:prerender:*)"
     ],
     "deny": [],
     "ask": []

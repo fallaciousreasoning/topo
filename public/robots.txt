@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://topo.nz/sitemap.xml
+Sitemap: https://topos.nz/sitemap.xml

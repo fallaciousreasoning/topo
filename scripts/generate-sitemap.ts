@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const SITE_URL = 'https://topo.nz'; // Update this to your actual domain
+const SITE_URL = 'https://topos.nz';
 const MAX_URLS_PER_SITEMAP = 50000;
 
 interface Mountain {
