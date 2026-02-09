@@ -15,6 +15,7 @@ import { getMountains, Mountain, MountainPitch } from "../layers/mountains";
 import { getHutByName, Hut } from "../layers/huts";
 import TopoText from "../components/TopoText";
 import { repeatString } from "../utils/array";
+import ImageGallery from "../components/ImageGallery";
 
 const joinBits = (bits: (string | number | boolean | null | undefined)[]) => bits
     .filter(b => b)
@@ -173,6 +174,7 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
 
       {isHut && hut && (
         <div>
+          {/* Hero image */}
           {(hut.heroImage || hut.introductionThumbnail) && (
             <img
               className="h-64 w-full object-cover object-center mb-4"
@@ -205,41 +207,6 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
           {hut.introduction && (
             <div className="mb-4">
               <TopoText text={hut.introduction} />
-            </div>
-          )}
-          {hut.gallery && hut.gallery.length > 0 && (
-            <div className="mb-4">
-              <h5 className="font-semibold mb-2">Gallery</h5>
-              <div className="grid grid-cols-2 gap-2">
-                {hut.gallery.map((image, i) => {
-                  // Strip HTML tags and decode entities from caption
-                  const cleanCaption = image.caption
-                    ? image.caption
-                        .replace(/<[^>]*>/g, '') // Remove HTML tags
-                        .replace(/&amp;/g, '&')
-                        .replace(/&lt;/g, '<')
-                        .replace(/&gt;/g, '>')
-                        .replace(/&quot;/g, '"')
-                        .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)))
-                        .trim()
-                    : `${hut.name} photo ${i + 1}`;
-
-                  return (
-                    <div key={i}>
-                      <img
-                        className="w-full h-48 object-cover border border-gray-300"
-                        alt={cleanCaption}
-                        src={image.url}
-                      />
-                      {image.caption && (
-                        <div className="text-xs text-gray-600 mt-1">
-                          {cleanCaption}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           )}
           {hut.hutCategory && (
@@ -282,6 +249,30 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
               <span>{hut.place}</span>
             </div>
           )}
+          {/* Gallery images */}
+          {hut.gallery && hut.gallery.length > 0 && (() => {
+            const galleryImages = hut.gallery.map((image, i) => {
+              // Strip HTML tags and decode entities from caption
+              const cleanCaption = image.caption
+                ? image.caption
+                    .replace(/<[^>]*>/g, '') // Remove HTML tags
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)))
+                    .trim()
+                : undefined;
+
+              return {
+                url: image.url,
+                alt: cleanCaption || `${hut.name} photo ${i + 1}`,
+                caption: cleanCaption,
+              };
+            });
+
+            return <ImageGallery images={galleryImages} className="mb-4" />;
+          })()}
           {hut.staticLink && (
             <div className="mt-4">
               <a
