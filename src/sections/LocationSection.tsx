@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useRouteUpdater } from "../routing/router";
 import { useMap } from "../map/Map";
 import { getElevation } from "../layers/contours";
-import { findPlace } from "../search/nearest";
+import { closestPlace, findPlace } from "../search/nearest";
+import { getPlaces } from "../search/places";
 import db from "../caches/indexeddb";
 import { Point } from "../tracks/point";
 import round from "../utils/round";
@@ -52,22 +53,26 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
 
     const zoom = map.getZoom();
 
-    findPlace(lat, lng)
-      .catch(() => null)
-      .then((placeData) => {
-        const placeLat = placeData ? parseFloat(placeData.lat) : lat;
-        const placeLng = placeData ? parseFloat(placeData.lon) : lng;
+    Promise.all([
+      // Check for saved point
+      db.findPointByCoordinates(lng, lat).catch(() => null),
+      // Find underlying place (mountain, hut, etc.) excluding saved points
+      getPlaces().then(places => closestPlace(lat, lng, places, 0.1)).catch(() => null),
+    ])
+      .then(([point, underlyingPlace]) => {
+        const placeLat = underlyingPlace ? parseFloat(underlyingPlace.lat) : lat;
+        const placeLng = underlyingPlace ? parseFloat(underlyingPlace.lon) : lng;
 
         return Promise.all([
           getElevation([placeLat, placeLng], zoom).catch(() => null),
-          Promise.resolve(placeData),
-          db.findPointByCoordinates(placeLng, placeLat).catch(() => null),
+          Promise.resolve(underlyingPlace ?? (name ? { name } : null)),
+          Promise.resolve(point),
         ]);
       })
       .then(([elevationValue, placeData, point]) => {
         setElevation(elevationValue);
-        setPlace(placeData ?? (name ? { name } : null));
-        setExistingPoint(placeData?.type === "point" ? placeData : point);
+        setPlace(placeData);
+        setExistingPoint(point);
       });
   }, [lat, lng, map, name]);
 
