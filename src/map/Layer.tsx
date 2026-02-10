@@ -3,8 +3,10 @@ import { useMap } from "./Map"
 import { AddLayerObject } from "maplibre-gl"
 
 export default function Layer({ layer, beforeId }: { layer: AddLayerObject, beforeId?: string }) {
-    const { map } = useMap()
+    const { map, styleLoaded } = useMap()
     useEffect(() => {
+        if (!styleLoaded) return;
+
         let cancelled = false
         const addLayer = () => {
             if (cancelled) return
@@ -17,6 +19,6 @@ export default function Layer({ layer, beforeId }: { layer: AddLayerObject, befo
             if (!map.getLayer(layer.id)) return
             map.removeLayer(layer.id)
         }
-    }, [])
+    }, [styleLoaded])
     return null
 }

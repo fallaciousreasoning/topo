@@ -9,8 +9,9 @@ const style = {
   background: '#d0e6f4'
 }
 
-const Context = React.createContext<{ map: Map }>({
+const Context = React.createContext<{ map: Map; styleLoaded: boolean }>({
   map: null!,
+  styleLoaded: false,
 });
 
 export function useMap() {
@@ -23,6 +24,7 @@ export default function MapContext(props: React.PropsWithChildren) {
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [map, setMap] = React.useState<Map>();
+  const [styleLoaded, setStyleLoaded] = React.useState(false);
 
   // Initial setup
   useEffect(() => {
@@ -59,11 +61,24 @@ export default function MapContext(props: React.PropsWithChildren) {
         showCompass: true
       }))
 
+    const onStyleLoad = () => setStyleLoaded(true);
+
+    // Check if style is already loaded
+    if (map.isStyleLoaded()) {
+      setStyleLoaded(true);
+    } else {
+      map.on('style.load', onStyleLoad);
+    }
+
     setMap(map);
+
+    return () => {
+      map.off('style.load', onStyleLoad);
+    };
   }, []);
 
   return <div ref={containerRef} style={style}>
-    {map && <Context.Provider value={{ map: map }}>
+    {map && styleLoaded && <Context.Provider value={{ map: map, styleLoaded }}>
       <Terrain />
 
 

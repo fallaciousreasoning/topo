@@ -4,10 +4,12 @@ import { useMap } from "./Map";
 import React from "react";
 
 export default function Source({ id, spec, children }: React.PropsWithChildren<{ id: string, spec: SourceSpecification | VectorSourceSpecification | CanvasSourceSpecification | GeoJSONSourceSpecification }>) {
-    const { map } = useMap()
+    const { map, styleLoaded } = useMap()
     const [loaded, setLoaded] = React.useState(false)
 
     useEffect(() => {
+        if (!styleLoaded) return;
+
         let cancelled = false
         const addSource = () => {
             if (cancelled) return
@@ -22,6 +24,7 @@ export default function Source({ id, spec, children }: React.PropsWithChildren<{
         addSource()
 
         return () => {
+            cancelled = true;
             if (map.getSource(id)) {
                 // Parent effects are destroyed before child ones, see
                 // https://github.com/facebook/react/issues/16728
@@ -38,7 +41,7 @@ export default function Source({ id, spec, children }: React.PropsWithChildren<{
                 map.removeSource(id);
             }
         }
-    }, [id])
+    }, [id, styleLoaded])
 
     return loaded ? children : null
 }
