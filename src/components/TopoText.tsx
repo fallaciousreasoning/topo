@@ -18,7 +18,9 @@ export default function TopoText({ text }: { text?: string }) {
                     e.preventDefault()
 
                     updateRoute({
-                        page: `location/${p.latlng![0]}/${p.latlng![1]}/${encodeURIComponent(p.text)}`
+                        page: `location/${p.latlng![0]}/${p.latlng![1]}/${encodeURIComponent(p.text)}`,
+                        lat: p.latlng![0],
+                        lon: p.latlng![1]
                     })
                 }}>
                     {p.text}

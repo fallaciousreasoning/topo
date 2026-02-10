@@ -46,9 +46,14 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     const isNewPage = prevPageRef.current !== params.page;
     const wasClosedBefore = prevPageRef.current === null;
     const savedPosition = scrollPositionsRef.current[params.page];
+    const isLocationPage = params.page.startsWith('location/');
 
-    // Restore saved scroll position if available
-    if (isNewPage && savedPosition !== undefined) {
+    // Location pages always start in collapsed mode
+    if (isNewPage && isLocationPage) {
+      containerRef.current.scrollTop = window.innerHeight;
+    }
+    // Restore saved scroll position if available (for non-location pages)
+    else if (isNewPage && savedPosition !== undefined) {
       containerRef.current.scrollTop = savedPosition;
     }
     // Otherwise, set initial position
