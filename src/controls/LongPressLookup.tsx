@@ -23,16 +23,26 @@ export default function LongPressLookup() {
         let pressTimeout: NodeJS.Timeout | null = null
         let hasTriggered: boolean = false
         let isDragging: boolean = false
+        let startX: number = 0
+        let startY: number = 0
+        let startZoom: number = 0
+        let startBearing: number = 0
 
-        const startHandler = () => {
+        const startHandler = (e: MapMouseEvent | MapTouchEvent) => {
             pressStartTime = Date.now()
             hasTriggered = false
             isDragging = false
-            
+
+            // Track initial position and map state
+            startX = e.point.x
+            startY = e.point.y
+            startZoom = map.getZoom()
+            startBearing = map.getBearing()
+
             if (pressTimeout) {
                 clearTimeout(pressTimeout)
             }
-            
+
             pressTimeout = setTimeout(() => {
                 if (!isDragging) {
                     hasTriggered = true
@@ -49,6 +59,20 @@ export default function LongPressLookup() {
             // Don't trigger if we were dragging
             if (isDragging) {
                 isDragging = false
+                return
+            }
+
+            // Check if finger/mouse moved significantly (>10px tolerance for touch imprecision)
+            const deltaX = Math.abs(e.point.x - startX)
+            const deltaY = Math.abs(e.point.y - startY)
+            if (deltaX > 10 || deltaY > 10) {
+                return
+            }
+
+            // Check if map was zoomed or rotated
+            const deltaZoom = Math.abs(map.getZoom() - startZoom)
+            const deltaBearing = Math.abs(map.getBearing() - startBearing)
+            if (deltaZoom > 0.01 || deltaBearing > 0.1) {
                 return
             }
 
