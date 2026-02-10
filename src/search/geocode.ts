@@ -1,4 +1,4 @@
-import { convertNZMGReferenceToLatLng } from '../utils/mapReference';
+import { convertNZMGReferenceToLatLng, convertTopo50ReferenceToLatLng } from '../utils/mapReference';
 import { getPlaces, type Place } from './places';
 import db from '../caches/indexeddb';
 
@@ -42,7 +42,8 @@ const searchNzPlaces = async (query: string, maxResults = 100): Promise<Place[]>
 }
 
 const searchMapReferences = async (query: string): Promise<Place[]> => {
-    const ref = convertNZMGReferenceToLatLng(query)!
+    // Try Topo50 (NZTM) first, then NZMG
+    const ref = convertTopo50ReferenceToLatLng(query) ?? convertNZMGReferenceToLatLng(query)
     return [ref].filter(r => r).map(([lat, lon]) => ({
         name: query,
         lat,
