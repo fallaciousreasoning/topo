@@ -137,7 +137,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     minHeight: `calc(${100 - COLLAPSED_HEIGHT_VH}dvh - 48px)`, // Creates collapsed snap point
     flexShrink: 0,
     scrollSnapAlign: 'start' as const,
-    scrollSnapStop: 'always' as const,
+    scrollSnapStop: 'normal' as const,
     pointerEvents: 'none' as const
   } : {};
 
@@ -145,7 +145,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     minHeight: '48px', // Always present at top
     flexShrink: 0,
     scrollSnapAlign: 'start' as const,
-    scrollSnapStop: 'always' as const,
+    scrollSnapStop: 'normal' as const,
     pointerEvents: 'none' as const
   } : {};
 
@@ -158,7 +158,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
       <div style={spacerOffScreenStyle} />
       <div style={spacerCollapsedStyle} />
       <div style={spacerFixedStyle} />
-      <div ref={contentRef} className="bg-white shadow rounded-t-lg pointer-events-auto" style={{ minHeight: `calc(100vh - 48px)`, 'scrollSnapAlign': 'none' }}>
+      <div ref={contentRef} className="bg-white shadow rounded-t-lg pointer-events-auto" style={{ minHeight: `calc(100vh - 48px)`, scrollSnapAlign: 'none', scrollSnapStop: 'normal' }}>
         {children}
       </div>
     </div>
