@@ -55,7 +55,11 @@ export default function MapContext(props: React.PropsWithChildren) {
       }), 'bottom-left')
       .addControl(new GeolocateControl({
         trackUserLocation: true,
-        showUserLocation: true
+        showUserLocation: true,
+        positionOptions: {
+          enableHighAccuracy: true,
+          maximumAge: 1800000 // Allow cached position up to 30 minutes old
+        }
       }))
       .addControl(new NavigationControl({
         showCompass: true
