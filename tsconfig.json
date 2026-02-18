@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
   "include": [
     "src/**/*"
   ],
@@ -19,7 +18,6 @@
     "sourceMap": true,
     "noImplicitAny": false,
     "target": "ES2022",
-    "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false,
     "verbatimModuleSyntax": false
