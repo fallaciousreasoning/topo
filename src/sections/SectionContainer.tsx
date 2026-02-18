@@ -162,7 +162,6 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     minHeight: `calc(100vh - 48px)`,
     scrollSnapAlign: 'none' as const,
     scrollSnapStop: 'normal' as const,
-    overflowY: 'auto' as const,
     WebkitOverflowScrolling: 'touch' as const,
     // Ensure content can scroll on iOS
     touchAction: 'pan-y' as const

@@ -16,7 +16,7 @@
             "src": "/monochrome.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "monochrome"
+            "purpose": "monochrome maskable"
         },
         {
             "src": "/favicon.png",
@@ -28,6 +28,6 @@
     "scope": ".",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#FFFFFF",
+    "background_color": "#25a33c",
     "theme_color": "#25a33c"
 }
