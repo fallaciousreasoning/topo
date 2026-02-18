@@ -158,12 +158,22 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     return <>{children}</>;
   }
 
+  const contentStyle = {
+    minHeight: `calc(100vh - 48px)`,
+    scrollSnapAlign: 'none' as const,
+    scrollSnapStop: 'normal' as const,
+    overflowY: 'auto' as const,
+    WebkitOverflowScrolling: 'touch' as const,
+    // Ensure content can scroll on iOS
+    touchAction: 'pan-y' as const
+  };
+
   return (
     <div ref={containerRef} className={outerContainerClasses} style={outerContainerStyle}>
       <div style={spacerOffScreenStyle} />
       <div style={spacerCollapsedStyle} />
       <div style={spacerFixedStyle} />
-      <div ref={contentRef} className="bg-white shadow rounded-t-lg pointer-events-auto" style={{ minHeight: `calc(100vh - 48px)`, scrollSnapAlign: 'none', scrollSnapStop: 'normal' }}>
+      <div ref={contentRef} className="bg-white shadow rounded-t-lg pointer-events-auto" style={contentStyle}>
         {children}
       </div>
     </div>
