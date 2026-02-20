@@ -155,12 +155,12 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     ? "fixed inset-0 z-20 pointer-events-none flex flex-col"
     : "";
 
-  // Three snap points: off-screen (0), collapsed (20vh), expanded (100vh - 48px)
+  // Two snap points: off-screen (for dismissal) and collapsed (20vh)
   const spacerOffScreenStyle = isSheet ? {
-    minHeight: '100dvh', // Allows content to scroll completely off screen
+    minHeight: '100dvh', // Allows content to scroll completely off screen for dismissal
     flexShrink: 0,
     scrollSnapAlign: 'none' as const,
-    scrollSnapStop: 'always' as const,
+    scrollSnapStop: 'normal' as const,
     pointerEvents: 'none' as const
   } : {};
 
@@ -175,7 +175,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
   const spacerFixedStyle = isSheet ? {
     minHeight: '48px', // Always present at top
     flexShrink: 0,
-    scrollSnapAlign: 'start' as const,
+    scrollSnapAlign: 'none' as const,
     scrollSnapStop: 'normal' as const,
     pointerEvents: 'none' as const
   } : {};
