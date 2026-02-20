@@ -5,6 +5,7 @@ const COLLAPSED_HEIGHT_VH = 20;
 
 export default function SectionContainer({ children }: { children: React.ReactNode }) {
   const [isSmallScreen, setIsSmallScreen] = React.useState(false);
+  const [enablePointerEvents, setEnablePointerEvents] = React.useState(false);
   const params = useParams();
   const updateRoute = useRouteUpdater();
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -119,6 +120,31 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     };
   }, [isSheet, updateRoute]);
 
+  // Enable pointer events when touching the content, disable after scroll ends
+  React.useEffect(() => {
+    if (!isSheet || !contentRef.current) return;
+
+    const handleTouchStart = () => {
+      setEnablePointerEvents(true);
+    };
+
+    const handleTouchEnd = () => {
+      // Keep pointer events enabled briefly after touch ends to allow momentum scrolling
+      setTimeout(() => {
+        setEnablePointerEvents(false);
+      }, 100);
+    };
+
+    const content = contentRef.current;
+    content.addEventListener('touchstart', handleTouchStart, { passive: true });
+    content.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      content.removeEventListener('touchstart', handleTouchStart);
+      content.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isSheet]);
+
   const outerContainerStyle = isSheet ? {
     scrollSnapType: 'y proximity',
     overflowY: 'scroll' as const,
@@ -158,21 +184,27 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     return <>{children}</>;
   }
 
-  const contentStyle = {
-    minHeight: `calc(100vh - 48px)`,
-    scrollSnapAlign: 'none' as const,
-    scrollSnapStop: 'normal' as const,
-    WebkitOverflowScrolling: 'touch' as const,
-    // Ensure content can scroll on iOS
-    touchAction: 'pan-y' as const
-  };
-
   return (
-    <div ref={containerRef} className={outerContainerClasses} style={outerContainerStyle}>
+    <div
+      ref={containerRef}
+      className={outerContainerClasses}
+      style={{
+        ...outerContainerStyle,
+        pointerEvents: enablePointerEvents ? 'auto' : undefined,
+      }}
+    >
       <div style={spacerOffScreenStyle} />
       <div style={spacerCollapsedStyle} />
       <div style={spacerFixedStyle} />
-      <div ref={contentRef} className="bg-white shadow rounded-t-lg pointer-events-auto" style={contentStyle}>
+      <div
+        ref={contentRef}
+        className="bg-white shadow rounded-t-lg pointer-events-auto"
+        style={{
+          minHeight: `calc(100vh - 48px)`,
+          scrollSnapAlign: 'none',
+          scrollSnapStop: 'normal',
+        }}
+      >
         {children}
       </div>
     </div>
