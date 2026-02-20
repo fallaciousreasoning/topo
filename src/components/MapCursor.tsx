@@ -39,10 +39,26 @@ export default function MapCursor() {
 
         // Find the geolocation control and listen to its events
         const geoControl = map._controls.find((control: any) => control._geolocateButton)
+
+        const handleButtonClick = () => {
+            // Check state after click has been processed
+            setTimeout(() => {
+                if (geoControl && geoControl._watchState === 'OFF') {
+                    setUserLocation(null)
+                }
+            }, 0)
+        }
+
         if (geoControl) {
             geoControl.on('geolocate', handleLocationFound)
             geoControl.on('error', handleLocationError)
             geoControl.on('outofmaxbounds', handleLocationError)
+
+            // Listen for button clicks to detect when geolocation is turned off
+            const button = geoControl._geolocateButton
+            if (button) {
+                button.addEventListener('click', handleButtonClick)
+            }
         }
 
         // Update center location when map moves
@@ -59,6 +75,11 @@ export default function MapCursor() {
                 geoControl.off('geolocate', handleLocationFound)
                 geoControl.off('error', handleLocationError)
                 geoControl.off('outofmaxbounds', handleLocationError)
+
+                const button = geoControl._geolocateButton
+                if (button) {
+                    button.removeEventListener('click', handleButtonClick)
+                }
             }
             map.off('move', updateCenterLocation)
         }
