@@ -27,6 +27,7 @@
     "wrangler": "^3.57.2"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.4.1",
     "@vitejs/plugin-react": "4.2.1",
     "dexie": "3.2.4",
     "dexie-react-hooks": "^1.1.7",
