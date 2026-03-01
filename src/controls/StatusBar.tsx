@@ -101,7 +101,7 @@ export default function StatusBar() {
 
     // Throttled elevation fetching
     const lastFetchTimeRef = React.useRef(0)
-    const fetchTimeoutRef = React.useRef<NodeJS.Timeout>()
+    const fetchTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined)
 
     React.useEffect(() => {
         if (!position) {

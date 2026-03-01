@@ -10,7 +10,10 @@
       "WebSearch",
       "WebFetch(domain:www.topomap.co.nz)",
       "WebFetch(domain:data.linz.govt.nz)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm show:*)",
+      "Bash(npm install:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

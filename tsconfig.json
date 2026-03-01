@@ -14,7 +14,8 @@
       "DOM",
       "WebWorker"
     ],
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
     "sourceMap": true,
     "noImplicitAny": false,
     "target": "ES2022",
