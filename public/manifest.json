@@ -25,6 +25,63 @@
             "purpose": "any"
         }
     ],
+    "screenshots": [
+        {
+            "src": "/screenshots/1.png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/2.png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/3.png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/4.png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/5.png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/tablet-0.png",
+            "sizes": "1920x1080",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshots/tablet-1.png",
+            "sizes": "1920x1080",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshots/tablet-2.png",
+            "sizes": "3840x2160",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshots/tablet-3.png",
+            "sizes": "1920x1080",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshots/tablet-4.png",
+            "sizes": "1920x1080",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshots/tablet-5.png",
+            "sizes": "1920x1080",
+            "form_factor": "wide"
+        }
+    ],
     "scope": ".",
     "start_url": "/",
     "display": "fullscreen",
