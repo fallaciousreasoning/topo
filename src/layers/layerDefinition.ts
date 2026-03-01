@@ -11,7 +11,6 @@ import osm from "./osm";
 import points from "./points";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
-import tracks from "./tracks";
 import utmGrid from "./utmGrid";
 
 export const extraData = {
@@ -36,6 +35,5 @@ export const overlays: OverlayDefinition[] = [
     slopeAngle,
     huts,
     mountains,
-    tracks,
     points
 ]
