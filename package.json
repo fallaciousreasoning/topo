@@ -31,16 +31,13 @@
     "@vitejs/plugin-react": "5.1.4",
     "dexie": "3.2.4",
     "dexie-react-hooks": "^1.1.7",
-    "human-date": "1.4.0",
     "isomorphic-fetch": "3.0.0",
-    "localforage": "1.10.0",
     "maplibre-contour": "github:fallaciousreasoning/maplibre-contour#main",
     "maplibre-gl": "^5.6.2",
     "ol": "9.1.0",
     "proj4": "2.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "supercluster": "^8.0.1",
-    "uuid": "9.0.0"
+    "supercluster": "^8.0.1"
   }
 }
