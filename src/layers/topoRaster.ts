@@ -26,16 +26,14 @@ export default {
       id: "topo50",
       type: "raster",
       tiles: [hillshade50],
-      // Note: Important to set this to 128 so that maplibre-gl picks the
-      // zoom + 1 tiles instead of upscaling the zoom level tiles.
-      tileSize: 192,
+      tileSize: 128,
       minzoom: 12,
     },
     topo250: {
       id: "topo250",
       type: "raster",
       tiles: [hillshade250],
-      tileSize: 192,
+      tileSize: 256,
       minzoom: 0,
         maxzoom: 12,
       },
