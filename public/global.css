@@ -12,6 +12,13 @@ body {
 	font-family: sans-serif;
 }
 
+/* Map control buttons - doubled from MapLibre default of 29px */
+.maplibregl-ctrl-group button {
+	width: 35px !important;
+	height: 35px !important;
+	font-size: 1.1rem;
+}
+
 /* Hide scrollbar for gallery */
 .scrollbar-hide::-webkit-scrollbar {
 	display: none;
