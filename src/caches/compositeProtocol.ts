@@ -40,7 +40,8 @@ addProtocol(PROTOCOL, async (params, abortController) => {
     const context = canvas.getContext('2d')!
 
     try {
-        const imageBuffers = await Promise.all(urls.map(r => loadImage({ ...params, url: r }, abortController)))
+        const activeUrls = overlayAlpha === 0 ? urls.slice(0, 1) : urls
+        const imageBuffers = await Promise.all(activeUrls.map(r => loadImage({ ...params, url: r }, abortController)))
         context.clearRect(0, 0, canvas.width, canvas.height)
 
         for (let i = 0; i < imageBuffers.length; i++) {
