@@ -5,13 +5,13 @@ import { BaseLayerDefinition, LINZ_BASEMAPS_KEY } from "./config";
 const hillshadeUrl = `https://basemaps.linz.govt.nz/v1/tiles/geographx-nz-dem-2012-8m/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}`;
 const hillshade50 = createCompositeLayer(
   "color-burn",
-  `maybe-cache://basemaps.linz.govt.nz/v1/tiles/nz-topo50-new-zealand-mainland-gridless/WebMercatorQuad/{z}/{x}/{y}.webp?api=c01kk4xh3821a8pgvm6fb379ndn#topo-raster`,
+  `maybe-cache://basemaps.linz.govt.nz/v1/tiles/nz-topo50-new-zealand-mainland-gridless/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}#topo-raster`,
   hillshadeUrl,
 );
 
 const hillshade250 = createCompositeLayer(
   "color-burn",
-  `maybe-cache://basemaps.linz.govt.nz/v1/tiles/nz-topo250-new-zealand-mainland-gridless/WebMercatorQuad/{z}/{x}/{y}.webp?api=c01kk4xh3821a8pgvm6fb379ndn#topo-raster`,
+  `maybe-cache://basemaps.linz.govt.nz/v1/tiles/nz-topo250-new-zealand-mainland-gridless/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}#topo-raster`,
   hillshadeUrl,
 );
 
