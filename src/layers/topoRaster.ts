@@ -33,7 +33,7 @@ export default {
       id: "topo250",
       type: "raster",
       tiles: [hillshade250],
-      tileSize: 256,
+      tileSize: 192,
       minzoom: 0,
         maxzoom: 12,
       },
