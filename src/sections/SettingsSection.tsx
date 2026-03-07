@@ -4,11 +4,38 @@ import Checkbox from "../components/Checkbox";
 import { friendlyBytes } from "../utils/bytes";
 import { baseLayers, overlays } from "../layers/layerDefinition";
 import Card from "../components/Card";
-import { updateSettings, useSetting, type CursorMode, type StatusBarMode } from "../utils/settings";
+import { updateLayerSetting, updateSettings, useLayerSetting, useSetting, type CursorMode, type StatusBarMode } from "../utils/settings";
 import { usePromise } from "../hooks/usePromise";
 import { cacherPromise } from "../caches/cachingProtocol";
 import { demOverlaySource } from "../layers/contours";
 import Button from "../components/Button";
+import { LayerSettingDescriptor } from "../layers/config";
+
+function LayerSettingControl({ layerId, settingKey, descriptor }: { layerId: string, settingKey: string, descriptor: LayerSettingDescriptor }) {
+    const value = useLayerSetting(layerId, settingKey, descriptor.default)
+    return (
+        <>
+            <hr className="my-2" />
+            <div className="text-xs">
+                <div className="flex justify-between items-center">
+                    <label className="font-medium">{descriptor.label}</label>
+                    <span className="text-gray-500">{Math.round(value * 100)}%</span>
+                </div>
+                {descriptor.description && <div className="text-gray-500 italic mb-1">{descriptor.description}</div>}
+                <input
+                    type="range"
+                    min={descriptor.min}
+                    max={descriptor.max}
+                    step={descriptor.step}
+                    value={value}
+                    onChange={e => updateLayerSetting(layerId, settingKey, parseFloat(e.target.value))}
+                    className="w-full"
+                />
+            </div>
+            <hr className="my-2" />
+        </>
+    )
+}
 
 const cacheableLayers = [
     ...baseLayers,
@@ -73,6 +100,9 @@ export default function SettingsSection() {
                 {cacheableLayers.map(layer => <Card key={layer.id}>
                     <h5 className="font-semibold">{layer.name}</h5>
                     <div className="text-gray-500 italic">{layer.description}</div>
+                    {layer.settings && Object.entries(layer.settings).map(([key, descriptor]) => (
+                        <LayerSettingControl key={key} layerId={layer.id} settingKey={key} descriptor={descriptor} />
+                    ))}
                     <Checkbox
                         checked={cacheLayers.includes(layer.id)}
                         onChange={(checked) => {

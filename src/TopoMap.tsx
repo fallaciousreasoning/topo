@@ -7,11 +7,14 @@ import PositionSyncer from "./controls/PositionSyncer";
 import SearchControl from "./controls/SearchControl";
 import { baseLayers, overlays } from "./layers/layerDefinition";
 import linzVector from "./layers/linzVector";
+import { createTopoRasterSources, hillshadeBlendSetting } from "./layers/topoRaster";
 import Terrain from "./layers/terrain";
 import Layer from "./map/Layer";
 import Map, { useMap } from "./map/Map";
 import Source from "./map/Source";
 import { useParams } from "./routing/router";
+import { addListener, getLayerSetting, removeListener } from "./utils/settings";
+import { RasterTileSource } from "maplibre-gl";
 import MenuSection from "./sections/MenuSection";
 import MountainsSection from "./sections/MountainsSection";
 import SearchSection from "./sections/SearchSection";
@@ -29,11 +32,40 @@ import PointSection from "./sections/PointSection";
 import Mountains from "./layers/mountains";
 import SectionContainer from "./sections/SectionContainer";
 
-const sources = baseLayers.flatMap((b) =>
-  Object.entries(b.sources).map(([key, spec]) => (
+const initialTopoBlend = getLayerSetting('topo-raster', 'hillshadeBlend', hillshadeBlendSetting.default)
+const sources = baseLayers.flatMap((b) => {
+  const sourcesSpec = b.id === 'topo-raster' ? createTopoRasterSources(initialTopoBlend) : b.sources
+  return Object.entries(sourcesSpec).map(([key, spec]) => (
     <Source key={key} id={key} spec={spec as any} />
-  )),
-);
+  ))
+});
+
+function TopoRasterBlendSync() {
+  const { map } = useMap()
+
+  React.useEffect(() => {
+    const applyBlend = () => {
+      const blend = getLayerSetting('topo-raster', 'hillshadeBlend', hillshadeBlendSetting.default)
+      const topoSources = createTopoRasterSources(blend)
+      try {
+        ;(map.getSource('topo50') as RasterTileSource | undefined)?.setTiles(topoSources.topo50.tiles)
+        ;(map.getSource('topo250') as RasterTileSource | undefined)?.setTiles(topoSources.topo250.tiles)
+      } catch {
+      }
+    }
+
+    const listener = (key: string) => {
+      if (key === 'layerSettings') applyBlend()
+    }
+
+    addListener(listener)
+    return () => {
+      removeListener(listener)
+    }
+  }, [map])
+
+  return null
+}
 const terrain = {
   source: "terrainSource",
   exaggeration: 1,
@@ -109,6 +141,7 @@ export default function TopoMap() {
       <LongPressLookup />
 
       {sources}
+      <TopoRasterBlendSync />
       <Layers />
       <MapLabel />
       <Drawing />

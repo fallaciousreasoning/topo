@@ -16,12 +16,14 @@ interface Settings {
     cacheLayers: string[]
     cursorMode: CursorMode
     statusBarMode: StatusBarMode
+    layerSettings: Record<string, Record<string, number>>
 }
 
 const defaultSettings: Settings = {
     cacheLayers: [linzAerial.id, linzVector.id, topoRaster.id, marine.id, osm.id, openTopo.id, demOverlaySource.id],
     cursorMode: 'automatic',
-    statusBarMode: 'always'
+    statusBarMode: 'always',
+    layerSettings: {},
 }
 
 let cachedValue: Settings | undefined
@@ -81,4 +83,23 @@ export const useSetting = <T extends keyof Settings>(key: T) => {
         }
     }, [key])
     return getSetting(key)
+}
+
+export const getLayerSetting = (layerId: string, key: string, defaultValue: number): number => {
+    return getSetting('layerSettings')[layerId]?.[key] ?? defaultValue
+}
+
+export const updateLayerSetting = (layerId: string, key: string, value: number) => {
+    const current = getSetting('layerSettings')
+    updateSettings({
+        layerSettings: {
+            ...current,
+            [layerId]: { ...current[layerId], [key]: value },
+        },
+    })
+}
+
+export const useLayerSetting = (layerId: string, key: string, defaultValue: number): number => {
+    const layerSettings = useSetting('layerSettings')
+    return layerSettings[layerId]?.[key] ?? defaultValue
 }

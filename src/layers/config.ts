@@ -3,11 +3,24 @@ export const linzVectorId = 'topoVector'
 
 import { StyleSpecification } from "maplibre-gl"
 
+export type RangeLayerSetting = {
+    type: 'range'
+    label: string
+    description?: string
+    default: number
+    min: number
+    max: number
+    step: number
+}
+
+export type LayerSettingDescriptor = RangeLayerSetting
+
 type LayerShared = {
     id: string,
     name: string,
     description: string,
-    cacheable: boolean
+    cacheable: boolean,
+    settings?: Record<string, LayerSettingDescriptor>
 }
 
 export type BaseLayerDefinition = {
