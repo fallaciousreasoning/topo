@@ -35,6 +35,13 @@ export default function DrawControls() {
         </button>
         <button
           type="button"
+          title={drawing.mode === 'straight' ? 'Switch to path snapping' : 'Switch to straight lines'}
+          onClick={() => drawing.setMode(drawing.mode === 'straight' ? 'snap' : 'straight')}
+        >
+          {drawing.mode === 'straight' ? '—' : '~'}
+        </button>
+        <button
+          type="button"
           disabled={drawing.track.coordinates.length < 2}
           onClick={() => setShowElevationProfile(!showElevationProfile)}
           title="Toggle elevation profile"

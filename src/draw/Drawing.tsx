@@ -7,6 +7,7 @@ import { useParams } from "../routing/router";
 import db from "../caches/indexeddb";
 import { usePromise } from "../hooks/usePromise";
 import { debounce } from "../utils/debounce";
+import { RoutingManager } from "./routingManager";
 
 const Context = createContext<Drawing | undefined>(undefined);
 
@@ -17,6 +18,18 @@ function EditableTrack({ id }: { id: number }) {
   const [drawing, setDrawing] = React.useState<Drawing | undefined>(undefined);
   const [, setVersion] = React.useState(0);
 
+  const routingManagerRef = React.useRef<RoutingManager | null>(null);
+  if (!routingManagerRef.current) {
+    routingManagerRef.current = new RoutingManager();
+  }
+
+  React.useEffect(() => {
+    return () => {
+      routingManagerRef.current?.destroy();
+      routingManagerRef.current = null;
+    };
+  }, []);
+
   React.useEffect(() => {
     let d: Drawing | undefined;
     let unsubscribe: (() => void) | undefined;
@@ -24,7 +37,7 @@ function EditableTrack({ id }: { id: number }) {
 
     db.getTrack(id).then(track => {
       if (cancelled || !track) return;
-      d = new Drawing(map, track);
+      d = new Drawing(map, track, routingManagerRef.current ?? undefined);
       setDrawing(d);
       if (track.coordinates.length > 1)
         map.fitBounds(d.bounds, { padding: 100 });

@@ -12,8 +12,13 @@ import {
 import { Track } from "../tracks/track";
 import { range } from "../utils/array";
 import { getClosestPoint } from "../utils/vector";
+import { RoutingManager } from "./routingManager";
 
 type Listener = (drawing: Drawing) => void;
+
+function segKey(a: [number, number], b: [number, number]): string {
+  return `${a[0]},${a[1]}:${b[0]},${b[1]}`;
+}
 
 const addHoverState = (map: Map, layerIds: string[]) => {
   for (const layerId of layerIds) {
@@ -88,6 +93,7 @@ const createDragger = (
     }
 
     drawing.setReplacementPoint(pointIndex, undefined);
+    drawing.recomputeRoutesForPoint(pointIndex);
   };
   listeners.push(map.on("mouseup", finish));
   listeners.push(map.on("touchend", finish));
@@ -100,6 +106,10 @@ interface IndexedPoint {
 
 export class Drawing {
   hasDragger = false;
+  mode: 'straight' | 'snap' = 'straight';
+
+  #routedSegments: globalThis.Map<string, [number, number][]> = new globalThis.Map();
+  #routingManager: RoutingManager | undefined;
 
   get features(): GeoJSON.FeatureCollection {
     const coords = [
@@ -129,7 +139,7 @@ export class Drawing {
       },
       geometry: {
         type: "LineString",
-        coordinates: [coords[i], coords[i + 1]],
+        coordinates: this.#getSegmentCoords(i, coords as [number, number][]),
       },
     }));
 
@@ -152,6 +162,15 @@ export class Drawing {
       type: "FeatureCollection",
       features: [...points, ...lines, ...additionalPoints],
     };
+  }
+
+  #getSegmentCoords(i: number, coords: [number, number][]): [number, number][] {
+    if (this.mode === 'snap') {
+      const key = segKey(coords[i], coords[i + 1]);
+      const routed = this.#routedSegments.get(key);
+      if (routed) return routed;
+    }
+    return [coords[i], coords[i + 1]];
   }
 
   #replacementPoints: { [index: number]: IndexedPoint } = {};
@@ -218,9 +237,10 @@ export class Drawing {
     "split-points",
   ];
 
-  constructor(map: Map, track: Track) {
+  constructor(map: Map, track: Track, routingManager?: RoutingManager) {
     this.#map = map;
     this.#track = track;
+    this.#routingManager = routingManager;
 
     this.#map.addSource(this.#sourceId, {
       type: "geojson",
@@ -353,14 +373,55 @@ export class Drawing {
 
       this.#map.on("click", (e) => {
         if (e.defaultPrevented) return;
+        const prevCoords = this.#track.coordinates as [number, number][];
         this.updateTrack((t) => ({
           ...t,
           coordinates: [...t.coordinates, e.lngLat.toArray()],
         }));
+        if (this.mode === 'snap' && prevCoords.length >= 1) {
+          const newCoords = this.#track.coordinates as [number, number][];
+          this.#requestRoute(
+            prevCoords[prevCoords.length - 1],
+            newCoords[newCoords.length - 1],
+          );
+        }
       }),
     );
 
     setTimeout(() => this.initialize(), 1000);
+  }
+
+  async #requestRoute(from: [number, number], to: [number, number]) {
+    if (!this.#routingManager) return;
+    const key = segKey(from, to);
+    if (this.#routedSegments.has(key)) return;
+    const coords = await this.#routingManager.route(from, to);
+    if (!coords) return;
+    this.#routedSegments.set(key, coords);
+    this.notifyListeners();
+  }
+
+  setMode(mode: 'straight' | 'snap') {
+    this.mode = mode;
+    this.#routedSegments.clear();
+    if (mode === 'snap') {
+      const coords = this.#track.coordinates as [number, number][];
+      for (let i = 0; i < coords.length - 1; i++) {
+        this.#requestRoute(coords[i], coords[i + 1]);
+      }
+    }
+    this.notifyListeners();
+  }
+
+  recomputeRoutesForPoint(pointIndex: number) {
+    if (this.mode !== 'snap' || !this.#routingManager) return;
+    const coords = this.#track.coordinates as [number, number][];
+    if (pointIndex > 0 && pointIndex < coords.length) {
+      this.#requestRoute(coords[pointIndex - 1], coords[pointIndex]);
+    }
+    if (pointIndex < coords.length - 1) {
+      this.#requestRoute(coords[pointIndex], coords[pointIndex + 1]);
+    }
   }
 
   initialize() {
@@ -496,6 +557,7 @@ export class Drawing {
     this.#track = { ...this.#track, coordinates: [], elevations: undefined };
     this.#undoStack = [];
     this.#redoStack = [];
+    this.#routedSegments.clear();
     this.notifyListeners();
   }
 
