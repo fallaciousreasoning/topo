@@ -39,15 +39,17 @@ const createDragger = (
     features?: MapGeoJSONFeature[];
   },
   drawing: Drawing,
+  onFinish?: (coord: [number, number]) => void,
 ) => {
   const feature = e.features?.[0];
   if (feature?.geometry.type !== "Point") return;
 
   if (drawing.hasDragger) return;
   drawing.hasDragger = true;
+  drawing.clearClosestPoint();
 
   const pointIndex = feature.properties.pointIndex;
-  const center = feature.geometry.coordinates;
+  const center = feature.geometry.coordinates as [number, number];
   const clickedAt = e.lngLat.toArray();
   const offset = [clickedAt[0] - center[0], clickedAt[1] - center[1]] as const;
 
@@ -56,16 +58,12 @@ const createDragger = (
       number,
       number,
     ];
-  let replacementPoint: IndexedPoint | undefined;
+  let draggedCoord: [number, number] | undefined;
 
   const handleMove = (e: MapMouseEvent | MapTouchEvent) => {
     e.preventDefault();
-
-    replacementPoint = {
-      coord: getCoord(e),
-      pointIndex,
-    };
-    drawing.setReplacementPoint(pointIndex, replacementPoint);
+    draggedCoord = getCoord(e);
+    drawing.setReplacementPoint(pointIndex, { coord: draggedCoord, pointIndex });
   };
 
   const listeners = [
@@ -75,16 +73,21 @@ const createDragger = (
 
   const finish = () => {
     listeners.forEach((l) => l.unsubscribe());
-
-    if (!replacementPoint) return;
-    drawing.updateTrack((t) => ({
-      ...t,
-      coordinates: t.coordinates.map((c, i) =>
-        i === pointIndex ? replacementPoint!.coord : c,
-      ),
-    }));
-    drawing.setReplacementPoint(pointIndex, undefined);
     drawing.hasDragger = false;
+
+    const finalCoord = draggedCoord ?? center;
+    if (onFinish) {
+      onFinish(finalCoord);
+    } else if (draggedCoord) {
+      drawing.updateTrack((t) => ({
+        ...t,
+        coordinates: t.coordinates.map((c, i) =>
+          i === pointIndex ? draggedCoord! : c,
+        ),
+      }));
+    }
+
+    drawing.setReplacementPoint(pointIndex, undefined);
   };
   listeners.push(map.on("mouseup", finish));
   listeners.push(map.on("touchend", finish));
@@ -152,6 +155,12 @@ export class Drawing {
   }
 
   #replacementPoints: { [index: number]: IndexedPoint } = {};
+  clearClosestPoint() {
+    if (!this.#closestPoint) return;
+    this.#closestPoint = undefined;
+    this.notifyListeners();
+  }
+
   setReplacementPoint(index: number, indexedPoint: IndexedPoint | undefined) {
     if (indexedPoint) {
       this.#replacementPoints[index] = indexedPoint;
@@ -228,6 +237,7 @@ export class Drawing {
         features?: MapGeoJSONFeature[];
       },
     ) => {
+      if (this.hasDragger) return;
       const feature = e.features?.[0];
       if (!feature) return;
 
@@ -299,11 +309,15 @@ export class Drawing {
       }
 
       const insertAfter = this.#closestPoint.pointIndex;
-      const clone = [...this.#track.coordinates];
       const pointIndex = insertAfter + 1;
-      clone.splice(pointIndex, 0, this.#closestPoint.coord);
+      const insertCoord = this.#closestPoint.coord;
+      const trackBeforeInsert = this.#track;
       this.#closestPoint = undefined;
-      this.updateTrack({ coordinates: clone });
+
+      // Insert the point visually without creating an undo entry yet
+      const insertedCoords = [...trackBeforeInsert.coordinates];
+      insertedCoords.splice(pointIndex, 0, insertCoord);
+      this.updateTrackSilently({ coordinates: insertedCoords });
 
       createDragger(
         this.#map,
@@ -313,7 +327,7 @@ export class Drawing {
             {
               geometry: {
                 type: "Point",
-                coordinates: clone.at(pointIndex)!,
+                coordinates: insertedCoords[pointIndex],
               },
               properties: {
                 pointIndex: pointIndex,
@@ -323,6 +337,13 @@ export class Drawing {
           ],
         },
         this,
+        (finalCoord) => {
+          // Restore pre-insert state so updateTrack records the correct undo entry
+          this.#track = trackBeforeInsert;
+          const finalCoords = [...trackBeforeInsert.coordinates];
+          finalCoords.splice(pointIndex, 0, finalCoord);
+          this.updateTrack({ coordinates: finalCoords });
+        },
       );
     };
 
@@ -431,6 +452,16 @@ export class Drawing {
     });
   }
 
+  updateTrackSilently(change: Partial<Track> | ((track: Track) => Track)) {
+    const newValue =
+      typeof change === "function"
+        ? change(this.#track)
+        : { ...this.#track, ...change };
+    newValue.id = this.#track.id;
+    this.#track = newValue;
+    this.notifyListeners();
+  }
+
   updateTrack(change: Partial<Track> | ((track: Track) => Track)) {
     const newValue =
       typeof change === "function"
@@ -438,6 +469,7 @@ export class Drawing {
         : { ...this.#track, ...change };
 
     this.#undoStack.push(this.#track);
+    this.#redoStack = [];
     newValue.id = this.#track.id;
     this.#track = newValue;
 

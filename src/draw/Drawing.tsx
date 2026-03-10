@@ -14,36 +14,36 @@ const debouncedSave = debounce(db.updateTrack, 500);
 
 function EditableTrack({ id }: { id: number }) {
   const { map } = useMap();
-
-  const drawing = React.useRef<Drawing | undefined>(undefined);
+  const [drawing, setDrawing] = React.useState<Drawing | undefined>(undefined);
+  const [, setVersion] = React.useState(0);
 
   React.useEffect(() => {
-    let unloaded = false;
+    let d: Drawing | undefined;
     let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
 
-    const getTrack = async () => {
-      const track = await db.getTrack(id);
-      if (!track || unloaded) return;
-      drawing.current = new Drawing(map, track);
+    db.getTrack(id).then(track => {
+      if (cancelled || !track) return;
+      d = new Drawing(map, track);
+      setDrawing(d);
       if (track.coordinates.length > 1)
-        map.fitBounds(drawing.current.bounds, { padding: 100 });
-      unsubscribe = drawing.current.addListener(() => {
-        if (drawing.current) debouncedSave(drawing.current?.track);
+        map.fitBounds(d.bounds, { padding: 100 });
+      unsubscribe = d.addListener(() => {
+        debouncedSave(d!.track);
+        setVersion(v => v + 1);
       });
-    };
-
-    getTrack();
+    });
 
     return () => {
-      unloaded = true;
+      cancelled = true;
       unsubscribe?.();
-      drawing.current?.destroy();
-      drawing.current = undefined;
+      d?.destroy();
+      setDrawing(undefined);
     };
   }, [id, map]);
 
-  return drawing.current ? (
-    <Context.Provider value={drawing.current}>
+  return drawing ? (
+    <Context.Provider value={drawing}>
       <DrawControls />
     </Context.Provider>
   ) : null;
