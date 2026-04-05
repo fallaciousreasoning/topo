@@ -27,6 +27,7 @@ import LocationSection from "./sections/LocationSection";
 import LongPressLookup from "./controls/LongPressLookup";
 import { BaseLayerDefinition } from "./layers/config";
 import Drawing from "./draw/Drawing";
+import TracksLayer from "./layers/TracksLayer";
 import TracksSection from "./sections/TracksSection";
 import PointsSection from "./sections/PointsSection";
 import PointSection from "./sections/PointSection";
@@ -146,6 +147,7 @@ export default function TopoMap() {
       <TopoRasterBlendSync />
       <Layers />
       <MapLabel />
+      <TracksLayer />
       <Drawing />
     </Map>
   );

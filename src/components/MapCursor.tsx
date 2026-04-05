@@ -99,10 +99,11 @@ export default function MapCursor() {
 
     // Try to find routed distance between user location and map center
     React.useEffect(() => {
-        setRoutedCoords(null)
-        setRoutedDistanceM(null)
-
-        if (!userLocation || !centerLocation) return
+        if (!userLocation || !centerLocation) {
+            setRoutedCoords(null)
+            setRoutedDistanceM(null)
+            return
+        }
 
         let cancelled = false
         const timer = setTimeout(async () => {
