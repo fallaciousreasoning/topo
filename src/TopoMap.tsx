@@ -5,6 +5,7 @@ import LayersControl from "./controls/LayersControl";
 import MenuControl from "./controls/MenuControl";
 import PositionSyncer from "./controls/PositionSyncer";
 import SearchControl from "./controls/SearchControl";
+import MeasureControl from "./controls/MeasureControl";
 import { baseLayers, overlays } from "./layers/layerDefinition";
 import linzVector from "./layers/linzVector";
 import { createTopoRasterSources, hillshadeBlendSetting } from "./layers/topoRaster";
@@ -135,6 +136,7 @@ export default function TopoMap() {
       <LayersControl />
       <MenuControl />
       <SearchControl />
+      <MeasureControl />
       <StatusBar />
 
       <MapCursor />

@@ -3,40 +3,64 @@ import Control from "../controls/Control";
 import { useDrawing } from "./Drawing";
 import { useRouteUpdater } from "../routing/router";
 import ElevationProfile from "../components/ElevationProfile";
+import { publishTrackStats } from "./trackStatsSignal";
+import { buildFullCoordinates, generateSamplePoints } from "../tracks/trackUtils";
+import { getElevation } from "../layers/contours";
+import { getLineLength } from "../utils/distance";
+import { Track } from "../tracks/track";
 
-function PointContextMenu({ drawing }: { drawing: ReturnType<typeof useDrawing> }) {
-  const ctx = drawing.contextMenuPoint;
-  if (!ctx) return null;
-  const snapped = drawing.isPointSnapped(ctx.pointIndex);
-  return (
-    <>
-      <div
-        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-        onClick={() => drawing.clearContextMenu()}
-        onContextMenu={(e) => { e.preventDefault(); drawing.clearContextMenu(); }}
-      />
-      <div
-        style={{ position: 'fixed', left: ctx.x + 4, top: ctx.y + 4, zIndex: 51 }}
-        className="bg-white rounded shadow-lg overflow-hidden text-sm min-w-36"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          className="block w-full px-3 py-2 text-left hover:bg-gray-100"
-          onClick={() => snapped ? drawing.unSnapPoint(ctx.pointIndex) : drawing.snapPoint(ctx.pointIndex)}
-        >
-          {snapped ? 'Use straight line' : 'Snap to track'}
-        </button>
-        <button
-          type="button"
-          className="block w-full px-3 py-2 text-left hover:bg-gray-100 text-red-600"
-          onClick={() => drawing.deletePoint(ctx.pointIndex)}
-        >
-          Delete point
-        </button>
-      </div>
-    </>
-  );
+const ELEVATION_ZOOM_LEVEL = 12;
+const STATS_SAMPLE_INTERVAL = 50; // metres — coarser than elevation profile to reduce API calls
+
+function usePublishTrackStats(track: Track) {
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const coords = buildFullCoordinates(track);
+    const distanceM = getLineLength(coords) * 1000;
+
+    // Publish distance immediately without waiting for elevation
+    publishTrackStats({ distanceM, totalUp: 0, totalDown: 0 });
+
+    if (coords.length < 2) return;
+
+    const compute = async () => {
+      const points = generateSamplePoints(coords, STATS_SAMPLE_INTERVAL);
+      let totalUp = 0;
+      let totalDown = 0;
+      let prevEle: number | null = null;
+
+      for (const p of points) {
+        if (cancelled) return;
+        try {
+          const ele = await getElevation([p.coord[1], p.coord[0]], ELEVATION_ZOOM_LEVEL);
+          if (prevEle !== null) {
+            const diff = ele - prevEle;
+            if (diff > 0) totalUp += diff;
+            else totalDown += Math.abs(diff);
+          }
+          prevEle = ele;
+        } catch {
+          // skip bad tiles
+        }
+      }
+
+      if (!cancelled) publishTrackStats({ distanceM, totalUp, totalDown });
+    };
+
+    // Debounce: wait 800ms after last track change before fetching elevations
+    const timer = setTimeout(compute, 800);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [track.coordinates, track.routedSegments]);
+
+  // Clear stats on unmount
+  React.useEffect(() => {
+    return () => publishTrackStats(null);
+  }, []);
 }
 
 export default function DrawControls() {
@@ -44,9 +68,10 @@ export default function DrawControls() {
   const updateRoute = useRouteUpdater();
   const [showElevationProfile, setShowElevationProfile] = React.useState(false);
 
+  usePublishTrackStats(drawing.track);
+
   return (
     <>
-      <PointContextMenu drawing={drawing} />
       <Control position="top-left">
         <button
           type="button"
@@ -91,10 +116,10 @@ export default function DrawControls() {
           ✓
         </button>
       </Control>
-      
+
       {showElevationProfile && drawing.track.coordinates.length >= 2 && (
-        <ElevationProfile 
-          onClose={() => setShowElevationProfile(false)} 
+        <ElevationProfile
+          onClose={() => setShowElevationProfile(false)}
         />
       )}
     </>

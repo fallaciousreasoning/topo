@@ -6,11 +6,14 @@ import { slopeAngleSource } from '../layers/slopeAngle'
 import round from '../utils/round'
 import { useParams } from '../routing/router'
 import { useSetting } from '../utils/settings'
+import { useTrackStats } from '../draw/trackStatsSignal'
+import { friendlyDistance } from '../utils/friendlyUnits'
 
 export default function StatusBar() {
     const { map } = useMap()
     const params = useParams()
     const statusBarMode = useSetting('statusBarMode')
+    const trackStats = useTrackStats()
     const [position, setPosition] = React.useState<{ lng: number, lat: number } | null>(null)
     const [elevation, setElevation] = React.useState<number | null>(null)
     const [place, setPlace] = React.useState<any | null>(null)
@@ -191,7 +194,21 @@ export default function StatusBar() {
         return false
     }, [statusBarMode, isTouchDevice, isTouching, position])
 
-    return shouldShow ? (
+    return (
+      <>
+        {trackStats && (
+            <div className="fixed bottom-8 right-2 pointer-events-none z-10 flex gap-1">
+                <span className="px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded">
+                    {friendlyDistance(trackStats.distanceM)}
+                </span>
+                {(trackStats.totalUp > 0 || trackStats.totalDown > 0) && (
+                    <span className="px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded">
+                        ↗ {Math.round(trackStats.totalUp)}m ↘ {Math.round(trackStats.totalDown)}m
+                    </span>
+                )}
+            </div>
+        )}
+        {shouldShow ? (
         <div className="fixed bottom-0 right-0 pointer-events-none z-10">
             <div className="bg-white bg-opacity-90 text-black px-2 py-1 rounded-tl" style={{ fontSize: '10px' }}>
                 <div className="flex items-center space-x-2 min-w-0">
@@ -216,5 +233,7 @@ export default function StatusBar() {
                 </div>
             </div>
         </div>
-    ) : null
+        ) : null}
+      </>
+    )
 }

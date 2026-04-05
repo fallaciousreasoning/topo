@@ -110,45 +110,6 @@ export class Drawing {
 
   #routedSegments: globalThis.Map<string, [number, number][]> = new globalThis.Map();
   #routingManager: RoutingManager | undefined;
-  #contextMenuPoint: { pointIndex: number; x: number; y: number } | undefined;
-  #cleanupContextMenu: (() => void) | undefined;
-
-  get contextMenuPoint() { return this.#contextMenuPoint; }
-
-  clearContextMenu() {
-    if (!this.#contextMenuPoint) return;
-    this.#contextMenuPoint = undefined;
-    this.notifyListeners();
-  }
-
-  isPointSnapped(pointIndex: number): boolean {
-    const coords = this.#track.coordinates as [number, number][];
-    if (pointIndex > 0 && this.#routedSegments.has(segKey(coords[pointIndex - 1], coords[pointIndex]))) return true;
-    if (pointIndex < coords.length - 1 && this.#routedSegments.has(segKey(coords[pointIndex], coords[pointIndex + 1]))) return true;
-    return false;
-  }
-
-  snapPoint(pointIndex: number) {
-    this.#contextMenuPoint = undefined;
-    this.notifyListeners();
-    this.recomputeRoutesForPoint(pointIndex);
-  }
-
-  unSnapPoint(pointIndex: number) {
-    const coords = this.#track.coordinates as [number, number][];
-    if (pointIndex > 0) this.#routedSegments.delete(segKey(coords[pointIndex - 1], coords[pointIndex]));
-    if (pointIndex < coords.length - 1) this.#routedSegments.delete(segKey(coords[pointIndex], coords[pointIndex + 1]));
-    this.#contextMenuPoint = undefined;
-    this.notifyListeners();
-  }
-
-  deletePoint(pointIndex: number) {
-    this.#contextMenuPoint = undefined;
-    this.updateTrack(t => ({
-      ...t,
-      coordinates: t.coordinates.filter((_, i) => i !== pointIndex),
-    }));
-  }
 
   get features(): GeoJSON.FeatureCollection {
     // originalCoords: actual stored positions (with drag overrides), used for route key lookup
@@ -372,17 +333,6 @@ export class Drawing {
         features?: MapGeoJSONFeature[];
       },
     ) => {
-      if (e.originalEvent instanceof MouseEvent && e.originalEvent.button === 2) {
-        const feature = e.features?.[0];
-        if (!feature) return;
-        this.#contextMenuPoint = {
-          pointIndex: feature.properties.pointIndex as number,
-          x: e.originalEvent.clientX,
-          y: e.originalEvent.clientY,
-        };
-        this.notifyListeners();
-        return;
-      }
       if (e.originalEvent instanceof MouseEvent && e.originalEvent.button !== 0) return;
       e.preventDefault();
       createDragger(this.#map, e, this);
@@ -451,10 +401,6 @@ export class Drawing {
 
       this.#map.on("click", (e) => {
         if (e.defaultPrevented) return;
-        if (this.#contextMenuPoint) {
-          this.clearContextMenu();
-          return;
-        }
         const prevCoords = this.#track.coordinates as [number, number][];
         this.updateTrack((t) => ({
           ...t,
@@ -469,12 +415,6 @@ export class Drawing {
         }
       }),
     );
-
-    // Prevent the browser's native context menu over the map canvas.
-    const canvas = this.#map.getCanvas();
-    const preventContextMenu = (e: Event) => e.preventDefault();
-    canvas.addEventListener("contextmenu", preventContextMenu);
-    this.#cleanupContextMenu = () => canvas.removeEventListener("contextmenu", preventContextMenu);
 
     setTimeout(() => this.initialize(), 1000);
   }
@@ -658,7 +598,6 @@ export class Drawing {
   }
 
   destroy() {
-    this.#cleanupContextMenu?.();
     for (const subscription of this.#subscriptions) {
       subscription.unsubscribe();
     }

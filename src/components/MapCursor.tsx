@@ -4,6 +4,8 @@ import Source from '../map/Source'
 import Layer from '../map/Layer'
 import { friendlyDistance } from '../utils/friendlyUnits'
 import { useSetting } from '../utils/settings'
+import { RoutingManager } from '../draw/routingManager'
+import { getLineLength } from '../utils/distance'
 
 export default function MapCursor() {
     const { map } = useMap()
@@ -13,6 +15,16 @@ export default function MapCursor() {
     const [labelPosition, setLabelPosition] = React.useState<{ x: number, y: number, distance: string, rotation: number, flipped: boolean } | null>(null)
     const [isInteracting, setIsInteracting] = React.useState(false)
     const [isTouchDevice, setIsTouchDevice] = React.useState(false)
+    const [routedDistanceM, setRoutedDistanceM] = React.useState<number | null>(null)
+    const [routedCoords, setRoutedCoords] = React.useState<[number, number][] | null>(null)
+
+    const routingManagerRef = React.useRef<RoutingManager | null>(null)
+    if (!routingManagerRef.current) {
+        routingManagerRef.current = new RoutingManager()
+    }
+    React.useEffect(() => {
+        return () => { routingManagerRef.current?.destroy() }
+    }, [])
 
     // Detect touch device
     React.useEffect(() => {
@@ -85,6 +97,28 @@ export default function MapCursor() {
         }
     }, [map])
 
+    // Try to find routed distance between user location and map center
+    React.useEffect(() => {
+        setRoutedCoords(null)
+        setRoutedDistanceM(null)
+
+        if (!userLocation || !centerLocation) return
+
+        let cancelled = false
+        const timer = setTimeout(async () => {
+            const coords = await routingManagerRef.current!.route(userLocation, centerLocation)
+            if (cancelled) return
+            if (coords) console.log('Found route with', coords.length, 'points, distance:', getLineLength(coords) * 1000, 'm')
+            setRoutedCoords(coords)
+            setRoutedDistanceM(coords ? getLineLength(coords) * 1000 : null)
+        }, 200)
+
+        return () => {
+            cancelled = true
+            clearTimeout(timer)
+        }
+    }, [userLocation, centerLocation])
+
     // Handle automatic mode interaction detection
     React.useEffect(() => {
         if (!map || cursorMode !== 'automatic') {
@@ -139,18 +173,20 @@ export default function MapCursor() {
             }
         }
 
+        const coordinates = routedCoords ?? [userLocation, centerLocation]
+
         return {
             type: 'FeatureCollection' as const,
             features: [{
                 type: 'Feature' as const,
                 geometry: {
                     type: 'LineString' as const,
-                    coordinates: [userLocation, centerLocation]
+                    coordinates
                 },
                 properties: {}
             }]
         }
-    }, [userLocation, centerLocation])
+    }, [userLocation, centerLocation, routedCoords])
 
     // Calculate label position and distance for DOM rendering
     React.useEffect(() => {
@@ -305,7 +341,7 @@ export default function MapCursor() {
                         transformOrigin: labelPosition.flipped ? '100% 50%' : '0 50%'
                     }}
                 >
-                    {labelPosition.distance}
+                    {routedDistanceM !== null ? friendlyDistance(routedDistanceM) : labelPosition.distance}
                 </div>
             )}
             
