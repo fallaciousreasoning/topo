@@ -7,6 +7,7 @@ import { useSetting } from '../utils/settings'
 import { RoutingManager } from '../draw/routingManager'
 import { getLineLength } from '../utils/distance'
 import { publishHasLocation } from '../utils/userLocationSignal'
+import { closestPointOnPolyline } from '../utils/vector'
 
 export default function MapCursor() {
     const { map } = useMap()
@@ -168,22 +169,6 @@ export default function MapCursor() {
             map.off('zoomend', handleInteractionEnd)
         }
     }, [map, cursorMode])
-
-    const closestPointOnPolyline = (point: [number, number], coords: [number, number][]): [number, number] => {
-        let bestDist = Infinity
-        let best: [number, number] = coords[0]
-        for (let i = 0; i < coords.length - 1; i++) {
-            const ax = coords[i][0], ay = coords[i][1]
-            const bx = coords[i+1][0], by = coords[i+1][1]
-            const dx = bx - ax, dy = by - ay
-            const lenSq = dx*dx + dy*dy
-            const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((point[0]-ax)*dx + (point[1]-ay)*dy) / lenSq))
-            const px = ax + t*dx, py = ay + t*dy
-            const d = (px - point[0])**2 + (py - point[1])**2
-            if (d < bestDist) { bestDist = d; best = [px, py] }
-        }
-        return best
-    }
 
     // Create GeoJSON data for the line only
     const lineData = React.useMemo(() => {

@@ -1,181 +1,32 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Track } from '../tracks/track';
-import { getElevation } from '../layers/contours';
 import { useDrawing } from '../draw/Drawing';
-import { buildFullCoordinates, generateSamplePoints } from '../tracks/trackUtils';
+import ElevationChart from './ElevationChart';
 
-const ELEVATION_ZOOM_LEVEL = 12;
-
-interface ElevationProfileProps {
-  onClose: () => void;
-}
-
-// Hook to listen to track changes from drawing
 function useTrackListener() {
   const drawing = useDrawing();
   const [currentTrack, setCurrentTrack] = useState<Track>(drawing.track);
 
   useEffect(() => {
-    const unsubscribe = drawing.addListener((drawingInstance) => {
-      setCurrentTrack({ ...drawingInstance.track });
-    });
+    const unsubscribe = drawing.addListener((d) => setCurrentTrack({ ...d.track }));
     return unsubscribe;
   }, [drawing]);
 
   return currentTrack;
 }
 
-// Hook to fetch elevation data for track coordinates
-function useElevationData(track: Track) {
-  const [elevations, setElevations] = useState<{ distance: number; elevation: number }[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function ElevationProfile({ onClose }: { onClose: () => void }) {
+  const track = useTrackListener();
 
-  useEffect(() => {
-    if (!track.coordinates.length) {
-      setElevations([]);
-      return;
-    }
-
-    setLoading(true);
-    const fetchElevations = async () => {
-      const samplePoints = generateSamplePoints(buildFullCoordinates(track));
-      const points: { distance: number; elevation: number }[] = [];
-
-      for (const samplePoint of samplePoints) {
-        try {
-          const elevation = await getElevation([samplePoint.coord[1], samplePoint.coord[0]], ELEVATION_ZOOM_LEVEL);
-          points.push({ distance: samplePoint.distance, elevation });
-        } catch (error) {
-          console.warn(`Failed to get elevation for sample point:`, error);
-          points.push({ distance: samplePoint.distance, elevation: 0 });
-        }
-      }
-
-      setElevations(points);
-      setLoading(false);
-    };
-
-    fetchElevations();
-  }, [track.coordinates, track.routedSegments]);
-
-  return { elevations, loading };
-}
-
-export default function ElevationProfile({ onClose }: ElevationProfileProps) {
-  const currentTrack = useTrackListener();
-  const { elevations, loading } = useElevationData(currentTrack);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (!elevations.length || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d')!;
-    const { width, height } = canvas;
-
-    ctx.clearRect(0, 0, width, height);
-
-    const padding = 40;
-    const chartWidth = width - 2 * padding;
-    const chartHeight = height - 2 * padding;
-
-    const maxDistance = Math.max(...elevations.map(p => p.distance));
-    const minElevation = Math.min(...elevations.map(p => p.elevation));
-    const maxElevation = Math.max(...elevations.map(p => p.elevation));
-    const elevationRange = maxElevation - minElevation;
-
-    ctx.strokeStyle = '#e5e5e5';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 5; i++) {
-      const x = padding + (chartWidth * i / 5);
-      ctx.beginPath(); ctx.moveTo(x, padding); ctx.lineTo(x, height - padding); ctx.stroke();
-    }
-    for (let i = 0; i <= 5; i++) {
-      const y = padding + (chartHeight * i / 5);
-      ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(width - padding, y); ctx.stroke();
-    }
-
-    ctx.strokeStyle = '#0066cc';
-    ctx.fillStyle = 'rgba(0, 102, 204, 0.2)';
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    elevations.forEach((point, index) => {
-      const x = padding + (point.distance / maxDistance) * chartWidth;
-      const y = height - padding - ((point.elevation - minElevation) / elevationRange) * chartHeight;
-      if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
-
-    const firstPoint = elevations[0];
-    const lastPoint = elevations[elevations.length - 1];
-    if (firstPoint && lastPoint) {
-      const firstX = padding + (firstPoint.distance / maxDistance) * chartWidth;
-      const lastX = padding + (lastPoint.distance / maxDistance) * chartWidth;
-      ctx.lineTo(lastX, height - padding);
-      ctx.lineTo(firstX, height - padding);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.beginPath();
-      elevations.forEach((point, index) => {
-        const x = padding + (point.distance / maxDistance) * chartWidth;
-        const y = height - padding - ((point.elevation - minElevation) / elevationRange) * chartHeight;
-        if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = '#333';
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'center';
-    for (let i = 0; i <= 5; i++) {
-      const distance = (maxDistance * i / 5) / 1000;
-      ctx.fillText(`${distance.toFixed(1)}km`, padding + (chartWidth * i / 5), height - 10);
-    }
-    ctx.textAlign = 'right';
-    for (let i = 0; i <= 5; i++) {
-      const elevation = minElevation + (elevationRange * (5 - i) / 5);
-      ctx.fillText(`${Math.round(elevation)}m`, padding - 10, padding + (chartHeight * i / 5) + 4);
-    }
-  }, [elevations]);
+  if (track.coordinates.length < 2) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg p-4 max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Elevation Profile</h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl font-bold">×</button>
+    <div className="fixed bottom-4 left-4 right-4 bg-white border border-gray-200 rounded-xl shadow-lg p-4 max-w-2xl mx-auto z-20">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm font-semibold text-gray-700">Elevation Profile</span>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
       </div>
-
-      {elevations.length > 0 ? (
-        <div className="space-y-2 relative">
-          {loading && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded">
-              <div className="text-gray-500">Loading elevation data...</div>
-            </div>
-          )}
-          <canvas ref={canvasRef} width={600} height={200} className="w-full h-48 border border-gray-200" />
-          <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
-            <span>Distance: {(Math.max(...elevations.map(p => p.distance)) / 1000).toFixed(2)} km</span>
-            <span className="text-center">
-              Elevation: {Math.round(Math.min(...elevations.map(p => p.elevation)))}m – {Math.round(Math.max(...elevations.map(p => p.elevation)))}m
-            </span>
-            <span className="text-right">
-              {(() => {
-                let totalUp = 0, totalDown = 0;
-                for (let i = 1; i < elevations.length; i++) {
-                  const diff = elevations[i].elevation - elevations[i - 1].elevation;
-                  if (diff > 0) totalUp += diff; else totalDown += Math.abs(diff);
-                }
-                return `↗ ${Math.round(totalUp)}m ↘ ${Math.round(totalDown)}m`;
-              })()}
-            </span>
-          </div>
-        </div>
-      ) : (
-        <div className="h-48 flex items-center justify-center">
-          <div className="text-gray-500">No elevation data available</div>
-        </div>
-      )}
+      <ElevationChart track={track} />
     </div>
   );
 }

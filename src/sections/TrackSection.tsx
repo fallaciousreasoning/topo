@@ -4,6 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import db from "../caches/indexeddb";
 import Button from "../components/Button";
 import { useParams, useRouteUpdater } from "../routing/router";
+import ElevationChart from "../components/ElevationChart";
 
 export default function TrackSection() {
   const params = useParams();
@@ -91,6 +92,13 @@ export default function TrackSection() {
             className="w-full text-sm px-2 py-1 border rounded"
           />
         </div>
+
+        {track.coordinates.length >= 2 && (
+          <div>
+            <label className="text-sm text-gray-600 block mb-1">Elevation Profile</label>
+            <ElevationChart track={track} />
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button

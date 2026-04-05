@@ -11,7 +11,7 @@ import {
 } from "maplibre-gl";
 import { Track } from "../tracks/track";
 import { range } from "../utils/array";
-import { getClosestPoint } from "../utils/vector";
+import { closestPointOnPolyline } from "../utils/vector";
 import { RoutingManager } from "./routingManager";
 
 type Listener = (drawing: Drawing) => void;
@@ -282,25 +282,8 @@ export class Drawing {
       const allCoords = feature.geometry.coordinates as [number, number][];
       const mouse = e.lngLat.toArray() as [number, number];
 
-      let closest: [number, number] = allCoords[0] as [number, number];
-      let bestDist = Infinity;
-      for (let i = 0; i < allCoords.length - 1; i++) {
-        const ax = allCoords[i][0], ay = allCoords[i][1];
-        const bx = allCoords[i + 1][0], by = allCoords[i + 1][1];
-        const dx = bx - ax, dy = by - ay;
-        const lenSq = dx * dx + dy * dy;
-        const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1,
-          ((mouse[0] - ax) * dx + (mouse[1] - ay) * dy) / lenSq
-        ));
-        const px = ax + t * dx, py = ay + t * dy;
-        const d = (px - mouse[0]) ** 2 + (py - mouse[1]) ** 2;
-        if (d < bestDist) {
-          bestDist = d;
-          closest = [px, py];
-        }
-      }
       this.#closestPoint = {
-        coord: closest,
+        coord: closestPointOnPolyline(mouse, allCoords) as [number, number],
         pointIndex: feature.properties.pointIndex,
       };
 
