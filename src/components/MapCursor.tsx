@@ -6,6 +6,7 @@ import { friendlyDistance } from '../utils/friendlyUnits'
 import { useSetting } from '../utils/settings'
 import { RoutingManager } from '../draw/routingManager'
 import { getLineLength } from '../utils/distance'
+import { publishHasLocation } from '../utils/userLocationSignal'
 
 export default function MapCursor() {
     const { map } = useMap()
@@ -43,10 +44,12 @@ export default function MapCursor() {
         const handleLocationFound = (e: any) => {
             const coords = e.coords
             setUserLocation([coords.longitude, coords.latitude])
+            publishHasLocation(true)
         }
 
         const handleLocationError = () => {
             setUserLocation(null)
+            publishHasLocation(false)
         }
 
         // Find the geolocation control and listen to its events
@@ -57,6 +60,7 @@ export default function MapCursor() {
             setTimeout(() => {
                 if (geoControl && geoControl._watchState === 'OFF') {
                     setUserLocation(null)
+                    publishHasLocation(false)
                 }
             }, 0)
         }

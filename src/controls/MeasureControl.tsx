@@ -1,13 +1,17 @@
 import * as React from 'react'
 import Control from './Control'
-import { useRouteUpdater } from '../routing/router'
+import { useParams, useRouteUpdater } from '../routing/router'
 import db from '../caches/indexeddb'
+import { randomColor } from '../utils/randomColor'
 
 export default function MeasureControl() {
     const updateRoute = useRouteUpdater()
+    const { editingFeature } = useParams()
+
+    if (editingFeature) return null
 
     const handleClick = async () => {
-        const track = await db.updateTrack({ coordinates: [] })
+        const track = await db.updateTrack({ coordinates: [], color: randomColor() })
         updateRoute({ editingFeature: track.id! })
     }
 

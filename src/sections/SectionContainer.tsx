@@ -71,6 +71,14 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     prevPageRef.current = params.page;
   }, [hasActivePage, isSheet, shouldStartMaximized, params.page]);
 
+  // Collapse the sheet when editing starts on a track page
+  React.useEffect(() => {
+    if (!isSheet || !containerRef.current) return;
+    if (params.editingFeature && params.page?.startsWith('track/')) {
+      containerRef.current.scrollTop = window.innerHeight;
+    }
+  }, [params.editingFeature, isSheet]);
+
   // Save scroll position when scrolling
   React.useEffect(() => {
     if (!isSheet || !containerRef.current || !params.page) return;

@@ -8,6 +8,8 @@ import db from "../caches/indexeddb";
 import { usePromise } from "../hooks/usePromise";
 import { debounce } from "../utils/debounce";
 import { RoutingManager } from "./routingManager";
+import { closestPlace } from "../search/nearest";
+import { getPlaces } from "../search/places";
 
 const Context = createContext<Drawing | undefined>(undefined);
 
@@ -42,6 +44,15 @@ function EditableTrack({ id }: { id: number }) {
       if (track.coordinates.length > 1)
         map.fitBounds(d.bounds, { padding: 100 });
       unsubscribe = d.addListener(() => {
+        const t = d!.track;
+        if (t.coordinates.length === 1 && !t.name) {
+          const [lng, lat] = t.coordinates[0];
+          getPlaces().then(places => {
+            const place = closestPlace(lat, lng, places, 20);
+            const name = place ? `Track near ${place.name}` : undefined;
+            d!.updateTrackSilently({ name });
+          });
+        }
         debouncedSave(d!.track);
         setVersion(v => v + 1);
       });

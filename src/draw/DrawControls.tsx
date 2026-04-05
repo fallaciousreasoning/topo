@@ -8,6 +8,7 @@ import { buildFullCoordinates, generateSamplePoints } from "../tracks/trackUtils
 import { getElevation } from "../layers/contours";
 import { getLineLength } from "../utils/distance";
 import { Track } from "../tracks/track";
+import db from "../caches/indexeddb";
 
 const ELEVATION_ZOOM_LEVEL = 12;
 const STATS_SAMPLE_INTERVAL = 50; // metres — coarser than elevation profile to reduce API calls
@@ -70,6 +71,16 @@ export default function DrawControls() {
 
   usePublishTrackStats(drawing.track);
 
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      if (e.key === 'z') { e.preventDefault(); drawing.undo(); }
+      if (e.key === 'y') { e.preventDefault(); drawing.redo(); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [drawing]);
+
   return (
     <>
       <Control position="top-left">
@@ -89,8 +100,12 @@ export default function DrawControls() {
         </button>
         <button
           type="button"
-          disabled={!drawing.canClear}
-          onClick={() => drawing.clear()}
+          onClick={() => {
+            if (window.confirm('Delete this track?')) {
+              db.deleteTrack(drawing.track);
+              updateRoute({ editingFeature: null, page: null });
+            }
+          }}
         >
           ⨯
         </button>
@@ -111,7 +126,14 @@ export default function DrawControls() {
         </button>
         <button
           type="button"
-          onClick={() => updateRoute({ editingFeature: null })}
+          onClick={() => {
+            if (drawing.track.coordinates.length === 0) {
+              db.deleteTrack(drawing.track);
+              updateRoute({ editingFeature: null });
+            } else {
+              updateRoute({ editingFeature: null, page: `track/${drawing.track.id}` });
+            }
+          }}
         >
           ✓
         </button>

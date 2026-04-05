@@ -12,6 +12,7 @@ import points from "./points";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import utmGrid from "./utmGrid";
+import tracksLayer from "./TracksLayer";
 
 export const extraData = {
     version: 8,
@@ -35,5 +36,6 @@ export const overlays: OverlayDefinition[] = [
     slopeAngle,
     huts,
     mountains,
-    points
+    points,
+    tracksLayer,
 ]
