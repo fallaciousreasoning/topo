@@ -105,23 +105,31 @@ self.onmessage = (e: MessageEvent) => {
 
   const MAX_SNAP_DIST = 100; // metres
 
-  const startId = graph.nearestNode(fromX, fromY);
-  const endId = graph.nearestNode(toX, toY);
+  const startSnap = graph.nearestEdgePoint(fromX, fromY);
+  const endSnap = graph.nearestEdgePoint(toX, toY);
 
-  if (startId === null || endId === null) {
+  if (!startSnap || !endSnap) {
     self.postMessage({ type: 'ROUTE_RESULT', id, coordinates: null });
     return;
   }
 
-  const [sX, sY] = graph.nodeCoords(startId);
-  const [eX, eY] = graph.nodeCoords(endId);
-  if (
-    Math.hypot(sX - fromX, sY - fromY) > MAX_SNAP_DIST ||
-    Math.hypot(eX - toX, eY - toY) > MAX_SNAP_DIST
-  ) {
+  if (startSnap.dist > MAX_SNAP_DIST || endSnap.dist > MAX_SNAP_DIST) {
     self.postMessage({ type: 'ROUTE_RESULT', id, coordinates: null });
     return;
   }
+
+  // Pick the node (u or v) on each edge that faces toward the other endpoint
+  const [suX, suY] = graph.nodeCoords(startSnap.u);
+  const [svX, svY] = graph.nodeCoords(startSnap.v);
+  const startId =
+    Math.hypot(suX - toX, suY - toY) < Math.hypot(svX - toX, svY - toY)
+      ? startSnap.u : startSnap.v;
+
+  const [euX, euY] = graph.nodeCoords(endSnap.u);
+  const [evX, evY] = graph.nodeCoords(endSnap.v);
+  const endId =
+    Math.hypot(euX - fromX, euY - fromY) < Math.hypot(evX - fromX, evY - fromY)
+      ? endSnap.u : endSnap.v;
 
   const result = graph.shortestPath(startId, endId);
   if (!result) {
@@ -134,6 +142,10 @@ self.onmessage = (e: MessageEvent) => {
     const [x, y] = graph!.nodeCoords(nodeId);
     return fromNZTM(x, y);
   });
+
+  // Prepend actual snap point on start edge, append snap point on end edge
+  coordinates.unshift(fromNZTM(startSnap.point[0], startSnap.point[1]));
+  coordinates.push(fromNZTM(endSnap.point[0], endSnap.point[1]));
 
   self.postMessage({ type: 'ROUTE_RESULT', id, coordinates });
 };

@@ -169,26 +169,59 @@ export default function MapCursor() {
         }
     }, [map, cursorMode])
 
+    const closestPointOnPolyline = (point: [number, number], coords: [number, number][]): [number, number] => {
+        let bestDist = Infinity
+        let best: [number, number] = coords[0]
+        for (let i = 0; i < coords.length - 1; i++) {
+            const ax = coords[i][0], ay = coords[i][1]
+            const bx = coords[i+1][0], by = coords[i+1][1]
+            const dx = bx - ax, dy = by - ay
+            const lenSq = dx*dx + dy*dy
+            const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((point[0]-ax)*dx + (point[1]-ay)*dy) / lenSq))
+            const px = ax + t*dx, py = ay + t*dy
+            const d = (px - point[0])**2 + (py - point[1])**2
+            if (d < bestDist) { bestDist = d; best = [px, py] }
+        }
+        return best
+    }
+
     // Create GeoJSON data for the line only
     const lineData = React.useMemo(() => {
         if (!userLocation || !centerLocation) {
-            return {
-                type: 'FeatureCollection' as const,
-                features: []
-            }
+            return { type: 'FeatureCollection' as const, features: [] }
         }
 
-        const coordinates = routedCoords ?? [userLocation, centerLocation]
+        if (routedCoords && routedCoords.length >= 2) {
+            const snapToUser = closestPointOnPolyline(userLocation, routedCoords)
+            const snapToCenter = closestPointOnPolyline(centerLocation, routedCoords)
+            return {
+                type: 'FeatureCollection' as const,
+                features: [
+                    {
+                        type: 'Feature' as const,
+                        geometry: { type: 'LineString' as const, coordinates: routedCoords },
+                        properties: { lineType: 'route' }
+                    },
+                    {
+                        type: 'Feature' as const,
+                        geometry: { type: 'LineString' as const, coordinates: [userLocation, snapToUser] },
+                        properties: { lineType: 'approach' }
+                    },
+                    {
+                        type: 'Feature' as const,
+                        geometry: { type: 'LineString' as const, coordinates: [snapToCenter, centerLocation] },
+                        properties: { lineType: 'approach' }
+                    },
+                ]
+            }
+        }
 
         return {
             type: 'FeatureCollection' as const,
             features: [{
                 type: 'Feature' as const,
-                geometry: {
-                    type: 'LineString' as const,
-                    coordinates
-                },
-                properties: {}
+                geometry: { type: 'LineString' as const, coordinates: [userLocation, centerLocation] },
+                properties: { lineType: 'route' }
             }]
         }
     }, [userLocation, centerLocation, routedCoords])
@@ -325,6 +358,20 @@ export default function MapCursor() {
                             id: 'cursor-line',
                             type: 'line',
                             source: 'cursor-line-source',
+                            filter: ['==', ['get', 'lineType'], 'route'],
+                            paint: {
+                                'line-color': '#000000',
+                                'line-width': 2,
+                                'line-opacity': 0.7
+                            }
+                        }}
+                    />
+                    <Layer
+                        layer={{
+                            id: 'cursor-line-approach',
+                            type: 'line',
+                            source: 'cursor-line-source',
+                            filter: ['==', ['get', 'lineType'], 'approach'],
                             paint: {
                                 'line-color': '#000000',
                                 'line-width': 2,

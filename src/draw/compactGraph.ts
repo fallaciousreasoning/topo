@@ -224,6 +224,61 @@ export class CompactGraph {
   nodeCoords(i: number): [number, number] {
     return [this.nodes[i * 2], this.nodes[i * 2 + 1]];
   }
+
+  /** Returns the nearest point on any graph edge to (x, y), along with the edge's endpoint node ids and distance. */
+  nearestEdgePoint(x: number, y: number): { point: [number, number]; u: number; v: number; dist: number } | null {
+    if (this.numNodes === 0) return null;
+
+    const [ix, iy] = this.cellAt(x, y);
+    let bestDist = Infinity;
+    let bestPoint: [number, number] = [0, 0];
+    let bestU = -1;
+    let bestV = -1;
+
+    // Search 2-cell radius to catch edges whose midpoints pass near the query
+    const radius = 2;
+    for (let di = -radius; di <= radius; di++) {
+      for (let dj = -radius; dj <= radius; dj++) {
+        const ci = ix + di;
+        const cj = iy + dj;
+        if (ci < 0 || ci >= this.gridNx || cj < 0 || cj >= this.gridNy) continue;
+        const c = ci * this.gridNy + cj;
+        const start = this.gridOffsets[c];
+        const end = this.gridOffsets[c + 1];
+        for (let k = start; k < end; k++) {
+          const u = this.gridNodeIds[k];
+          const ax = this.nodes[u * 2];
+          const ay = this.nodes[u * 2 + 1];
+          for (let j = this.edgeOffsets[u]; j < this.edgeOffsets[u + 1]; j++) {
+            const v = this.edgeTargets[j];
+            const bx = this.nodes[v * 2];
+            const by = this.nodes[v * 2 + 1];
+            const dx = bx - ax;
+            const dy = by - ay;
+            const lenSq = dx * dx + dy * dy;
+            let px: number, py: number;
+            if (lenSq === 0) {
+              px = ax; py = ay;
+            } else {
+              const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / lenSq));
+              px = ax + t * dx;
+              py = ay + t * dy;
+            }
+            const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestPoint = [px, py];
+              bestU = u;
+              bestV = v;
+            }
+          }
+        }
+      }
+    }
+
+    if (bestU === -1) return null;
+    return { point: bestPoint, u: bestU, v: bestV, dist: bestDist };
+  }
 }
 
 function parseCompactBuffer(buf: ArrayBuffer): CompactGraphData {
