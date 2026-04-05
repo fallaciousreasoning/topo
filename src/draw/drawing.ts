@@ -106,18 +106,71 @@ interface IndexedPoint {
 
 export class Drawing {
   hasDragger = false;
-  mode: 'straight' | 'snap' = 'straight';
+  mode: 'straight' | 'snap' = 'snap';
 
   #routedSegments: globalThis.Map<string, [number, number][]> = new globalThis.Map();
   #routingManager: RoutingManager | undefined;
+  #contextMenuPoint: { pointIndex: number; x: number; y: number } | undefined;
+  #cleanupContextMenu: (() => void) | undefined;
+
+  get contextMenuPoint() { return this.#contextMenuPoint; }
+
+  clearContextMenu() {
+    if (!this.#contextMenuPoint) return;
+    this.#contextMenuPoint = undefined;
+    this.notifyListeners();
+  }
+
+  isPointSnapped(pointIndex: number): boolean {
+    const coords = this.#track.coordinates as [number, number][];
+    if (pointIndex > 0 && this.#routedSegments.has(segKey(coords[pointIndex - 1], coords[pointIndex]))) return true;
+    if (pointIndex < coords.length - 1 && this.#routedSegments.has(segKey(coords[pointIndex], coords[pointIndex + 1]))) return true;
+    return false;
+  }
+
+  snapPoint(pointIndex: number) {
+    this.#contextMenuPoint = undefined;
+    this.notifyListeners();
+    this.recomputeRoutesForPoint(pointIndex);
+  }
+
+  unSnapPoint(pointIndex: number) {
+    const coords = this.#track.coordinates as [number, number][];
+    if (pointIndex > 0) this.#routedSegments.delete(segKey(coords[pointIndex - 1], coords[pointIndex]));
+    if (pointIndex < coords.length - 1) this.#routedSegments.delete(segKey(coords[pointIndex], coords[pointIndex + 1]));
+    this.#contextMenuPoint = undefined;
+    this.notifyListeners();
+  }
+
+  deletePoint(pointIndex: number) {
+    this.#contextMenuPoint = undefined;
+    this.updateTrack(t => ({
+      ...t,
+      coordinates: t.coordinates.filter((_, i) => i !== pointIndex),
+    }));
+  }
 
   get features(): GeoJSON.FeatureCollection {
-    const coords = [
-      ...(this.#track?.coordinates?.map(
-        (c, i) => this.#replacementPoints[i]?.coord ?? c,
-      ) ?? []),
-    ];
-    const points: GeoJSON.Feature[] = coords.map((c, i) => ({
+    // originalCoords: actual stored positions (with drag overrides), used for route key lookup
+    const originalCoords = (this.#track?.coordinates?.map(
+      (c, i) => this.#replacementPoints[i]?.coord ?? c,
+    ) ?? []) as [number, number][];
+
+    // displayCoords: snap each waypoint to the nearest graph node when it's an
+    // endpoint of a routed segment (first/last coord of that route).
+    const displayCoords: [number, number][] = originalCoords.map((c, i) => {
+      if (i < originalCoords.length - 1) {
+        const routed = this.#routedSegments.get(segKey(c, originalCoords[i + 1]));
+        if (routed) return routed[0];
+      }
+      if (i > 0) {
+        const routed = this.#routedSegments.get(segKey(originalCoords[i - 1], c));
+        if (routed) return routed[routed.length - 1];
+      }
+      return c;
+    });
+
+    const points: GeoJSON.Feature[] = displayCoords.map((c, i) => ({
       type: "Feature",
       properties: {
         class: "point",
@@ -130,7 +183,7 @@ export class Drawing {
       },
     }));
 
-    const lines: GeoJSON.Feature[] = range(coords.length - 1).map((i) => ({
+    const lines: GeoJSON.Feature[] = range(originalCoords.length - 1).map((i) => ({
       id: i + points.length,
       type: "Feature",
       properties: {
@@ -139,7 +192,10 @@ export class Drawing {
       },
       geometry: {
         type: "LineString",
-        coordinates: this.#getSegmentCoords(i, coords as [number, number][]),
+        // Route is keyed by original coords; straight fallback uses display coords
+        // so unrouted segments still connect to snapped point positions.
+        coordinates: this.#routedSegments.get(segKey(originalCoords[i], originalCoords[i + 1]))
+          ?? [displayCoords[i], displayCoords[i + 1]],
       },
     }));
 
@@ -162,15 +218,6 @@ export class Drawing {
       type: "FeatureCollection",
       features: [...points, ...lines, ...additionalPoints],
     };
-  }
-
-  #getSegmentCoords(i: number, coords: [number, number][]): [number, number][] {
-    if (this.mode === 'snap') {
-      const key = segKey(coords[i], coords[i + 1]);
-      const routed = this.#routedSegments.get(key);
-      if (routed) return routed;
-    }
-    return [coords[i], coords[i + 1]];
   }
 
   #replacementPoints: { [index: number]: IndexedPoint } = {};
@@ -197,8 +244,11 @@ export class Drawing {
 
   #listeners: Listener[] = [];
   #track: Track;
-  get track() {
-    return this.#track;
+  get track(): Track {
+    return {
+      ...this.#track,
+      routedSegments: Object.fromEntries(this.#routedSegments),
+    };
   }
 
   get bounds(): LngLatBounds {
@@ -241,6 +291,11 @@ export class Drawing {
     this.#map = map;
     this.#track = track;
     this.#routingManager = routingManager;
+    if (track.routedSegments) {
+      this.#routedSegments = new globalThis.Map(
+        Object.entries(track.routedSegments) as [string, [number, number][]][],
+      );
+    }
 
     this.#map.addSource(this.#sourceId, {
       type: "geojson",
@@ -263,15 +318,26 @@ export class Drawing {
 
       if (feature.geometry.type !== "LineString") return;
 
-      const start = feature.geometry.coordinates.at(0)!;
-      const end = feature.geometry.coordinates.at(-1)!;
-
+      const allCoords = feature.geometry.coordinates as [number, number][];
       const mouse = e.lngLat.toArray() as [number, number];
-      const closest = getClosestPoint(
-        start as [number, number],
-        end as [number, number],
-        mouse,
-      );
+
+      let closest: [number, number] = allCoords[0] as [number, number];
+      let bestDist = Infinity;
+      for (let i = 0; i < allCoords.length - 1; i++) {
+        const ax = allCoords[i][0], ay = allCoords[i][1];
+        const bx = allCoords[i + 1][0], by = allCoords[i + 1][1];
+        const dx = bx - ax, dy = by - ay;
+        const lenSq = dx * dx + dy * dy;
+        const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1,
+          ((mouse[0] - ax) * dx + (mouse[1] - ay) * dy) / lenSq
+        ));
+        const px = ax + t * dx, py = ay + t * dy;
+        const d = (px - mouse[0]) ** 2 + (py - mouse[1]) ** 2;
+        if (d < bestDist) {
+          bestDist = d;
+          closest = [px, py];
+        }
+      }
       this.#closestPoint = {
         coord: closest,
         pointIndex: feature.properties.pointIndex,
@@ -306,6 +372,18 @@ export class Drawing {
         features?: MapGeoJSONFeature[];
       },
     ) => {
+      if (e.originalEvent instanceof MouseEvent && e.originalEvent.button === 2) {
+        const feature = e.features?.[0];
+        if (!feature) return;
+        this.#contextMenuPoint = {
+          pointIndex: feature.properties.pointIndex as number,
+          x: e.originalEvent.clientX,
+          y: e.originalEvent.clientY,
+        };
+        this.notifyListeners();
+        return;
+      }
+      if (e.originalEvent instanceof MouseEvent && e.originalEvent.button !== 0) return;
       e.preventDefault();
       createDragger(this.#map, e, this);
     };
@@ -373,6 +451,10 @@ export class Drawing {
 
       this.#map.on("click", (e) => {
         if (e.defaultPrevented) return;
+        if (this.#contextMenuPoint) {
+          this.clearContextMenu();
+          return;
+        }
         const prevCoords = this.#track.coordinates as [number, number][];
         this.updateTrack((t) => ({
           ...t,
@@ -387,6 +469,12 @@ export class Drawing {
         }
       }),
     );
+
+    // Prevent the browser's native context menu over the map canvas.
+    const canvas = this.#map.getCanvas();
+    const preventContextMenu = (e: Event) => e.preventDefault();
+    canvas.addEventListener("contextmenu", preventContextMenu);
+    this.#cleanupContextMenu = () => canvas.removeEventListener("contextmenu", preventContextMenu);
 
     setTimeout(() => this.initialize(), 1000);
   }
@@ -403,18 +491,11 @@ export class Drawing {
 
   setMode(mode: 'straight' | 'snap') {
     this.mode = mode;
-    this.#routedSegments.clear();
-    if (mode === 'snap') {
-      const coords = this.#track.coordinates as [number, number][];
-      for (let i = 0; i < coords.length - 1; i++) {
-        this.#requestRoute(coords[i], coords[i + 1]);
-      }
-    }
     this.notifyListeners();
   }
 
   recomputeRoutesForPoint(pointIndex: number) {
-    if (this.mode !== 'snap' || !this.#routingManager) return;
+    if (!this.#routingManager) return;
     const coords = this.#track.coordinates as [number, number][];
     if (pointIndex > 0 && pointIndex < coords.length) {
       this.#requestRoute(coords[pointIndex - 1], coords[pointIndex]);
@@ -577,6 +658,7 @@ export class Drawing {
   }
 
   destroy() {
+    this.#cleanupContextMenu?.();
     for (const subscription of this.#subscriptions) {
       subscription.unsubscribe();
     }

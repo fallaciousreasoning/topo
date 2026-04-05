@@ -6,4 +6,5 @@ export interface Track {
     percent: number;
     elevation: number;
   }[];
+  routedSegments?: Record<string, [number, number][]>;
 }

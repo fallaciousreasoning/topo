@@ -1,7 +1,6 @@
 import { loadCompactBuffer, CompactGraph } from './compactGraph';
 
 const GRAPH_URL = 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.tg';
-const CACHE_NAME = 'track-graph-v1';
 
 // NZTM2000 parameters (GRS80, CM=173°E, FE=1600000, FN=10000000, k0=0.9996)
 const TM_A = 6378137.0;
@@ -81,13 +80,8 @@ function fromNZTM(E: number, N: number): [number, number] {
 let graph: CompactGraph | null = null;
 
 async function loadGraph() {
-  const cache = await caches.open(CACHE_NAME);
-  let response = await cache.match(GRAPH_URL);
-  if (!response) {
-    response = await fetch(GRAPH_URL);
-    if (!response.ok) throw new Error(`Failed to fetch graph: ${response.status}`);
-    await cache.put(GRAPH_URL, response.clone());
-  }
+  const response = await fetch(GRAPH_URL);
+  if (!response.ok) throw new Error(`Failed to fetch graph: ${response.status}`);
   const buffer = await response.arrayBuffer();
   graph = loadCompactBuffer(buffer);
   self.postMessage({ type: 'READY' });
@@ -109,10 +103,22 @@ self.onmessage = (e: MessageEvent) => {
   const [fromX, fromY] = toNZTM(fromLat, fromLng);
   const [toX, toY] = toNZTM(toLat, toLng);
 
+  const MAX_SNAP_DIST = 100; // metres
+
   const startId = graph.nearestNode(fromX, fromY);
   const endId = graph.nearestNode(toX, toY);
 
   if (startId === null || endId === null) {
+    self.postMessage({ type: 'ROUTE_RESULT', id, coordinates: null });
+    return;
+  }
+
+  const [sX, sY] = graph.nodeCoords(startId);
+  const [eX, eY] = graph.nodeCoords(endId);
+  if (
+    Math.hypot(sX - fromX, sY - fromY) > MAX_SNAP_DIST ||
+    Math.hypot(eX - toX, eY - toY) > MAX_SNAP_DIST
+  ) {
     self.postMessage({ type: 'ROUTE_RESULT', id, coordinates: null });
     return;
   }
