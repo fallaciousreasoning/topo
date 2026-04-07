@@ -208,7 +208,7 @@ export default function StatusBar() {
                 )}
             </div>
         )}
-        {shouldShow ? (
+        {shouldShow && (
         <div className="fixed bottom-0 right-0 pointer-events-none z-10">
             <div className="bg-white bg-opacity-90 text-black px-2 py-1 rounded-tl" style={{ fontSize: '10px' }}>
                 <div className="flex items-center space-x-2 min-w-0">
@@ -233,7 +233,7 @@ export default function StatusBar() {
                 </div>
             </div>
         </div>
-        ) : null}
+        )}
       </>
     )
 }

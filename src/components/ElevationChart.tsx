@@ -84,13 +84,21 @@ export default function ElevationChart({ track }: { track: Track }) {
 
     const Y_TICKS = 4, X_TICKS = 4
 
-    const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const svgX = (e.clientX - rect.left) * (W / rect.width)
+    const updateHoverFromClientX = (el: SVGSVGElement, clientX: number) => {
+        const rect = el.getBoundingClientRect()
+        const svgX = (clientX - rect.left) * (W / rect.width)
         const chartX = svgX - PAD.left
         if (chartX < 0 || chartX > CW) { setHover(null); return }
         const dist = (chartX / CW) * maxDist
         setHover({ xPx: svgX, dist, ele: interpolate(elevations, dist) })
+    }
+
+    const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) =>
+        updateHoverFromClientX(e.currentTarget, e.clientX)
+
+    const handleTouchMove = (e: React.TouchEvent<SVGSVGElement>) => {
+        e.preventDefault()
+        updateHoverFromClientX(e.currentTarget, e.touches[0].clientX)
     }
 
     let totalUp = 0, totalDown = 0
@@ -107,6 +115,9 @@ export default function ElevationChart({ track }: { track: Track }) {
                 style={{ height: '110px' }}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHover(null)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={() => setHover(null)}
+                onTouchCancel={() => setHover(null)}
             >
                 <defs>
                     <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
