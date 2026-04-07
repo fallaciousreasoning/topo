@@ -8,14 +8,12 @@ import { useParams } from '../routing/router'
 import { useSetting } from '../utils/settings'
 import { useTrackStats } from '../draw/trackStatsSignal'
 import { friendlyDistance } from '../utils/friendlyUnits'
-import { useHasLocation } from '../utils/userLocationSignal'
 
 export default function StatusBar() {
     const { map } = useMap()
     const params = useParams()
     const statusBarMode = useSetting('statusBarMode')
     const trackStats = useTrackStats()
-    const hasLocation = useHasLocation()
     const [position, setPosition] = React.useState<{ lng: number, lat: number } | null>(null)
     const [elevation, setElevation] = React.useState<number | null>(null)
     const [place, setPlace] = React.useState<any | null>(null)
@@ -198,7 +196,7 @@ export default function StatusBar() {
 
     return (
       <>
-        {trackStats && hasLocation && (
+        {trackStats && (
             <div className="fixed bottom-8 right-2 pointer-events-none z-10 flex gap-1">
                 <span className="px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded">
                     {friendlyDistance(trackStats.distanceM)}
