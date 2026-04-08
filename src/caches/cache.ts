@@ -5,9 +5,3 @@ export interface Cache {
     clearLayer: (layer: string) => Promise<void>
     getLayerSizes: () => Promise<{ [layer: string]: number }>
 }
-
-export interface Tile {
-    id: string,
-    layer: string,
-    data: Blob
-}

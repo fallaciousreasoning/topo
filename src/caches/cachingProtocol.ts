@@ -1,7 +1,7 @@
 import { addProtocol, getData } from './protocols'
 import { getSetting, addListener as addSettingsListener } from '../utils/settings'
 
-export const cacherPromise = import('./indexeddb')
+export const cacherPromise = import('./opfs')
 const failed = { data: null }
 
 let cacheLayers = new Set<string>(getSetting('cacheLayers'))
