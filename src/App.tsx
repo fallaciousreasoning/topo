@@ -15,3 +15,13 @@ function App() {
 
 createRoot(document.body).render(<App />)
 
+function requestPersistentStorage() {
+    navigator.storage?.persist()
+}
+
+if (window.matchMedia('(display-mode: standalone)').matches) {
+    requestPersistentStorage()
+} else {
+    window.addEventListener('appinstalled', requestPersistentStorage, { once: true })
+}
+
