@@ -5,6 +5,7 @@ import db from "../caches/indexeddb";
 import Button from "../components/Button";
 import { useParams, useRouteUpdater } from "../routing/router";
 import ElevationChart from "../components/ElevationChart";
+import { exportGPX, downloadGPX } from "../utils/exportGPX";
 
 export default function TrackSection() {
   const params = useParams();
@@ -101,11 +102,8 @@ export default function TrackSection() {
         )}
 
         <div className="flex gap-2">
-          <Button
-            onClick={() => updateRoute({ editingFeature: trackId })}
-          >
-            Edit Track
-          </Button>
+          <Button onClick={() => updateRoute({ editingFeature: trackId })}>Edit Track</Button>
+          <Button onClick={() => downloadGPX(exportGPX([track], []), `${track.name ?? `track-${track.id}`}.gpx`)}>Export GPX</Button>
           <Button onClick={handleDelete}>Delete Track</Button>
         </div>
       </div>

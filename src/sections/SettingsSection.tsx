@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import Section from "./Section";
 import Checkbox from "../components/Checkbox";
 import { friendlyBytes } from "../utils/bytes";
@@ -10,6 +10,9 @@ import { cacherPromise } from "../caches/cachingProtocol";
 import { demOverlaySource } from "../layers/contours";
 import Button from "../components/Button";
 import { LayerSettingDescriptor } from "../layers/config";
+import { importGPXFile } from "../utils/importGPX";
+import { exportGPX, downloadGPX } from "../utils/exportGPX";
+import db from "../caches/indexeddb";
 
 function LayerSettingControl({ layerId, settingKey, descriptor }: { layerId: string, settingKey: string, descriptor: LayerSettingDescriptor }) {
     const value = useLayerSetting(layerId, settingKey, descriptor.default)
@@ -48,6 +51,33 @@ export default function SettingsSection() {
     const cursorMode = useSetting('cursorMode')
     const statusBarMode = useSetting('statusBarMode')
     const { result: sizes = {} } = usePromise(() => cacherPromise.then(c => c.default.getLayerSizes()), [])
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        try {
+            const result = await importGPXFile(file)
+            for (const track of result.tracks) await db.updateTrack(track)
+            for (const point of result.points) await db.updatePoint(point)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+            const parts = []
+            if (result.tracks.length > 0) parts.push(`${result.tracks.length} track(s)`)
+            if (result.points.length > 0) parts.push(`${result.points.length} point(s)`)
+            alert(`Successfully imported ${parts.join(' and ')}`)
+        } catch (error) {
+            alert(`Failed to import GPX: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        }
+    }
+
+    const handleExport = async () => {
+        const [tracks, points] = await Promise.all([db.getTracks(), db.getPoints()])
+        if (tracks.length === 0 && points.length === 0) {
+            alert('No tracks or points to export.')
+            return
+        }
+        downloadGPX(exportGPX(tracks, points))
+    }
 
     return <Section page="settings" exact closable title="Settings">
         <div>
@@ -94,6 +124,13 @@ export default function SettingsSection() {
                     ))}
                 </div>
             </Card>
+
+            <h4 className="mt-4 font-semibold text-base">Tracks & Points</h4>
+            <div className="flex flex-col gap-2">
+                <Button onClick={() => fileInputRef.current?.click()}>Import GPX</Button>
+                <Button onClick={handleExport}>Export GPX</Button>
+                <input ref={fileInputRef} type="file" accept=".gpx" onChange={handleImport} style={{ display: 'none' }} />
+            </div>
 
             <h4 className="mt-4 font-semibold text-base">Layers</h4>
             <div className="flex flex-col gap-2 my-1">
