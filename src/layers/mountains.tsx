@@ -92,7 +92,7 @@ const getFeatures = async () => {
 }
 
 const cluster = new Supercluster({
-    maxZoom: 12,
+    maxZoom: 10,
     reduce: (accumulator, current) => {
         if (!accumulator.occurrence || accumulator.occurrence.elevation < current.occurrence.elevation) {
             accumulator.occurrence = current.occurrence;

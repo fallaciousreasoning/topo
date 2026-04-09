@@ -1,12 +1,12 @@
-import React from "react";
-import { useClusterHandlers } from "../hooks/useClusterHandlers";
+import React, { useEffect } from "react";
+import Supercluster from "supercluster";
 import { useLayerHandler } from "../hooks/useLayerClickHandler";
 import { usePromise } from "../hooks/usePromise";
 import { useRouteUpdater } from "../routing/router";
-import { Place } from "../search/places";
 import { OverlayDefinition } from "./config";
 import Source from "../map/Source";
 import Layer from "../map/Layer";
+import { useMap } from "../map/Map";
 
 export interface HutGalleryImage {
     url: string;
@@ -59,24 +59,22 @@ const getHutsGeoJson = async () => {
     const huts = await getHuts()
     const geojson: GeoJSON.GeoJSON = {
         type: 'FeatureCollection',
-        features: huts.map(h => ({
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [
-                    parseFloat(h.lon),
-                    parseFloat(h.lat)
-                ]
-            },
-            properties: {
-                message: h.name,
+        features: huts.map(h => {
+            const geometry = {
+                type: 'Point' as const,
+                coordinates: [parseFloat(h.lon as any), parseFloat(h.lat as any)]
             }
-        })),
-
+            return {
+                type: 'Feature' as const,
+                geometry,
+                properties: { message: h.name, geometry }
+            }
+        })
     }
-
     return geojson
 }
+
+const cluster = new Supercluster({ maxZoom: 11, reduce: () => {} })
 
 export default {
     id: 'huts',
@@ -86,72 +84,52 @@ export default {
     cacheable: false,
     source: () => {
         const { result } = usePromise(getHutsGeoJson, [])
+        const { map } = useMap()
         const updateRoute = useRouteUpdater()
 
-        useLayerHandler('click', 'huts-unclustered-point', e => {
+        useEffect(() => {
+            if (!result) return
+            cluster.load(result.features as any)
+            const updateCluster = () => {
+                const zoom = Math.floor(map.getZoom())
+                const clusters = cluster.getClusters([-180, -85, 180, 85], zoom);
+                (map.getSource('huts') as any)?.setData({
+                    type: 'FeatureCollection',
+                    features: clusters.map(m => {
+                        if (!m.id) return m
+                        return { ...m, geometry: m.properties.geometry }
+                    })
+                })
+            }
+            updateCluster()
+            map.on('zoom', updateCluster)
+            return () => { map.off('zoom', updateCluster) }
+        }, [result])
+
+        useLayerHandler('click', 'huts-point', e => {
             const hutFeature = e.features?.[0]
             if (!hutFeature) return
-
             const hutName = hutFeature.properties?.message
             if (!hutName) return
-
             const point = hutFeature.geometry as GeoJSON.Point
-
             updateRoute({
                 page: `location/${point.coordinates[1]}/${point.coordinates[0]}/${encodeURIComponent(hutName)}`
             })
         })
 
-        useClusterHandlers('huts')
-
         if (!result) return null
-        return <Source id="huts" spec={{
-            type: 'geojson',
-            data: result,
-            cluster: true,
-            clusterMaxZoom: 14
-        }}>
+        return <Source id="huts" spec={{ type: 'geojson', data: { type: 'FeatureCollection', features: [] } }}>
             <Layer layer={{
-                id: "huts-clusters", type: "circle", source: "huts", filter: ['has', 'point_count'], paint: {
-                    'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 100, '#f1f075', 750, '#f28cb1'],
-                    'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
-                }
-            }} />
-            <Layer layer={{
-                id: 'huts-cluster-count',
-                type: 'symbol',
-                source: 'huts',
-                filter: ['has', 'point_count'],
-                layout: {
-                    'text-field': '{point_count_abbreviated}',
-                    'text-size': 12,
-                    "text-font": [
-                        "Open Sans Italic"
-                    ],
-                    'icon-image': 'building_pnt_hut',
-                    "icon-anchor": 'right',
-                    "text-anchor": 'left',
-                    "text-justify": 'right'
-                }
-            }} />
-            <Layer layer={{
-                id: 'huts-unclustered-point',
+                id: 'huts-point',
                 type: 'circle',
                 source: 'huts',
-                filter: ['!', ['has', 'point_count']],
-                paint: {
-                    'circle-color': 'transparent',
-                    'circle-radius': 15,
-                }
+                paint: { 'circle-color': 'transparent', 'circle-radius': 15 }
             }} />
             <Layer layer={{
-                id: 'huts-unclustered-point-icon',
+                id: 'huts-point-icon',
                 type: 'symbol',
                 source: 'huts',
-                filter: ['!', ['has', 'point_count']],
-                layout: {
-                    "icon-image": 'building_pnt_hut'
-                }
+                layout: { 'icon-image': 'building_pnt_hut' }
             }} />
         </Source>
     }
