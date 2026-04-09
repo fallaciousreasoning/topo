@@ -51,11 +51,8 @@ export default function Section(props: Props) {
           )}
           {props.title && (
             <h2 className="font-semibold text-lg flex items-center gap-1">
-              {props.backButton && (
-                <button onClick={(e) => window.history.back()} className="leading-none">←</button>
-              )}
-              {props.closable && (
-                <button onClick={(e) => updateRoute({ page: null })}>☰</button>
+              {(props.closable || (props.backButton && !isSmallScreen)) && (
+                <button onClick={() => updateRoute({ page: null })}>☰</button>
               )}
               {props.title}
             </h2>

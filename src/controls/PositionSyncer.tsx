@@ -21,7 +21,7 @@ export default function PositionSyncer() {
                 zoom: map.getZoom(),
                 rotation: map.getBearing(),
                 pitch: map.getPitch()
-            })
+            }, true)
         }
 
         map.on('moveend', updatePosition)

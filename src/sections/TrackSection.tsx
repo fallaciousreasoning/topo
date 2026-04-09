@@ -102,7 +102,7 @@ export default function TrackSection() {
         )}
 
         <div className="flex gap-2">
-          <Button onClick={() => updateRoute({ editingFeature: trackId })}>Edit Track</Button>
+          <Button onClick={() => updateRoute({ editingFeature: trackId }, true)}>Edit Track</Button>
           <Button onClick={() => downloadGPX(exportGPX([track], []), `${track.name ?? `track-${track.id}`}.gpx`)}>Export GPX</Button>
           <Button onClick={handleDelete}>Delete Track</Button>
         </div>

@@ -129,9 +129,9 @@ export default function DrawControls() {
           onClick={() => {
             if (drawing.track.coordinates.length === 0) {
               db.deleteTrack(drawing.track);
-              updateRoute({ editingFeature: null });
+              updateRoute({ editingFeature: null }, true);
             } else {
-              updateRoute({ editingFeature: null, page: `track/${drawing.track.id}` });
+              updateRoute({ editingFeature: null, page: `track/${drawing.track.id}` }, true);
             }
           }}
         >

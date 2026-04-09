@@ -5,6 +5,7 @@ import topoRaster from "../layers/topoRaster";
 import utmGrid from "../layers/utmGrid";
 import mountains from "../layers/mountains";
 import points from "../layers/points";
+import tracksLayer from "../layers/TracksLayer";
 
 const localStorageKey = "map-view-info";
 
@@ -28,7 +29,7 @@ const defaultRouteParams: RouteParams = {
   rotation: 0,
   pitch: 0,
   basemap: topoRaster.id,
-  overlays: [mountains.id, utmGrid.id, points.id],
+  overlays: [mountains.id, utmGrid.id, points.id, tracksLayer.id],
   page: null,
 
   editingFeature: null,
@@ -36,7 +37,7 @@ const defaultRouteParams: RouteParams = {
 
 interface RouterContext {
   params: RouteParams;
-  update: (update: Partial<RouteParams>) => void;
+  update: (update: Partial<RouteParams>, replace?: boolean) => void;
 }
 
 const RouterContext = React.createContext<RouterContext>({
@@ -142,17 +143,22 @@ const persistParams = (params: RouteParams) => {
 
 export const Context = (props: React.PropsWithChildren) => {
   const [params, setParams] = useState(parseUrl());
-  const update = (partial: Partial<RouteParams>) => {
-    const update = {
+  const update = (partial: Partial<RouteParams>, replace = false) => {
+    const updated = {
       ...params,
       ...partial,
     };
 
-    persistParams(update);
+    persistParams(updated);
 
-    const hashed = toHash(update);
+    const hashed = toHash(updated);
     if (hashed == location.hash) return;
-    window.location.hash = hashed;
+    if (replace) {
+      history.replaceState(null, '', hashed);
+      setParams(updated);
+    } else {
+      window.location.hash = hashed;
+    }
   };
   useEffect(() => {
     const reparse = () => {
@@ -191,7 +197,7 @@ export const useRouteUpdater = () => {
   }, [update]);
 
   const updater = React.useCallback(
-    (u: Partial<RouteParams>) => updateRef?.current(u),
+    (u: Partial<RouteParams>, replace?: boolean) => updateRef?.current(u, replace),
     [],
   );
   return updater;

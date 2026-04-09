@@ -50,7 +50,7 @@ export default function SettingsSection() {
     const cacheLayers = useSetting('cacheLayers')
     const cursorMode = useSetting('cursorMode')
     const statusBarMode = useSetting('statusBarMode')
-    const { result: sizes = {} } = usePromise(() => cacherPromise.then(c => c.default.getLayerSizes()), [])
+    const { result: sizes, loading: sizesLoading } = usePromise(() => cacherPromise.then(c => c.default.getLayerSizes()), [])
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,9 +149,12 @@ export default function SettingsSection() {
                         Cache viewed tiles
                     </Checkbox>
                     <div>
-                        Currently using {friendlyBytes(sizes[layer.id] ?? 0)} of storage.
+                        Currently using {sizesLoading
+                            ? <span className="inline-block w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin align-middle" />
+                            : friendlyBytes((sizes ?? {})[layer.id] ?? 0)
+                        } of storage.
                     </div>
-                    {!!sizes[layer.id] && <Button
+                    {!!(sizes ?? {})[layer.id] && <Button
                         onClick={() => {
                             if (
                                 window.confirm(
