@@ -5,7 +5,6 @@ import linzVector from "../layers/linzVector"
 import topoRaster from "../layers/topoRaster"
 import osm from "../layers/osm"
 import openTopo from "../layers/openTopo"
-import marine from "../layers/marine"
 
 const SETTINGS_LOCAL_STORAGE_KEY = 'topos-settings'
 
@@ -20,7 +19,7 @@ interface Settings {
 }
 
 const defaultSettings: Settings = {
-    cacheLayers: [linzAerial.id, linzVector.id, topoRaster.id, marine.id, osm.id, openTopo.id, demOverlaySource.id],
+    cacheLayers: [linzAerial.id, linzVector.id, topoRaster.id, osm.id, openTopo.id, demOverlaySource.id],
     cursorMode: 'automatic',
     statusBarMode: 'always',
     layerSettings: {},
