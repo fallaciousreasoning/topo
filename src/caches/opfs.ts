@@ -8,12 +8,16 @@ function parseTileCoords(id: string): { z: string, x: string, y: string, ext: st
 
 async function sumDir(dir: FileSystemDirectoryHandle): Promise<number> {
     let size = 0
-    for await (const [, entry] of dir.entries()) {
-        if (entry.kind === 'file') {
-            const file = await (entry as FileSystemFileHandle).getFile()
-            size += file.size
-        } else {
-            size += await sumDir(entry as FileSystemDirectoryHandle)
+    for await (const [name, entry] of dir.entries()) {
+        try {
+            if (entry.kind === 'file') {
+                const file = await (await dir.getFileHandle(name)).getFile()
+                size += file.size
+            } else if (entry.kind === 'directory') {
+                size += await sumDir(await dir.getDirectoryHandle(name))
+            }
+        } catch {
+            // skip unreadable entries
         }
     }
     return size
@@ -69,11 +73,15 @@ const opfsCache: Cache = {
             const tilesDir = await root.getDirectoryHandle('tiles')
             for await (const [layerName, entry] of tilesDir.entries()) {
                 if (entry.kind === 'directory') {
-                    result[layerName] = await sumDir(entry as FileSystemDirectoryHandle)
+                    result[layerName] = await sumDir(await tilesDir.getDirectoryHandle(layerName))
                 }
             }
-        } catch {
-            // tiles dir doesn't exist yet
+        } catch (e) {
+            if (e instanceof DOMException && e.name === 'NotFoundError') {
+                // tiles dir doesn't exist yet
+            } else {
+                console.error('getLayerSizes failed:', e)
+            }
         }
         return result
     },
