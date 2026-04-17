@@ -163,7 +163,9 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
       </button>
       <div className="flex items-start justify-between pr-8">
         <div className="flex flex-col">
-          <h3 className="font-bold text-lg">{place?.name ?? "Location"}</h3>
+          <h3 className="font-bold text-lg">
+            {huntingBlock ? `Hunting: ${huntingBlock.name}` : place?.name ?? "Location"}
+          </h3>
           <div className="text-xs text-gray-500">
             {round(lat, 6)}, {round(lng, 6)}
             {elevation !== null && <span> • {round(elevation, 0)}m</span>}

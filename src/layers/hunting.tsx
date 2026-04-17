@@ -22,13 +22,58 @@ export interface HuntingBlock {
     noHuntingZones?: string;
 }
 
+const HUNTING_CACHE = 'hunting-data-v1'
+const HUNTING_URL = '/data/hunting.json'
+
 let huntingPromise: Promise<GeoJSON.FeatureCollection> | null = null;
 
 export const getHunting = (): Promise<GeoJSON.FeatureCollection> => {
     if (!huntingPromise) {
-        huntingPromise = fetch('/data/hunting.json').then(r => r.json())
+        huntingPromise = (async () => {
+            if ('caches' in window) {
+                const cache = await caches.open(HUNTING_CACHE)
+                const cached = await cache.match(HUNTING_URL)
+                if (cached) return cached.json() as Promise<GeoJSON.FeatureCollection>
+                const response = await fetch(HUNTING_URL)
+                await cache.put(HUNTING_URL, response.clone())
+                return response.json()
+            }
+            return fetch(HUNTING_URL).then(r => r.json())
+        })()
     }
     return huntingPromise
+}
+
+export const getHuntingDownloadSize = async (): Promise<number | null> => {
+    try {
+        const response = await fetch(HUNTING_URL, { method: 'HEAD' })
+        const len = response.headers.get('content-length')
+        return len ? parseInt(len, 10) : null
+    } catch {
+        return null
+    }
+}
+
+export const getHuntingCacheSize = async (): Promise<number | null> => {
+    if (!('caches' in window)) return null
+    const cache = await caches.open(HUNTING_CACHE)
+    const response = await cache.match(HUNTING_URL)
+    if (!response) return null
+    const blob = await response.blob()
+    return blob.size
+}
+
+export const downloadHunting = async (): Promise<void> => {
+    const response = await fetch(HUNTING_URL)
+    if (!response.ok) throw new Error(`Download failed: ${response.status}`)
+    const cache = await caches.open(HUNTING_CACHE)
+    await cache.put(HUNTING_URL, response)
+    huntingPromise = null
+}
+
+export const clearHuntingCache = async (): Promise<void> => {
+    await caches.delete(HUNTING_CACHE)
+    huntingPromise = null
 }
 
 export const getHuntingBlockByName = async (name: string): Promise<HuntingBlock | null> => {

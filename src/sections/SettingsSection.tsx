@@ -1,10 +1,11 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Section from "./Section";
 import Checkbox from "../components/Checkbox";
 import { friendlyBytes } from "../utils/bytes";
 import { baseLayers, overlays } from "../layers/layerDefinition";
 import Card from "../components/Card";
 import { updateLayerSetting, updateSettings, useLayerSetting, useSetting, type CursorMode, type StatusBarMode } from "../utils/settings";
+import { useParams, useRouteUpdater } from "../routing/router";
 import { usePromise } from "../hooks/usePromise";
 import { cacherPromise } from "../caches/cachingProtocol";
 import { demOverlaySource } from "../layers/contours";
@@ -13,6 +14,7 @@ import { LayerSettingDescriptor } from "../layers/config";
 import { importGPXFile } from "../utils/importGPX";
 import { exportGPX, downloadGPX } from "../utils/exportGPX";
 import db from "../caches/indexeddb";
+import { downloadHunting, clearHuntingCache, getHuntingCacheSize, getHuntingDownloadSize } from "../layers/hunting";
 
 function LayerSettingControl({ layerId, settingKey, descriptor }: { layerId: string, settingKey: string, descriptor: LayerSettingDescriptor }) {
     const value = useLayerSetting(layerId, settingKey, descriptor.default)
@@ -50,8 +52,33 @@ export default function SettingsSection() {
     const cacheLayers = useSetting('cacheLayers')
     const cursorMode = useSetting('cursorMode')
     const statusBarMode = useSetting('statusBarMode')
+    const routeParams = useParams()
+    const updateRoute = useRouteUpdater()
     const { result: sizes, loading: sizesLoading } = usePromise(() => cacherPromise.then(c => c.default.getLayerSizes()), [])
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const [huntingRev, setHuntingRev] = useState(0)
+    const { result: huntingCacheSize, loading: huntingCacheLoading } = usePromise(getHuntingCacheSize, [huntingRev])
+    const { result: huntingDownloadSize } = usePromise(getHuntingDownloadSize, [])
+    const [huntingDownloading, setHuntingDownloading] = useState(false)
+
+    const handleDownloadHunting = async () => {
+        setHuntingDownloading(true)
+        try {
+            await downloadHunting()
+            setHuntingRev(r => r + 1)
+        } finally {
+            setHuntingDownloading(false)
+        }
+    }
+
+    const handleDeleteHunting = async () => {
+        await clearHuntingCache()
+        setHuntingRev(r => r + 1)
+        if (routeParams.overlays.includes('hunting')) {
+            updateRoute({ overlays: routeParams.overlays.filter(id => id !== 'hunting') })
+        }
+    }
 
     const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -130,6 +157,25 @@ export default function SettingsSection() {
                 <Button onClick={() => fileInputRef.current?.click()}>Import GPX</Button>
                 <Button onClick={handleExport}>Export GPX</Button>
                 <input ref={fileInputRef} type="file" accept=".gpx" onChange={handleImport} style={{ display: 'none' }} />
+            </div>
+
+            <h4 className="mt-4 font-semibold text-base">Layer Data</h4>
+            <div className="flex flex-col gap-2 my-1">
+                <Card>
+                    <h5 className="font-semibold">Hunting Areas</h5>
+                    <div className="text-gray-500 italic mb-2">DOC Recreational Hunting Permit Areas</div>
+                    {huntingCacheLoading
+                        ? <span className="inline-block w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        : huntingCacheSize !== null
+                            ? <>
+                                <div className="text-sm mb-2">Downloaded · {friendlyBytes(huntingCacheSize)}</div>
+                                <Button onClick={handleDeleteHunting}>Delete</Button>
+                              </>
+                            : <Button onClick={handleDownloadHunting} disabled={huntingDownloading}>
+                                {huntingDownloading ? 'Downloading…' : huntingDownloadSize != null ? `Download (${friendlyBytes(huntingDownloadSize)})` : 'Download'}
+                              </Button>
+                    }
+                </Card>
             </div>
 
             <h4 className="mt-4 font-semibold text-base">Layers</h4>
