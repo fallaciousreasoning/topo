@@ -13,7 +13,10 @@
       "Bash(curl:*)",
       "Bash(npm show:*)",
       "Bash(npm install:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(chmod +x /home/jay/dev/topo/scripts/update_hunting.py)",
+      "Bash(grep -ri \"mawheranui\\\\|greymouth\" /home/jay/dev/topo/.cache/hunting/*.xml)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

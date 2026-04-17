@@ -1,6 +1,7 @@
 import { BaseLayerDefinition, OverlayDefinition } from "./config";
 import contours from "./contours";
 import hillshade from "./hillshade";
+import hunting from "./hunting";
 import huts from "./huts";
 import linzAerial from "./linzAerial";
 import linzVector from "./linzVector";
@@ -36,4 +37,5 @@ export const overlays: OverlayDefinition[] = [
     mountains,
     points,
     tracksLayer,
+    hunting,
 ]

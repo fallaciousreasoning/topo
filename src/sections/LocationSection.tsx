@@ -12,7 +12,8 @@ import { shareLocation } from "../utils/share";
 import Section from "./Section";
 import { usePromise } from "../hooks/usePromise";
 import { getMountains, Mountain, MountainPitch } from "../layers/mountains";
-import { getHutByName, Hut } from "../layers/huts";
+import { getHutByName, getHuts, Hut } from "../layers/huts";
+import { getHuntingBlockByName, HuntingBlock } from "../layers/hunting";
 import TopoText from "../components/TopoText";
 import { repeatString } from "../utils/array";
 import ImageGallery from "../components/ImageGallery";
@@ -48,6 +49,8 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
   const [place, setPlace] = useState<any | null>(null);
   const [existingPoint, setExistingPoint] = useState<Point | null>(null);
   const [hut, setHut] = useState<Hut | null>(null);
+  const [huntingBlock, setHuntingBlock] = useState<HuntingBlock | null>(null);
+  const [huntingHuts, setHuntingHuts] = useState<Hut[] | undefined>(undefined);
   const { result: mountains = {} } = usePromise(getMountains, []);
 
   // Fetch location info
@@ -87,6 +90,18 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
         }
       });
   }, [lat, lng, map, name]);
+
+  useEffect(() => {
+    if (!name) {
+      setHuntingBlock(null);
+      setHuntingHuts(undefined);
+      return;
+    }
+    getHuntingBlockByName(name).then(block => {
+      setHuntingBlock(block);
+      if (block) getHuts().then(setHuntingHuts);
+    });
+  }, [name]);
 
   const isHut = place?.type === "hut";
   const isMountain = place?.type === "peak" && place?.href;
@@ -277,6 +292,77 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
             <div className="mt-4">
               <a
                 href={hut.staticLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                View on DOC website
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
+      {huntingBlock && (
+        <div>
+          {huntingBlock.heroImage && (
+            <img
+              className="h-64 w-full object-cover object-center mb-4"
+              alt={huntingBlock.name}
+              src={huntingBlock.heroImage}
+            />
+          )}
+          {huntingBlock.introduction && (
+            <div className="mb-4">
+              <TopoText text={huntingBlock.introduction} huts={huntingHuts} />
+            </div>
+          )}
+          {huntingBlock.permitArea && (
+            <div className="mb-2">
+              <span className="font-bold">Permit area: </span>
+              <span>{huntingBlock.permitArea}</span>
+            </div>
+          )}
+          {huntingBlock.blockType && (
+            <div className="mb-2">
+              <span className="font-bold">Block type: </span>
+              <span>{huntingBlock.blockType}</span>
+            </div>
+          )}
+          {huntingBlock.ha && (
+            <div className="mb-2">
+              <span className="font-bold">Area: </span>
+              <span>{Math.round(huntingBlock.ha).toLocaleString()} ha</span>
+            </div>
+          )}
+          {huntingBlock.about && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-1">About</h5>
+              <TopoText text={huntingBlock.about} huts={huntingHuts} />
+            </div>
+          )}
+          {huntingBlock.access && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-1">Access</h5>
+              <TopoText text={huntingBlock.access} huts={huntingHuts} />
+            </div>
+          )}
+          {huntingBlock.dogs && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-1">Dogs</h5>
+              <TopoText text={huntingBlock.dogs} huts={huntingHuts} />
+            </div>
+          )}
+          {huntingBlock.noHuntingZones && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-1 text-red-600">No hunting zones</h5>
+              <TopoText text={huntingBlock.noHuntingZones} huts={huntingHuts} />
+            </div>
+          )}
+          {huntingBlock.docUrl && (
+            <div className="mt-4">
+              <a
+                href={huntingBlock.docUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
