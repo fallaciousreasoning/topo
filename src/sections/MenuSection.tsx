@@ -26,6 +26,7 @@ export default function MenuSection() {
         <MenuEntry text="Routes" page="routes" />
         <MenuEntry text="Tracks" page="tracks" />
         <MenuEntry text="Points" page="points" />
+        <MenuEntry text="Downloads" page="downloads" />
         <MenuEntry text="Settings" page="settings" />
       </ul>
     </Section>

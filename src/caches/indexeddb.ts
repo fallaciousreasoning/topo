@@ -2,12 +2,26 @@ import Dexie, { Table } from "dexie";
 import { Track } from "../tracks/track";
 import { Point } from "../tracks/point";
 
-class TileDb extends Dexie {
-  // @ts-expect-error
-  tracks: Table<Track, number>;
+export interface Download {
+  id?: number
+  /** Matches a Region.id for preconfigured regions; null for user-defined rectangular downloads. */
+  regionId: string | null
+  layerId: string
+  minZoom: number
+  maxZoom: number
+  /** Closed [lng, lat] ring representing the download bounds. */
+  polygon: [number, number][]
+  status: 'downloading' | 'complete' | 'error'
+  /** Overall progress 0–1, updated periodically during a download. */
+  progress: number
+  tilesDownloaded: number
+  error?: string
+}
 
-  // @ts-expect-error
-  points: Table<Point, number>;
+class TileDb extends Dexie {
+  tracks!: Table<Track, number>;
+  points!: Table<Point, number>;
+  downloads!: Table<Download, number>;
 
   constructor() {
     super("database");
@@ -28,12 +42,29 @@ class TileDb extends Dexie {
       tracks: "++id",
       points: "++id,*tags",
     });
+
+    this.version(7).stores({
+      downloads: "++id,regionId,layerId",
+    });
   }
 }
 
 const db = new TileDb();
 
 export default {
+  async updateDownload(download: Download) {
+    const id = await db.downloads.put(download);
+    return { ...download, id };
+  },
+  async deleteDownload(download: Download) {
+    await db.downloads.delete(download.id!);
+  },
+  async getDownloads() {
+    return db.downloads.toArray();
+  },
+  async getDownload(regionId: string, layerId: string) {
+    return db.downloads.where('regionId').equals(regionId).and(d => d.layerId === layerId).first();
+  },
   async updateTrack(track: Track) {
     const id = await db.tracks.put(track);
     return {

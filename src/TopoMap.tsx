@@ -31,6 +31,7 @@ import TracksSection from "./sections/TracksSection";
 import TrackSection from "./sections/TrackSection";
 import PointsSection from "./sections/PointsSection";
 import PointSection from "./sections/PointSection";
+import DownloadsSection from "./sections/DownloadsSection";
 import Mountains from "./layers/mountains";
 import SectionContainer from "./sections/SectionContainer";
 
@@ -132,6 +133,7 @@ export default function TopoMap() {
         <PointsSection />
         <PointSection />
         <LocationSection />
+        <DownloadsSection />
       </SectionContainer>
 
       <PositionSyncer />
