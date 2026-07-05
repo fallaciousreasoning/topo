@@ -12,6 +12,7 @@
     "lib": [
       "ESNext",
       "DOM",
+      "DOM.AsyncIterable",
       "WebWorker"
     ],
     "jsx": "react-jsx",

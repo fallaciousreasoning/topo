@@ -1,5 +1,7 @@
 import { Cache } from "./cache";
 
+const isSupported = () => typeof navigator !== 'undefined' && typeof navigator.storage?.getDirectory === 'function'
+
 function parseTileCoords(id: string): { z: string, x: string, y: string, ext: string } | null {
     const match = id.match(/\/(\d+)\/(\d+)\/(\d+)\.([a-z]+)(?:\?|$)/)
     if (!match) return null
@@ -27,6 +29,7 @@ const opfsCache: Cache = {
     name: 'opfs',
 
     async loadTile(layer, id) {
+        if (!isSupported()) return null
         const coords = parseTileCoords(id)
         if (!coords) return null
         try {
@@ -43,20 +46,26 @@ const opfsCache: Cache = {
     },
 
     async saveTile(layer, id, blob) {
+        if (!isSupported()) return
         const coords = parseTileCoords(id)
         if (!coords) return
-        const root = await navigator.storage.getDirectory()
-        const tilesDir = await root.getDirectoryHandle('tiles', { create: true })
-        const layerDir = await tilesDir.getDirectoryHandle(layer, { create: true })
-        const zDir = await layerDir.getDirectoryHandle(coords.z, { create: true })
-        const xDir = await zDir.getDirectoryHandle(coords.x, { create: true })
-        const fileHandle = await xDir.getFileHandle(`${coords.y}.${coords.ext}`, { create: true })
-        const writable = await fileHandle.createWritable()
-        await writable.write(blob)
-        await writable.close()
+        try {
+            const root = await navigator.storage.getDirectory()
+            const tilesDir = await root.getDirectoryHandle('tiles', { create: true })
+            const layerDir = await tilesDir.getDirectoryHandle(layer, { create: true })
+            const zDir = await layerDir.getDirectoryHandle(coords.z, { create: true })
+            const xDir = await zDir.getDirectoryHandle(coords.x, { create: true })
+            const fileHandle = await xDir.getFileHandle(`${coords.y}.${coords.ext}`, { create: true })
+            const writable = await fileHandle.createWritable()
+            await writable.write(blob)
+            await writable.close()
+        } catch {
+            // OPFS unsupported or write failed, skip caching
+        }
     },
 
     async clearLayer(layer) {
+        if (!isSupported()) return
         try {
             const root = await navigator.storage.getDirectory()
             const tilesDir = await root.getDirectoryHandle('tiles')
@@ -68,6 +77,7 @@ const opfsCache: Cache = {
 
     async getLayerSizes() {
         const result: { [layer: string]: number } = {}
+        if (!isSupported()) return result
         try {
             const root = await navigator.storage.getDirectory()
             const tilesDir = await root.getDirectoryHandle('tiles')
