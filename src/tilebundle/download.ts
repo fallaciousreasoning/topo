@@ -33,8 +33,8 @@ const WRITE_CONCURRENCY = 8
  * downloading, so peak memory usage stays bounded to a single tile rather than
  * the whole bundle. Tiles are stored with the given `tileExt` (e.g. 'png').
  *
- * `onProgress` receives a value in [0, 1], tracking bytes received against the
- * bundle's total size.
+ * `onProgress` receives a progress value in [0, 1] (tracking bytes received against the
+ * bundle's total size) alongside the running byte count itself.
  *
  * Pass `signal` to allow cancelling mid-download; a cancelled download throws an `AbortError`.
  *
@@ -52,7 +52,7 @@ export async function downloadBundle(
     url: string,
     layerId: string,
     tileExt: string,
-    onProgress: (progress: number) => void,
+    onProgress: (progress: number, bytesDownloaded: number) => void,
     signal?: AbortSignal,
     resumeOffset: number = 0,
     onCheckpoint?: (offset: number) => void,
@@ -121,7 +121,7 @@ export async function downloadBundle(
 
         tilesWritten++
         bytesReceived += recordBytes
-        if (totalBytes > 0) onProgress(Math.min(1, bytesReceived / totalBytes))
+        onProgress(totalBytes > 0 ? Math.min(1, bytesReceived / totalBytes) : 0, bytesReceived)
 
         if (inFlight.size >= WRITE_CONCURRENCY) {
             await Promise.race(inFlight)
@@ -129,6 +129,6 @@ export async function downloadBundle(
     }
 
     await Promise.all(inFlight)
-    onProgress(1)
+    onProgress(1, bytesReceived)
     return tilesWritten
 }

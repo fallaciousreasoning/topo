@@ -41,6 +41,7 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
             status: 'downloading',
             progress: 0,
             tilesDownloaded: 0,
+            bytesDownloaded: resumeOffset,
             resumeOffset,
             error: undefined,
         }
@@ -61,6 +62,9 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
         ? (record.maxZoom <= SD_MAX_ZOOM ? 'SD' : 'HD')
         : null
     const bundleSize = offerQuality ? ISLAND_BUNDLE_SIZES[region.id] : undefined
+    const totalBytes = bundleSize && record?.maxZoom != null
+        ? (record.maxZoom <= SD_MAX_ZOOM ? bundleSize.sd : bundleSize.hd)
+        : undefined
 
     const { result: sizeBytes } = usePromise(async () => {
         if (!isComplete) return undefined
@@ -74,15 +78,16 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
             <span className="flex-1 text-sm">{region.name}</span>
 
             {isDownloading ? (
-                <div className="flex items-center gap-2 w-32 h-8">
+                <div className={`flex items-center gap-2 h-8 ${totalBytes != null ? 'w-60' : 'w-44'}`}>
                     <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-purple-600 transition-all duration-300"
                             style={{ width: `${Math.round(displayProgress * 100)}%` }}
                         />
                     </div>
-                    <span className="text-xs text-gray-500 w-8 text-right">
-                        {Math.round(displayProgress * 100)}%
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {Math.round(displayProgress * 100)}% · {friendlyBytes(record?.bytesDownloaded ?? 0, 1)}
+                        {totalBytes != null ? ` / ${friendlyBytes(totalBytes, 1)}` : ''}
                     </span>
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"
@@ -180,15 +185,15 @@ function CustomAreaRow({ download }: { download: Download }) {
             </span>
 
             {isDownloading ? (
-                <div className="flex items-center gap-2 w-32 h-8">
+                <div className="flex items-center gap-2 w-44 h-8">
                     <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-purple-600 transition-all duration-300"
                             style={{ width: `${Math.round(download.progress * 100)}%` }}
                         />
                     </div>
-                    <span className="text-xs text-gray-500 w-8 text-right">
-                        {Math.round(download.progress * 100)}%
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {Math.round(download.progress * 100)}% · {friendlyBytes(download.bytesDownloaded ?? 0, 1)}
                     </span>
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"

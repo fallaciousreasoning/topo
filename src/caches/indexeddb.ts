@@ -17,6 +17,8 @@ export interface Download {
   /** Overall progress 0–1, updated periodically during a download. */
   progress: number
   tilesDownloaded: number
+  /** Bytes downloaded so far in the current/most recent run, for a live byte counter. */
+  bytesDownloaded?: number
   /** Bundle downloads only: byte offset already fetched, for resuming via a Range request. */
   resumeOffset?: number
   error?: string

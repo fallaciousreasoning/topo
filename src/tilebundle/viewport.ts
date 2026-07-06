@@ -125,7 +125,7 @@ export async function downloadViewportTiles(
     bbox: [number, number, number, number],
     minZoom: number,
     maxZoom: number,
-    onProgress: (progress: number) => void,
+    onProgress: (progress: number, bytesDownloaded: number) => void,
     signal?: AbortSignal,
 ): Promise<number> {
     const { urlTemplate, ext } = getRawTileSource(baseLayerId)
@@ -142,6 +142,7 @@ export async function downloadViewportTiles(
 
     let tilesWritten = 0
     let completed = 0
+    let bytesDownloaded = 0
 
     await runPool(jobs, async ({ z, x, y }) => {
         if (signal?.aborted) return
@@ -156,6 +157,7 @@ export async function downloadViewportTiles(
                 const response = await fetch(url, { signal })
                 if (response.ok) {
                     const blob = await response.blob()
+                    bytesDownloaded += blob.size
                     await opfsCache.saveTile(baseLayerId, id, blob)
                     tilesWritten++
                 }
@@ -165,7 +167,7 @@ export async function downloadViewportTiles(
             // otherwise: network error fetching this tile; skip it
         }
         completed++
-        onProgress(completed / jobs.length)
+        onProgress(completed / jobs.length, bytesDownloaded)
     })
 
     if (signal?.aborted) throw new DOMException('Download cancelled', 'AbortError')

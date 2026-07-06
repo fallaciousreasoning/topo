@@ -75,12 +75,14 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
     await db.updateDownload(current)
 
     let lastWriteTime = 0
-    const throttledProgress = (p: number) => {
+    let lastBytes = 0
+    const throttledProgress = (p: number, bytes: number) => {
         onProgress?.(p)
+        lastBytes = bytes
         const now = Date.now()
         if (now - lastWriteTime > PROGRESS_WRITE_INTERVAL_MS) {
             lastWriteTime = now
-            current = { ...current, progress: p }
+            current = { ...current, progress: p, bytesDownloaded: bytes }
             db.updateDownload(current)
         }
     }
@@ -113,7 +115,7 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
                 controller.signal,
             )
         }
-        current = { ...current, status: 'complete', progress: 1, tilesDownloaded: tilesWritten, resumeOffset: 0 }
+        current = { ...current, status: 'complete', progress: 1, tilesDownloaded: tilesWritten, bytesDownloaded: lastBytes, resumeOffset: 0 }
         await db.updateDownload(current)
     } catch (err) {
         if (controller.signal.aborted) {
