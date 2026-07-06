@@ -52,8 +52,9 @@ export async function removeDownload(download: Download): Promise<void> {
  *
  * Per-tile viewport downloads skip tiles already present in the cache, so an interrupted
  * download (e.g. by a page reload) picks back up close to where it left off rather than
- * re-fetching everything. Region bundle downloads aren't fetched tile-by-tile, so resuming
- * one re-fetches the whole bundle — slower, but it won't leave the record stuck forever.
+ * re-fetching everything. Region bundle downloads resume via an HTTP Range request from the
+ * last checkpointed byte offset (`download.resumeOffset`), so an interrupted multi-gigabyte
+ * download doesn't have to restart from byte 0.
  *
  * If cancelled via `cancelDownload`, any tiles already written for it are deleted and the
  * download record itself is removed, rather than being left in an error state.
@@ -64,7 +65,10 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
     const controller = new AbortController()
     activeDownloads.set(download.id, controller)
 
-    await db.updateDownload({ ...download, status: 'downloading', error: undefined })
+    // All incremental DB writes below build on this, rather than the original `download` snapshot,
+    // so they don't stomp on each other's fields (e.g. a progress write undoing a checkpoint write).
+    let current: Download = { ...download, status: 'downloading', error: undefined }
+    await db.updateDownload(current)
 
     let lastWriteTime = 0
     const throttledProgress = (p: number) => {
@@ -72,8 +76,13 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
         const now = Date.now()
         if (now - lastWriteTime > PROGRESS_WRITE_INTERVAL_MS) {
             lastWriteTime = now
-            db.updateDownload({ ...download, status: 'downloading', progress: p })
+            current = { ...current, progress: p }
+            db.updateDownload(current)
         }
+    }
+    const persistCheckpoint = (offset: number) => {
+        current = { ...current, resumeOffset: offset }
+        db.updateDownload(current)
     }
 
     try {
@@ -87,6 +96,8 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
                 'png',
                 throttledProgress,
                 controller.signal,
+                download.resumeOffset ?? 0,
+                persistCheckpoint,
             )
         } else {
             tilesWritten = await downloadViewportTiles(
@@ -98,12 +109,14 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
                 controller.signal,
             )
         }
-        await db.updateDownload({ ...download, status: 'complete', progress: 1, tilesDownloaded: tilesWritten })
+        current = { ...current, status: 'complete', progress: 1, tilesDownloaded: tilesWritten, resumeOffset: 0 }
+        await db.updateDownload(current)
     } catch (err) {
         if (controller.signal.aborted) {
             await removeDownload(download)
         } else {
-            await db.updateDownload({ ...download, status: 'error', error: String(err) })
+            current = { ...current, status: 'error', error: String(err) }
+            await db.updateDownload(current)
         }
     } finally {
         activeDownloads.delete(download.id)

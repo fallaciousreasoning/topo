@@ -28,6 +28,9 @@ interface RegionRowProps {
 
 function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
     const handleDownload = useCallback(async (maxZoom: number) => {
+        // Only resume from a checkpoint if retrying the same quality — HD and SD are different
+        // files, so a byte offset from one is meaningless against the other.
+        const resumeOffset = record?.maxZoom === maxZoom ? (record?.resumeOffset ?? 0) : 0
         const base: Download = {
             ...(record ?? {}),
             regionId: region.id,
@@ -38,6 +41,7 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
             status: 'downloading',
             progress: 0,
             tilesDownloaded: 0,
+            resumeOffset,
             error: undefined,
         }
         const saved = await db.updateDownload(base)

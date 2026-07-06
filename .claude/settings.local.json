@@ -18,7 +18,12 @@
       "Bash(grep -ri \"mawheranui\\\\|greymouth\" /home/jay/dev/topo/.cache/hunting/*.xml)",
       "Bash(grep:*)",
       "Bash(npx tsx:*)",
-      "Skill(run)"
+      "Skill(run)",
+      "Bash(mkdir -p /tmp/bundle-test2/tiles/0/0 /tmp/bundle-test2/tiles/1/0 /tmp/bundle-test2/tiles/1/1 /tmp/bundle-test2/tiles/2/0)",
+      "Bash(printf 'zoom0tile')",
+      "Bash(printf 'zoom1tileA')",
+      "Bash(printf 'zoom1tileB-longer-data-here')",
+      "Bash(printf 'zoom2tile-final-one-here-too')"
     ],
     "deny": [],
     "ask": []

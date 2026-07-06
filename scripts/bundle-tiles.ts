@@ -6,8 +6,10 @@
  *   tsx scripts/bundle-tiles.ts <tileDir> <outputFile> [--max-zoom <z>] [--min-zoom <z>] [--region <id>]
  *
  * Tile directory must follow the standard z/x/y.<ext> layout.
- * Tiles are written highest-zoom-first so the top of the pyramid sits at the
- * end of the file, enabling sequential in-place extraction with truncation.
+ * Tiles are written lowest-zoom-first, so a client streaming the bundle can
+ * extract usable (if coarse) tiles well before the whole file has downloaded,
+ * and an interrupted download leaves a usable map rather than scattered
+ * high-zoom fragments with no overview.
  *
  * --region filters tiles to those intersecting the named region's bbox
  * (see src/tilebundle/regions.ts), e.g. --region south-island.
@@ -100,18 +102,18 @@ async function main() {
 
     if (!tileDir || !outputFile) usage();
 
-    // Discover zoom levels present in the directory, highest first.
+    // Discover zoom levels present in the directory, lowest first (see format note above).
     const zoomLevels = (await readdir(tileDir))
         .map(d => parseInt(d, 10))
         .filter(z => !isNaN(z) && z >= minZoom && z <= maxZoom)
-        .sort((a, b) => b - a);
+        .sort((a, b) => a - b);
 
     if (zoomLevels.length === 0) {
         console.error(`No zoom levels found in ${tileDir} within z${minZoom}–z${maxZoom}`);
         process.exit(1);
     }
 
-    console.log(`Zoom levels to bundle: ${[...zoomLevels].reverse().join(', ')}`);
+    console.log(`Zoom levels to bundle: ${zoomLevels.join(', ')}`);
     if (region) console.log(`Region filter: ${region}`);
 
     const out = createWriteStream(outputFile);
