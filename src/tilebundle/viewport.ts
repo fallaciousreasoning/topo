@@ -51,6 +51,14 @@ export function bboxContains(
     return aW <= bW && aE >= bE && aS <= bS && aN >= bN
 }
 
+/** True if two bboxes overlap at all (not just one fully containing the other). */
+export function bboxesOverlap(
+    [aW, aS, aE, aN]: [number, number, number, number],
+    [bW, bS, bE, bN]: [number, number, number, number],
+) {
+    return aW < bE && aE > bW && aS < bN && aN > bS
+}
+
 function tileRange([west, south, east, north]: [number, number, number, number], z: number) {
     return {
         xMin: tileX(west, z),
@@ -108,6 +116,8 @@ async function runPool<T>(items: T[], worker: (item: T) => Promise<void>) {
  * range for the source) are skipped rather than aborting the whole download. Tiles already present
  * in the cache are skipped too, so re-running this over the same area resumes rather than redoing it.
  *
+ * Pass `signal` to allow cancelling mid-download; a cancelled download throws an `AbortError`.
+ *
  * Returns the number of tiles successfully written.
  */
 export async function downloadViewportTiles(
@@ -116,6 +126,7 @@ export async function downloadViewportTiles(
     minZoom: number,
     maxZoom: number,
     onProgress: (progress: number) => void,
+    signal?: AbortSignal,
 ): Promise<number> {
     const { urlTemplate, ext } = getRawTileSource(baseLayerId)
 
@@ -133,6 +144,8 @@ export async function downloadViewportTiles(
     let completed = 0
 
     await runPool(jobs, async ({ z, x, y }) => {
+        if (signal?.aborted) return
+
         const id = `/${z}/${x}/${y}.${ext}`
         try {
             // Already cached from a previous (possibly interrupted) run — skip re-fetching it.
@@ -140,19 +153,22 @@ export async function downloadViewportTiles(
                 tilesWritten++
             } else {
                 const url = urlTemplate.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y))
-                const response = await fetch(url)
+                const response = await fetch(url, { signal })
                 if (response.ok) {
                     const blob = await response.blob()
                     await opfsCache.saveTile(baseLayerId, id, blob)
                     tilesWritten++
                 }
             }
-        } catch {
-            // network error fetching this tile; skip it
+        } catch (err) {
+            if (signal?.aborted) throw err
+            // otherwise: network error fetching this tile; skip it
         }
         completed++
         onProgress(completed / jobs.length)
     })
+
+    if (signal?.aborted) throw new DOMException('Download cancelled', 'AbortError')
 
     return tilesWritten
 }

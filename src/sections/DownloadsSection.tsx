@@ -6,28 +6,34 @@ import Button from '../components/Button'
 import db, { Download } from '../caches/indexeddb'
 import { cacherPromise } from '../caches/cachingProtocol'
 import { NZ_REGIONS, Region } from '../tilebundle/regions'
+import { ISLAND_BUNDLE_SIZES } from '../tilebundle/download'
 import { polygonBbox, bboxContains } from '../tilebundle/viewport'
-import { runDownload } from '../tilebundle/resume'
+import { runDownload, cancelDownload, removeDownload } from '../tilebundle/resume'
 import { baseLayers } from '../layers/layerDefinition'
 import { friendlyBytes } from '../utils/bytes'
 import { usePromise } from '../hooks/usePromise'
 
 // ─── Per-region row ───────────────────────────────────────────────────────────
 
+const HD_MAX_ZOOM = 16
+const SD_MAX_ZOOM = 15
+
 interface RegionRowProps {
     region: Region
     layerId: string
     record: Download | undefined
+    /** Offer a choice between the full-detail HD bundle and the smaller SD (z15) bundle. */
+    offerQuality?: boolean
 }
 
-function RegionRow({ region, layerId, record }: RegionRowProps) {
-    const handleDownload = useCallback(async () => {
+function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
+    const handleDownload = useCallback(async (maxZoom: number) => {
         const base: Download = {
             ...(record ?? {}),
             regionId: region.id,
             layerId,
             minZoom: region.minZoom,
-            maxZoom: region.maxZoom,
+            maxZoom,
             polygon: region.polygon,
             status: 'downloading',
             progress: 0,
@@ -40,16 +46,17 @@ function RegionRow({ region, layerId, record }: RegionRowProps) {
 
     const handleDelete = useCallback(async () => {
         if (!record) return
-        await db.deleteDownload(record)
-        const [west, south, east, north] = polygonBbox(record.polygon)
-        const cacher = await cacherPromise.then(r => r.default)
-        await cacher.deleteTilesInBbox(record.layerId, west, south, east, north)
+        await removeDownload(record)
     }, [record])
 
     const isDownloading = record?.status === 'downloading'
     const isComplete = record?.status === 'complete'
     const isError = record?.status === 'error'
     const displayProgress = record?.progress ?? 0
+    const qualityLabel = offerQuality && record?.maxZoom != null
+        ? (record.maxZoom <= SD_MAX_ZOOM ? 'SD' : 'HD')
+        : null
+    const bundleSize = offerQuality ? ISLAND_BUNDLE_SIZES[region.id] : undefined
 
     const { result: sizeBytes } = usePromise(async () => {
         if (!isComplete) return undefined
@@ -73,12 +80,24 @@ function RegionRow({ region, layerId, record }: RegionRowProps) {
                     <span className="text-xs text-gray-500 w-8 text-right">
                         {Math.round(displayProgress * 100)}%
                     </span>
+                    <button
+                        className="text-xs text-gray-400 hover:text-red-500 transition"
+                        onClick={() => cancelDownload(record!.id!)}
+                        title="Cancel download"
+                    >
+                        ✕
+                    </button>
                 </div>
             ) : isComplete ? (
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-green-600 font-medium">
-                        Downloaded{sizeBytes != null ? ` · ${friendlyBytes(sizeBytes)}` : ''}
+                        Downloaded{qualityLabel ? ` (${qualityLabel})` : ''}{sizeBytes != null ? ` · ${friendlyBytes(sizeBytes)}` : ''}
                     </span>
+                    {qualityLabel === 'SD' && (
+                        <Button onClick={() => handleDownload(HD_MAX_ZOOM)}>
+                            HD{bundleSize ? ` (${friendlyBytes(bundleSize.hd)})` : ''}
+                        </Button>
+                    )}
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"
                         onClick={handleDelete}
@@ -87,10 +106,20 @@ function RegionRow({ region, layerId, record }: RegionRowProps) {
                         ✕
                     </button>
                 </div>
+            ) : offerQuality ? (
+                <div className="flex items-center gap-1">
+                    {isError && <span className="text-xs text-red-500" title={record?.error}>⚠</span>}
+                    <Button onClick={() => handleDownload(HD_MAX_ZOOM)}>
+                        HD{bundleSize ? ` (${friendlyBytes(bundleSize.hd)})` : ''}
+                    </Button>
+                    <Button onClick={() => handleDownload(SD_MAX_ZOOM)}>
+                        SD{bundleSize ? ` (${friendlyBytes(bundleSize.sd)})` : ''}
+                    </Button>
+                </div>
             ) : isError ? (
-                <Button onClick={handleDownload} title={record?.error}>Retry</Button>
+                <Button onClick={() => handleDownload(region.maxZoom)} title={record?.error}>Retry</Button>
             ) : (
-                <Button onClick={handleDownload}>Download</Button>
+                <Button onClick={() => handleDownload(region.maxZoom)}>Download</Button>
             )}
         </div>
     )
@@ -107,10 +136,7 @@ function CustomAreaRow({ download }: { download: Download }) {
     }, [download])
 
     const handleDelete = useCallback(async () => {
-        await db.deleteDownload(download)
-        const [west, south, east, north] = polygonBbox(download.polygon)
-        const cacher = await cacherPromise.then(r => r.default)
-        await cacher.deleteTilesInBbox(download.layerId, west, south, east, north)
+        await removeDownload(download)
     }, [download])
 
     const isDownloading = download.status === 'downloading'
@@ -142,6 +168,13 @@ function CustomAreaRow({ download }: { download: Download }) {
                     <span className="text-xs text-gray-500 w-8 text-right">
                         {Math.round(download.progress * 100)}%
                     </span>
+                    <button
+                        className="text-xs text-gray-400 hover:text-red-500 transition"
+                        onClick={() => cancelDownload(download.id!)}
+                        title="Cancel download"
+                    >
+                        ✕
+                    </button>
                 </div>
             ) : isComplete ? (
                 <div className="flex items-center gap-2">
@@ -211,6 +244,7 @@ export default function DownloadsSection() {
                         region={r}
                         layerId="topo-raster"
                         record={topoRecord(r)}
+                        offerQuality
                     />
                 ))}
             </Card>

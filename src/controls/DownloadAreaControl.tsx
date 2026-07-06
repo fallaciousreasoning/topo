@@ -7,7 +7,7 @@ import { baseLayers } from '../layers/layerDefinition'
 import linzVector from '../layers/linzVector'
 import db, { Download } from '../caches/indexeddb'
 import { estimateTileCount, estimateDownloadBytes, getMaxDownloadZoom, polygonBbox, bboxContains } from '../tilebundle/viewport'
-import { runDownload } from '../tilebundle/resume'
+import { runDownload, cancelDownload } from '../tilebundle/resume'
 import { friendlyBytes } from '../utils/bytes'
 import ProgressCircle from '../components/ProgressCircle'
 
@@ -18,8 +18,9 @@ export default function DownloadAreaControl() {
     const routeParams = useParams()
     const [zoom, setZoom] = React.useState(map.getZoom())
     const [bounds, setBounds] = React.useState(map.getBounds())
-    const [downloading, setDownloading] = React.useState(false)
+    const [downloadingId, setDownloadingId] = React.useState<number | null>(null)
     const [progress, setProgress] = React.useState(0)
+    const downloading = downloadingId != null
     const downloads = useLiveQuery(() => db.getDownloads(), []) ?? []
 
     React.useEffect(() => {
@@ -53,7 +54,10 @@ export default function DownloadAreaControl() {
     )
 
     const handleClick = async () => {
-        if (downloading) return
+        if (downloadingId != null) {
+            cancelDownload(downloadingId)
+            return
+        }
 
         if (alreadyDownloaded) {
             window.alert('This area is already downloaded')
@@ -72,7 +76,6 @@ export default function DownloadAreaControl() {
         )
         if (name === null) return
 
-        setDownloading(true)
         setProgress(0)
 
         const base: Download = {
@@ -87,20 +90,20 @@ export default function DownloadAreaControl() {
             tilesDownloaded: 0,
         }
         const saved = await db.updateDownload(base)
+        setDownloadingId(saved.id!)
 
         try {
             await runDownload(saved, setProgress)
         } finally {
-            setDownloading(false)
+            setDownloadingId(null)
         }
     }
 
     return <Control position='top-left'>
         <button
             type='button'
-            title={alreadyDownloaded ? 'This area is already downloaded' : 'Download this area for offline use'}
+            title={downloading ? 'Cancel download' : alreadyDownloaded ? 'This area is already downloaded' : 'Download this area for offline use'}
             onClick={handleClick}
-            disabled={downloading}
             style={{
                 display: 'flex',
                 alignItems: 'center',
