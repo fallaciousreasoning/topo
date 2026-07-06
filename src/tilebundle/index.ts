@@ -108,8 +108,8 @@ export async function* parseTileStream(
             const recordSize = HEADER_SIZE + header.len;
             if (buffer.length < recordSize) break;
 
-            yield { z: header.z, x: header.x, y: header.y, data: buffer.slice(HEADER_SIZE, recordSize) };
-            buffer = buffer.slice(recordSize);
+            yield { z: header.z, x: header.x, y: header.y, data: buffer.subarray(HEADER_SIZE, recordSize) };
+            buffer = buffer.subarray(recordSize);
         }
 
         if (done) {
