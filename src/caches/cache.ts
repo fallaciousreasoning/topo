@@ -1,6 +1,6 @@
 export interface Cache {
     name: string,
-    saveTile: (layer: string, id: string, blob: Blob) => Promise<void>
+    saveTile: (layer: string, id: string, data: Blob | Uint8Array) => Promise<void>
     loadTile: (layer: string, id: string) => Promise<Blob | null>
     clearLayer: (layer: string) => Promise<void>
     getLayerSizes: () => Promise<{ [layer: string]: number }>

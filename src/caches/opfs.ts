@@ -9,6 +9,24 @@ function parseTileCoords(id: string): { z: string, x: string, y: string, ext: st
     return { z: match[1], x: match[2], y: match[3], ext: match[4] }
 }
 
+// Most tile reads/writes come in runs sharing the same layer/z/x (e.g. extracting a bundle, or
+// downloading a viewport column), so caching the last-resolved x-directory handle turns a
+// 5-hop OPFS directory walk into a cache hit for every tile after the first in that run.
+let cachedXDir: { layer: string, z: string, x: string, handle: FileSystemDirectoryHandle } | null = null
+
+async function getXDir(layer: string, z: string, x: string, create: boolean): Promise<FileSystemDirectoryHandle> {
+    if (cachedXDir && cachedXDir.layer === layer && cachedXDir.z === z && cachedXDir.x === x) {
+        return cachedXDir.handle
+    }
+    const root = await navigator.storage.getDirectory()
+    const tilesDir = await root.getDirectoryHandle('tiles', { create })
+    const layerDir = await tilesDir.getDirectoryHandle(layer, { create })
+    const zDir = await layerDir.getDirectoryHandle(z, { create })
+    const xDir = await zDir.getDirectoryHandle(x, { create })
+    cachedXDir = { layer, z, x, handle: xDir }
+    return xDir
+}
+
 async function sumDir(dir: FileSystemDirectoryHandle): Promise<number> {
     let size = 0
     for await (const [name, entry] of dir.entries()) {
@@ -34,11 +52,7 @@ const opfsCache: Cache = {
         const coords = parseTileCoords(id)
         if (!coords) return null
         try {
-            const root = await navigator.storage.getDirectory()
-            const tilesDir = await root.getDirectoryHandle('tiles')
-            const layerDir = await tilesDir.getDirectoryHandle(layer)
-            const zDir = await layerDir.getDirectoryHandle(coords.z)
-            const xDir = await zDir.getDirectoryHandle(coords.x)
+            const xDir = await getXDir(layer, coords.z, coords.x, false)
             const fileHandle = await xDir.getFileHandle(`${coords.y}.${coords.ext}`)
             return await fileHandle.getFile()
         } catch {
@@ -46,19 +60,15 @@ const opfsCache: Cache = {
         }
     },
 
-    async saveTile(layer, id, blob) {
+    async saveTile(layer, id, data) {
         if (!isSupported()) return
         const coords = parseTileCoords(id)
         if (!coords) return
         try {
-            const root = await navigator.storage.getDirectory()
-            const tilesDir = await root.getDirectoryHandle('tiles', { create: true })
-            const layerDir = await tilesDir.getDirectoryHandle(layer, { create: true })
-            const zDir = await layerDir.getDirectoryHandle(coords.z, { create: true })
-            const xDir = await zDir.getDirectoryHandle(coords.x, { create: true })
+            const xDir = await getXDir(layer, coords.z, coords.x, true)
             const fileHandle = await xDir.getFileHandle(`${coords.y}.${coords.ext}`, { create: true })
             const writable = await fileHandle.createWritable()
-            await writable.write(blob)
+            await writable.write(data)
             await writable.close()
         } catch {
             // OPFS unsupported or write failed, skip caching
@@ -67,6 +77,7 @@ const opfsCache: Cache = {
 
     async clearLayer(layer) {
         if (!isSupported()) return
+        if (cachedXDir?.layer === layer) cachedXDir = null
         try {
             const root = await navigator.storage.getDirectory()
             const tilesDir = await root.getDirectoryHandle('tiles')

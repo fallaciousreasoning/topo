@@ -24,6 +24,9 @@ export const ISLAND_BUNDLE_SIZES: Record<string, { hd: number, sd: number }> = {
 /** How many tiles to write between persisting a resumable checkpoint. */
 const CHECKPOINT_TILE_INTERVAL = 100
 
+/** How many OPFS writes to have in flight at once, so disk I/O doesn't stall the network read. */
+const WRITE_CONCURRENCY = 8
+
 /**
  * Fetch a pre-built tile bundle from `url` and extract each tile into OPFS under
  * `layerId` as its bytes arrive — tiles are written while the file is still
@@ -85,21 +88,47 @@ export async function downloadBundle(
     if (!reader) throw new Error('Response body is not readable')
 
     let tilesWritten = 0
-    let tilesSinceCheckpoint = 0
+
+    // Writes are fired off without waiting for each one individually (bounded to
+    // WRITE_CONCURRENCY at a time), so OPFS write latency doesn't stall the network read —
+    // otherwise the reader falling behind can throttle how fast the browser drains the
+    // connection. `saveTile` never rejects (it swallows write failures internally), so there's
+    // no unhandled-rejection risk in not awaiting these individually.
+    const inFlight = new Set<Promise<void>>()
+
+    // Checkpoints are based on confirmed (completed) writes rather than tiles merely parsed off
+    // the network, so a resume never assumes a tile is on disk before it actually is. Because
+    // writes can complete slightly out of order under concurrency, a checkpoint can very rarely
+    // be up to WRITE_CONCURRENCY tiles ahead of a genuinely contiguous prefix — an acceptable,
+    // bounded trade-off consistent with the best-effort tile caching elsewhere in this file.
+    let confirmedBytes = bytesReceived
+    let confirmedSinceCheckpoint = 0
 
     for await (const { z, x, y, data } of parseTileStream(reader)) {
         if (signal?.aborted) throw new DOMException('Download cancelled', 'AbortError')
-        await opfsCache.saveTile(layerId, `/${z}/${x}/${y}.${tileExt}`, new Blob([data]))
+
+        const recordBytes = HEADER_SIZE + data.length
+        let tracked: Promise<void>
+        tracked = opfsCache.saveTile(layerId, `/${z}/${x}/${y}.${tileExt}`, data).then(() => {
+            inFlight.delete(tracked)
+            confirmedBytes += recordBytes
+            if (++confirmedSinceCheckpoint >= CHECKPOINT_TILE_INTERVAL) {
+                confirmedSinceCheckpoint = 0
+                onCheckpoint?.(confirmedBytes)
+            }
+        })
+        inFlight.add(tracked)
+
         tilesWritten++
-        bytesReceived += HEADER_SIZE + data.length
+        bytesReceived += recordBytes
         if (totalBytes > 0) onProgress(Math.min(1, bytesReceived / totalBytes))
 
-        if (++tilesSinceCheckpoint >= CHECKPOINT_TILE_INTERVAL) {
-            tilesSinceCheckpoint = 0
-            onCheckpoint?.(bytesReceived)
+        if (inFlight.size >= WRITE_CONCURRENCY) {
+            await Promise.race(inFlight)
         }
     }
 
+    await Promise.all(inFlight)
     onProgress(1)
     return tilesWritten
 }
