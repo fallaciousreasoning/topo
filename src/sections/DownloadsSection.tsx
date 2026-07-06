@@ -82,7 +82,7 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
                     </span>
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"
-                        onClick={() => cancelDownload(record!.id!)}
+                        onClick={() => cancelDownload(record!)}
                         title="Cancel download"
                     >
                         ✕
@@ -115,9 +115,27 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
                     <Button onClick={() => handleDownload(SD_MAX_ZOOM)}>
                         SD{bundleSize ? ` (${friendlyBytes(bundleSize.sd)})` : ''}
                     </Button>
+                    {isError && (
+                        <button
+                            className="text-xs text-gray-400 hover:text-red-500 transition"
+                            onClick={handleDelete}
+                            title="Remove download record"
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
             ) : isError ? (
-                <Button onClick={() => handleDownload(region.maxZoom)} title={record?.error}>Retry</Button>
+                <div className="flex items-center gap-1">
+                    <Button onClick={() => handleDownload(region.maxZoom)} title={record?.error}>Retry</Button>
+                    <button
+                        className="text-xs text-gray-400 hover:text-red-500 transition"
+                        onClick={handleDelete}
+                        title="Remove download record"
+                    >
+                        ✕
+                    </button>
+                </div>
             ) : (
                 <Button onClick={() => handleDownload(region.maxZoom)}>Download</Button>
             )}
@@ -170,7 +188,7 @@ function CustomAreaRow({ download }: { download: Download }) {
                     </span>
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"
-                        onClick={() => cancelDownload(download.id!)}
+                        onClick={() => cancelDownload(download)}
                         title="Cancel download"
                     >
                         ✕
@@ -190,7 +208,16 @@ function CustomAreaRow({ download }: { download: Download }) {
                     </button>
                 </div>
             ) : isError ? (
-                <Button onClick={handleRetry} title={download.error}>Retry</Button>
+                <div className="flex items-center gap-1">
+                    <Button onClick={handleRetry} title={download.error}>Retry</Button>
+                    <button
+                        className="text-xs text-gray-400 hover:text-red-500 transition"
+                        onClick={handleDelete}
+                        title="Remove download record"
+                    >
+                        ✕
+                    </button>
+                </div>
             ) : null}
         </div>
     )

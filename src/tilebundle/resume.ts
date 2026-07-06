@@ -8,9 +8,20 @@ const PROGRESS_WRITE_INTERVAL_MS = 200
 
 const activeDownloads = new Map<number, AbortController>()
 
-/** Cancel an in-progress download. Any tiles it already wrote are removed, and its record is deleted. */
-export function cancelDownload(downloadId: number) {
-    activeDownloads.get(downloadId)?.abort()
+/**
+ * Cancel a download, however it's currently running. If a runner is actively fetching it, this
+ * aborts it — `runDownload`'s catch block then removes the record and any tiles it wrote. If the
+ * record is just sitting at 'downloading' with no active runner (e.g. orphaned by a crash before
+ * the auto-resumer picked it back up), there's nothing to abort, so it's removed directly instead —
+ * otherwise cancelling such a download would silently do nothing.
+ */
+export async function cancelDownload(download: Download): Promise<void> {
+    const controller = download.id != null ? activeDownloads.get(download.id) : undefined
+    if (controller) {
+        controller.abort()
+    } else {
+        await removeDownload(download)
+    }
 }
 
 /**

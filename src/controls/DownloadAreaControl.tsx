@@ -18,9 +18,9 @@ export default function DownloadAreaControl() {
     const routeParams = useParams()
     const [zoom, setZoom] = React.useState(map.getZoom())
     const [bounds, setBounds] = React.useState(map.getBounds())
-    const [downloadingId, setDownloadingId] = React.useState<number | null>(null)
+    const [downloadingRecord, setDownloadingRecord] = React.useState<Download | null>(null)
     const [progress, setProgress] = React.useState(0)
-    const downloading = downloadingId != null
+    const downloading = downloadingRecord != null
     const downloads = useLiveQuery(() => db.getDownloads(), []) ?? []
 
     React.useEffect(() => {
@@ -54,8 +54,8 @@ export default function DownloadAreaControl() {
     )
 
     const handleClick = async () => {
-        if (downloadingId != null) {
-            cancelDownload(downloadingId)
+        if (downloadingRecord != null) {
+            cancelDownload(downloadingRecord)
             return
         }
 
@@ -90,12 +90,12 @@ export default function DownloadAreaControl() {
             tilesDownloaded: 0,
         }
         const saved = await db.updateDownload(base)
-        setDownloadingId(saved.id!)
+        setDownloadingRecord(saved)
 
         try {
             await runDownload(saved, setProgress)
         } finally {
-            setDownloadingId(null)
+            setDownloadingRecord(null)
         }
     }
 
