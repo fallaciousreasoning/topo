@@ -6,4 +6,6 @@ export interface Cache {
     getLayerSizes: () => Promise<{ [layer: string]: number }>
     /** Delete only the tiles within the given geographic bounding box. Returns the number deleted. */
     deleteTilesInBbox: (layer: string, west: number, south: number, east: number, north: number) => Promise<number>
+    /** Total bytes on disk for tiles within the given geographic bounding box. */
+    getSizeInBbox: (layer: string, west: number, south: number, east: number, north: number) => Promise<number>
 }

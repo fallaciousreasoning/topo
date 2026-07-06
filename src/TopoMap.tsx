@@ -25,6 +25,8 @@ import MapCursor from "./components/MapCursor";
 import StatusBar from "./controls/StatusBar";
 import LocationSection from "./sections/LocationSection";
 import LongPressLookup from "./controls/LongPressLookup";
+import DownloadAreaControl from "./controls/DownloadAreaControl";
+import ResumeDownloads from "./controls/ResumeDownloads";
 import { BaseLayerDefinition } from "./layers/config";
 import Drawing from "./draw/Drawing";
 import TracksSection from "./sections/TracksSection";
@@ -141,6 +143,8 @@ export default function TopoMap() {
       <MenuControl />
       <SearchControl />
       <MeasureControl />
+      <DownloadAreaControl />
+      <ResumeDownloads />
       <StatusBar />
 
       <MapCursor />

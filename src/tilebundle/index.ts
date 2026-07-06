@@ -24,6 +24,17 @@ export interface TileCoord {
     y: number;
 }
 
+/** Web Mercator: longitude → tile x at zoom z */
+export function tileX(lng: number, z: number): number {
+    return Math.floor((lng + 180) / 360 * (1 << z));
+}
+
+/** Web Mercator: latitude → tile y at zoom z (y increases southward) */
+export function tileY(lat: number, z: number): number {
+    const r = lat * Math.PI / 180;
+    return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * (1 << z));
+}
+
 export interface TileRecord extends TileCoord {
     data: Uint8Array;
 }

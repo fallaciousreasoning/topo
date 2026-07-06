@@ -4,6 +4,9 @@ import { BaseLayerDefinition, LINZ_BASEMAPS_KEY } from "./config";
 // TODO: Work out how to reuse the hillshade tiles
 const hillshadeUrl = `https://basemaps.linz.govt.nz/v1/tiles/geographx-nz-dem-2012-8m/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}`;
 
+/** Raw (uncomposited) topo50 tile URL, used for direct viewport downloads. */
+export const topo50Url = `https://basemaps.linz.govt.nz/v1/tiles/nz-topo50-new-zealand-mainland-gridless/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}`;
+
 export const hillshadeBlendSetting = {
   type: 'range' as const,
   label: 'Hillshade blend',
@@ -18,7 +21,7 @@ export function createTopoRasterSources(blend: number) {
   const hillshade50 = createCompositeLayer(
     "color-burn",
     blend,
-    `maybe-cache://basemaps.linz.govt.nz/v1/tiles/nz-topo50-new-zealand-mainland-gridless/WebMercatorQuad/{z}/{x}/{y}.webp?api=${LINZ_BASEMAPS_KEY}#topo-raster`,
+    topo50Url.replace('https://', 'maybe-cache://') + '#topo-raster',
     hillshadeUrl,
   );
 

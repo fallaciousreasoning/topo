@@ -6,6 +6,8 @@ export interface Download {
   id?: number
   /** Matches a Region.id for preconfigured regions; null for user-defined rectangular downloads. */
   regionId: string | null
+  /** User-provided label, for user-defined rectangular downloads. */
+  name?: string
   layerId: string
   minZoom: number
   maxZoom: number

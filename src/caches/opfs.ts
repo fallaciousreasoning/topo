@@ -1,17 +1,7 @@
 import { Cache } from "./cache";
+import { tileX, tileY } from "../tilebundle";
 
 const isSupported = () => typeof navigator !== 'undefined' && typeof navigator.storage?.getDirectory === 'function'
-
-/** Web Mercator: longitude → tile x at zoom z */
-function tileX(lng: number, z: number): number {
-    return Math.floor((lng + 180) / 360 * (1 << z))
-}
-
-/** Web Mercator: latitude → tile y at zoom z (y increases southward) */
-function tileY(lat: number, z: number): number {
-    const r = lat * Math.PI / 180
-    return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * (1 << z))
-}
 
 function parseTileCoords(id: string): { z: string, x: string, y: string, ext: string } | null {
     const match = id.match(/\/(\d+)\/(\d+)\/(\d+)\.([a-z]+)(?:\?|$)/)
@@ -127,6 +117,49 @@ const opfsCache: Cache = {
             }
         }
         return deleted
+    },
+
+    async getSizeInBbox(layer, west, south, east, north) {
+        let size = 0
+        if (!isSupported()) return size
+        try {
+            const root = await navigator.storage.getDirectory()
+            const tilesDir = await root.getDirectoryHandle('tiles')
+            const layerDir = await tilesDir.getDirectoryHandle(layer)
+
+            for await (const [zStr, zEntry] of layerDir.entries()) {
+                if (zEntry.kind !== 'directory') continue
+                const z = parseInt(zStr, 10)
+                if (isNaN(z)) continue
+
+                const xMin = tileX(west, z)
+                const xMax = tileX(east, z)
+                const yMin = tileY(north, z) // north → smaller y (y increases southward)
+                const yMax = tileY(south, z)
+
+                const zDir = await layerDir.getDirectoryHandle(zStr)
+                for await (const [xStr, xEntry] of zDir.entries()) {
+                    if (xEntry.kind !== 'directory') continue
+                    const x = parseInt(xStr, 10)
+                    if (isNaN(x) || x < xMin || x > xMax) continue
+
+                    const xDir = await zDir.getDirectoryHandle(xStr)
+                    for await (const [yFile, yEntry] of xDir.entries()) {
+                        if (yEntry.kind !== 'file') continue
+                        const y = parseInt(yFile, 10)
+                        if (isNaN(y) || y < yMin || y > yMax) continue
+
+                        const file = await (await xDir.getFileHandle(yFile)).getFile()
+                        size += file.size
+                    }
+                }
+            }
+        } catch (e) {
+            if (!(e instanceof DOMException && e.name === 'NotFoundError')) {
+                console.error('getSizeInBbox failed:', e)
+            }
+        }
+        return size
     },
 
     async getLayerSizes() {
