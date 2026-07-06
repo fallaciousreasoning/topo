@@ -4,6 +4,7 @@ import opfsCache from '../caches/opfs'
 const BUNDLE_BASE_URL = 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev'
 
 export function getBundleUrl(layerId: string, regionCode: string): string {
+    if (layerId === 'dem') return `${BUNDLE_BASE_URL}/elevation-tiles.tilebundle`
     return `${BUNDLE_BASE_URL}/${layerId}-${regionCode}.tilebundle`
 }
 

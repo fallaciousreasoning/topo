@@ -15,7 +15,7 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-white rounded shadow w-full h-full overflow-hidden ${onClick && "cursor-pointer"}`}
+      className={`bg-white rounded shadow w-full overflow-hidden ${onClick && "cursor-pointer"}`}
       onClick={onClick}
     >
       {imageUrl && (
