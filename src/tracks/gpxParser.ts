@@ -1,5 +1,21 @@
 import { Track } from "./track";
 import { Point } from "./point";
+import { garminColorNameToHex, randomTrackColor } from "../utils/gpxColors";
+
+/**
+ * Reads a track/route color from a gpx_style:color or gpxx:DisplayColor
+ * extension, if present. Returns undefined if no recognized color extension
+ * is found.
+ */
+function parseTrackColor(el: Element): string | undefined {
+  const styleColor = el.getElementsByTagName("gpx_style:color")[0]?.textContent?.trim();
+  if (styleColor) return styleColor.startsWith("#") ? styleColor : `#${styleColor}`;
+
+  const displayColor = el.getElementsByTagName("gpxx:DisplayColor")[0]?.textContent?.trim();
+  if (displayColor) return garminColorNameToHex(displayColor);
+
+  return undefined;
+}
 
 export interface GPXParseResult {
   tracks: Track[];
@@ -36,6 +52,7 @@ export function parseGPXFull(gpxText: string): GPXParseResult {
   const trkElements = xmlDoc.querySelectorAll("trk");
   trkElements.forEach((trk) => {
     const name = trk.querySelector("name")?.textContent || undefined;
+    const color = parseTrackColor(trk) ?? randomTrackColor();
     const coordinates: [number, number][] = [];
 
     // Get all track points from all track segments
@@ -49,7 +66,7 @@ export function parseGPXFull(gpxText: string): GPXParseResult {
     });
 
     if (coordinates.length > 0) {
-      tracks.push({ name, coordinates });
+      tracks.push({ name, color, coordinates });
     }
   });
 
@@ -57,6 +74,7 @@ export function parseGPXFull(gpxText: string): GPXParseResult {
   const rteElements = xmlDoc.querySelectorAll("rte");
   rteElements.forEach((rte) => {
     const name = rte.querySelector("name")?.textContent || undefined;
+    const color = parseTrackColor(rte) ?? randomTrackColor();
     const coordinates: [number, number][] = [];
 
     // Get all route points
@@ -70,7 +88,7 @@ export function parseGPXFull(gpxText: string): GPXParseResult {
     });
 
     if (coordinates.length > 0) {
-      tracks.push({ name, coordinates });
+      tracks.push({ name, color, coordinates });
     }
   });
 

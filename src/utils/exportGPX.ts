@@ -1,6 +1,7 @@
 import { Track } from "../tracks/track";
 import { Point } from "../tracks/point";
 import { buildFullCoordinates } from "../tracks/trackUtils";
+import { nearestGarminColorName } from "./gpxColors";
 
 function escapeXml(str: string): string {
     return str
@@ -14,11 +15,23 @@ function escapeXml(str: string): string {
 export function exportGPX(tracks: Track[], points: Point[]): string {
     const lines: string[] = []
     lines.push('<?xml version="1.0" encoding="UTF-8"?>')
-    lines.push('<gpx version="1.1" creator="NZ Topo" xmlns="http://www.topografix.com/GPX/1/1">')
+    lines.push('<gpx version="1.1" creator="NZ Topo" xmlns="http://www.topografix.com/GPX/1/1"')
+    lines.push('  xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3"')
+    lines.push('  xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0.2">')
 
     for (const track of tracks) {
         lines.push('  <trk>')
         if (track.name) lines.push(`    <name>${escapeXml(track.name)}</name>`)
+        if (track.color) {
+            lines.push('    <extensions>')
+            lines.push('      <gpxx:TrackExtension>')
+            lines.push(`        <gpxx:DisplayColor>${nearestGarminColorName(track.color)}</gpxx:DisplayColor>`)
+            lines.push('      </gpxx:TrackExtension>')
+            lines.push('      <gpx_style:line>')
+            lines.push(`        <gpx_style:color>${track.color.replace('#', '')}</gpx_style:color>`)
+            lines.push('      </gpx_style:line>')
+            lines.push('    </extensions>')
+        }
         lines.push('    <trkseg>')
         for (const [lng, lat] of buildFullCoordinates(track)) {
             lines.push(`      <trkpt lat="${lat}" lon="${lng}"/>`)
