@@ -28,8 +28,14 @@ export async function cancelDownload(download: Download): Promise<void> {
  * Delete a download's record and, unless another download for the same layer covers overlapping
  * ground, the tiles it wrote too — so cancelling or removing one download never destroys tiles
  * that another download still relies on.
+ *
+ * The record is deleted first so the Downloads list (reactive on the DB) updates immediately —
+ * the tile cleanup that follows can be a slow full-layer scan for a large download, and there's
+ * no reason to make the user wait on it just to see the row disappear.
  */
 export async function removeDownload(download: Download): Promise<void> {
+    await db.deleteDownload(download)
+
     const bbox = polygonBbox(download.polygon)
     const others = await db.getDownloads()
     const overlapsAnother = others.some(d =>
@@ -43,8 +49,6 @@ export async function removeDownload(download: Download): Promise<void> {
         const cacher = await cacherPromise.then(r => r.default)
         await cacher.deleteTilesInBbox(download.layerId, west, south, east, north)
     }
-
-    await db.deleteDownload(download)
 }
 
 /**
