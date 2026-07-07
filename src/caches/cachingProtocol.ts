@@ -16,6 +16,9 @@ addSettingsListener(key => {
     cacheLayers = new Set(getSetting('cacheLayers'))
 })
 
+/** Whether the user has enabled offline caching for the given layer id. */
+export const isCacheEnabled = (layer: string): boolean => cacheLayers.has(layer)
+
 function hasGoodConnection(): boolean {
     const connection: NetworkInformation | undefined = (navigator as any).connection
     if (!connection) return true

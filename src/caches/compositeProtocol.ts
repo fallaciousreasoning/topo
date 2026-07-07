@@ -1,5 +1,6 @@
-import { RequestParameters } from 'maplibre-gl'
-import { addProtocol, getData } from './protocols'
+import { addProtocol } from './protocols'
+import { isCacheEnabled } from './cachingProtocol'
+import type { CompositeRequest, CompositeResponse } from './compositeWorker'
 
 const failed = { data: null }
 
@@ -14,65 +15,60 @@ export const createCompositeLayer = (blendMode: GlobalCompositeOperation, overla
         .replaceAll('%7By%7D', '{y}')
 }
 
-const loadImage = async (params: RequestParameters, abortController: AbortController) => {
-    const { data } = await getData(params, abortController)
-    const image = new Image()
-    const { resolve, promise, reject } = Promise.withResolvers<HTMLImageElement>()
+// The fetch + canvas compositing work all happens in compositeWorker.ts, off the main
+// thread. This is a plain actor pattern (request/response correlated by id), the same
+// approach slopeAngle.tsx uses for its worker.
+let worker: Worker | undefined
+const pending = new Map<string, (data: ArrayBuffer | null) => void>()
 
-    const blob = new Blob([data])
-    const objectUrl = URL.createObjectURL(blob)
-    image.src = objectUrl
-    image.onload = () => {
-        URL.revokeObjectURL(objectUrl)
-        resolve(image)
+function getWorker(): Worker {
+    if (!worker) {
+        worker = new Worker(new URL('./compositeWorker.ts', import.meta.url), { type: 'module' })
+        worker.addEventListener('message', (event: MessageEvent<CompositeResponse>) => {
+            const { id, data } = event.data
+            const resolve = pending.get(id)
+            if (!resolve) return
+            pending.delete(id)
+            resolve(data)
+        })
     }
-    image.onerror = (err) => {
-        URL.revokeObjectURL(objectUrl)
-        reject(err)
-    }
-
-    return promise
-        .catch(() => null)
+    return worker
 }
 
-// TODO: This would be better off in a Worker
+let nextId = 0
+
 addProtocol(PROTOCOL, async (params, abortController) => {
     const [blendMode, searchParamsRaw] = params.url.split('://')[1].split('?')
     const searchParams = new URLSearchParams(searchParamsRaw)
     const urls = searchParams.getAll('url')
-    const overlayAlpha = parseFloat(searchParams.get('alpha') ?? '1')
-    const canvas = document.createElement('canvas')
-    canvas.width = 256
-    canvas.height = 256
-    const context = canvas.getContext('2d')!
+    const alpha = parseFloat(searchParams.get('alpha') ?? '1')
 
-    try {
-        const activeUrls = overlayAlpha === 0 ? urls.slice(0, 1) : urls
-        const imageBuffers = await Promise.all(activeUrls.map(r => loadImage({ ...params, url: r }, abortController)))
-        context.clearRect(0, 0, canvas.width, canvas.height)
+    const id = `${Date.now()}-${nextId++}`
+    const w = getWorker()
 
-        for (let i = 0; i < imageBuffers.length; i++) {
-            const buffer = imageBuffers[i]
-            if (!buffer) continue
-            if (i === 0) {
-                context.globalCompositeOperation = 'source-over'
-                context.globalAlpha = 1
-            } else {
-                context.globalCompositeOperation = blendMode as GlobalCompositeOperation
-                context.globalAlpha = overlayAlpha
-            }
-            context.drawImage(buffer, 0, 0)
-        }
+    const { promise, resolve } = Promise.withResolvers<ArrayBuffer | null>()
+    pending.set(id, resolve)
 
-        const { resolve, promise } = Promise.withResolvers<Blob | null>()
-        canvas.toBlob(resolve)
-        const blob = await promise
-
-        return {
-            data: await blob!.arrayBuffer()
-        }
-    } catch (err) {
+    const onAbort = () => {
+        w.postMessage({ type: 'ABORT_TILE', id })
+        if (pending.delete(id)) resolve(null)
     }
+    abortController.signal.addEventListener('abort', onAbort)
 
-    return failed
+    const request: CompositeRequest = {
+        type: 'COMPOSITE_TILE',
+        id,
+        blendMode: blendMode as GlobalCompositeOperation,
+        alpha,
+        urls,
+        cacheFlags: urls.map(u => {
+            const layer = u.split('#')[1]
+            return layer ? isCacheEnabled(layer) : false
+        }),
+    }
+    w.postMessage(request)
+
+    const data = await promise
+    abortController.signal.removeEventListener('abort', onAbort)
+    return data ? { data } : failed
 })
