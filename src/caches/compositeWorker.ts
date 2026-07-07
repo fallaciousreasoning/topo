@@ -4,7 +4,10 @@
 // other layers), but can't reuse that module directly because it pulls in
 // localStorage-backed settings and layer definitions that don't exist in a worker.
 
-const cacherPromise = import('./opfs')
+// Static import (not dynamic): vite bundles worker entries as a single iife chunk by
+// default in this project, which can't be code-split, so a dynamic import() here would
+// fail the build.
+import cacher from './opfs'
 
 export interface CompositeRequest {
     type: 'COMPOSITE_TILE'
@@ -49,7 +52,6 @@ function firstNonNull<T>(promises: Promise<T | null>[]): Promise<T | null> {
 async function fetchTile(url: string, shouldCache: boolean, signal: AbortSignal): Promise<ArrayBuffer | null> {
     if (url.startsWith('maybe-cache://')) {
         const [hostPathAndQuery, layer] = url.slice('maybe-cache://'.length).split('#')
-        const cacher = await cacherPromise.then(r => r.default)
 
         const fetchFromNetwork = async (): Promise<ArrayBuffer | null> => {
             try {
