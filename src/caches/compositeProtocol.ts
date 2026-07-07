@@ -20,9 +20,16 @@ const loadImage = async (params: RequestParameters, abortController: AbortContro
     const { resolve, promise, reject } = Promise.withResolvers<HTMLImageElement>()
 
     const blob = new Blob([data])
-    image.src = URL.createObjectURL(blob)
-    image.onload = () => resolve(image)
-    image.onerror = reject
+    const objectUrl = URL.createObjectURL(blob)
+    image.src = objectUrl
+    image.onload = () => {
+        URL.revokeObjectURL(objectUrl)
+        resolve(image)
+    }
+    image.onerror = (err) => {
+        URL.revokeObjectURL(objectUrl)
+        reject(err)
+    }
 
     return promise
         .catch(() => null)
