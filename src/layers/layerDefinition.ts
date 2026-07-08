@@ -9,6 +9,7 @@ import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
 import points from "./points";
+import ridges from "./ridges";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import utmGrid from "./utmGrid";
@@ -36,6 +37,7 @@ export const overlays: OverlayDefinition[] = [
     huts,
     mountains,
     points,
+    ridges,
     tracksLayer,
     hunting,
 ]
