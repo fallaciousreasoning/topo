@@ -1,5 +1,6 @@
 import { BaseLayerDefinition, OverlayDefinition } from "./config";
 import contours from "./contours";
+import glaciers from "./glaciers";
 import hillshade from "./hillshade";
 import hunting from "./hunting";
 import huts from "./huts";
@@ -14,6 +15,8 @@ import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import utmGrid from "./utmGrid";
 import tracksLayer from "./TracksLayer";
+import valleys from "./valleys";
+import waterways from "./waterways";
 
 export const extraData = {
     version: 8,
@@ -38,6 +41,9 @@ export const overlays: OverlayDefinition[] = [
     mountains,
     points,
     ridges,
+    glaciers,
+    valleys,
+    waterways,
     tracksLayer,
     hunting,
 ]
