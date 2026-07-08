@@ -26,7 +26,7 @@ export default {
         },
         "minzoom": 0,
         "paint": {
-            "background-color": "rgba(184, 220, 242, 1)"
+            "background-color": "#eaedea"
         },
         "type": "background"
     },
@@ -453,22 +453,7 @@ export default {
         },
         "paint": {
             "fill-antialias": true,
-            "fill-color": {
-                "stops": [
-                    [
-                        1,
-                        "rgba(255, 255, 255, 1)"
-                    ],
-                    [
-                        6,
-                        "rgba(140, 195, 229, 0.2)"
-                    ],
-                    [
-                        10,
-                        "rgba(140, 195, 229, 0.2)"
-                    ]
-                ]
-            },
+            "fill-color": "#eaedea",
             "fill-outline-color": {
                 "stops": [
                     [

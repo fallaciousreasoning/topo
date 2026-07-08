@@ -23,7 +23,12 @@
       "Bash(printf 'zoom0tile')",
       "Bash(printf 'zoom1tileA')",
       "Bash(printf 'zoom1tileB-longer-data-here')",
-      "Bash(printf 'zoom2tile-final-one-here-too')"
+      "Bash(printf 'zoom2tile-final-one-here-too')",
+      "Bash(magick z14.png -crop 128x128+128+64 -filter point -resize 512x512 z14_crop1.png)",
+      "Bash(magick z15.png -crop 128x128+0+0 -filter point -resize 512x512 z15_crop1.png)",
+      "Bash(magick z16.png -crop 256x256+0+0 -filter point -resize 768x768 z16_crop1.png)",
+      "Bash(magick z13.png -crop 128x128+64+64 -filter point -resize 512x512 z13_crop1.png)",
+      "Bash(magick z12.png -crop 128x128+0+64 -filter point -resize 512x512 z12_crop1.png)"
     ],
     "deny": [],
     "ask": []

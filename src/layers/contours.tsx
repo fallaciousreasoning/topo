@@ -3,6 +3,7 @@ import type { OverlayDefinition } from "./config";
 import Layer from '../map/Layer'
 import Source from '../map/Source'
 import { demSource, elevationScheme, maxContourZoom } from "./demSource";
+import { LINZ_BASEMAPS_KEY } from "./config";
 
 
 const far = [200, 1000]
@@ -13,11 +14,14 @@ export const contourTiles = demSource.contourProtocolUrl({
     thresholds: {
         10: far,
         11: close,
-        12: close,
+        12: mid,
+        13: close,
         14: close,
         15: close,
     },
-
+    // used to color contour lines differently where they cross a glacier
+    glacierUrlPattern: `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}`,
+    glacierMaxzoom: 15,
 })
 
 const abortController = new AbortController()
@@ -51,7 +55,10 @@ export default {
                 source: 'contour-source',
                 'source-layer': 'contours',
                 paint: {
-                    "line-color": "rgba(205, 128, 31, 0.5)",
+                    "line-color": ["case",
+                        ["==", ["get", "glacier"], true], "rgba(52, 126, 191, 0.6)",
+                        "#df8f22"
+                    ],
                     // level = highest index in thresholds array the elevation is a multiple of
                     "line-width": ["match", ["get", "level"], 1, 2, 0.7],
                 }
