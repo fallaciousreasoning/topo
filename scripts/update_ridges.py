@@ -74,6 +74,8 @@ def to_feature(element):
     }
     if tags.get('name:mi'):
         properties['nameMi'] = tags['name:mi']
+    if tags.get('name:en'):
+        properties['nameEn'] = tags['name:en']
     if tags.get('ref:linz:place_id'):
         properties['linzPlaceId'] = first(tags['ref:linz:place_id'])
     if tags.get('wikidata'):

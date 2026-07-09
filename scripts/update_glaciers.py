@@ -5,11 +5,19 @@ Fetches named glaciers for New Zealand from OpenStreetMap (natural=glacier) via
 the Overpass API, and writes them out as a GeoJSON FeatureCollection to
 public/data/glaciers.json.
 
-Glaciers mapped as a single way become a Polygon (MapLibre places the label
-inside the shape automatically). Glaciers mapped as a multipolygon relation
-(most of the larger, better-known ones) are reduced to a Point at the
-relation's bounding-box centre instead of reassembling the full ring set -
-good enough for a label anchor, much simpler than multipolygon assembly.
+Glaciers mapped as a single way become either:
+- a Polygon, for roughly compact shapes - MapLibre places the label inside
+  the shape automatically, sized to the largest circle that actually fits
+  inside it (see polygon_shape.py), or
+- a LineString tracing the glacier's medial axis (its "spine"), for
+  elongated tongue-shaped ones where no circle big enough for readable text
+  fits - labelled the same way ridges/rivers are, following the shape's
+  length instead of being crammed into a small inscribed circle.
+
+Glaciers mapped as a multipolygon relation (most of the larger, better-known
+ones) are reduced to a Point at the relation's bounding-box centre instead of
+reassembling the full ring set - good enough for a label anchor, much simpler
+than multipolygon assembly.
 
 As with update_ridges.py, any gazetteer "glacier" entry with no matching OSM
 name is added as a Point fallback feature.
@@ -18,7 +26,8 @@ name is added as a Point fallback feature.
 import json
 import math
 
-from osm_features import bbox_clause, fetch_overpass, first, simplify, load_fallback_points
+import polygon_shape
+from osm_features import bbox_clause, fetch_overpass, first, simplify, length_km, load_fallback_points
 
 CACHE_DIR = '.cache/glaciers'
 PLACES_PATH = './public/data/places.json'
@@ -37,6 +46,13 @@ out tags geom;
 # survive a line-placement angle check, this is just for file size.
 SIMPLIFY_TOLERANCE_DEGREES = 0.002
 
+# A glacier is treated as "thin" (labelled with a spine line instead of a
+# point in a circle) when its widest inscribed circle's diameter is less than
+# this fraction of its spine length - i.e. a long way narrower than it is long.
+THIN_ASPECT_THRESHOLD = 0.35
+# Below this spine length, treating it as a line isn't worth it either way.
+MIN_SPINE_LENGTH_KM = 0.4
+
 
 def shared_properties(tags):
     properties = {
@@ -54,20 +70,18 @@ def shared_properties(tags):
 
 
 def polygon_size_km(ring):
-    """
-    sqrt(bbox width * bbox height) in km - a rough "characteristic size" for the
-    polygon, used to scale the label text to roughly fit inside the shape. Not
-    exact (doesn't know the glyph metrics MapLibre will actually use, and an
-    elongated tongue-shaped glacier isn't well summarised by one number), but
-    good enough to stop long names on tiny glaciers looming way outside their
-    outline.
-    """
+    """Fallback "characteristic size" (sqrt of bbox width * height) for the rare
+    case the medial axis analysis below can't find any inscribed circle at all."""
     lons = [c[0] for c in ring]
     lats = [c[1] for c in ring]
     mid_lat = (min(lats) + max(lats)) / 2
     width_km = (max(lons) - min(lons)) * 111.32 * math.cos(math.radians(mid_lat))
     height_km = (max(lats) - min(lats)) * 110.57
     return math.sqrt(max(width_km, 0.01) * max(height_km, 0.01))
+
+
+def path_length_km(path_xy):
+    return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(path_xy, path_xy[1:]))
 
 
 def way_to_feature(element):
@@ -83,8 +97,43 @@ def way_to_feature(element):
         return None
 
     properties = shared_properties(element.get('tags', {}))
-    properties['sizeKm'] = round(polygon_size_km(ring), 3)
 
+    ring_xy, lon0, lat0, cos_lat = polygon_shape.project_ring(ring)
+    bbox_diag_km = math.hypot(
+        max(p[0] for p in ring_xy) - min(p[0] for p in ring_xy),
+        max(p[1] for p in ring_xy) - min(p[1] for p in ring_xy),
+    )
+    # Boundary points need to be dense relative to the shape's own scale for the
+    # Voronoi-based analysis to be accurate - aim for ~25 segments around it.
+    target_segment_km = max(0.03, bbox_diag_km / 25)
+
+    graph, radii = polygon_shape.medial_axis(ring_xy, target_segment_km)
+    _, radius_km = polygon_shape.largest_inscribed_circle(graph, radii, ring_xy)
+    spine_xy = polygon_shape.longest_path(graph)
+    spine_km = path_length_km(spine_xy) if len(spine_xy) >= 2 else 0.0
+
+    is_thin = (
+        spine_km >= MIN_SPINE_LENGTH_KM
+        and radius_km > 0
+        and (2 * radius_km) / spine_km < THIN_ASPECT_THRESHOLD
+    )
+
+    if is_thin:
+        spine_lonlat = [polygon_shape.unproject_point(p, lon0, lat0, cos_lat) for p in spine_xy]
+        spine_lonlat = simplify(spine_lonlat, SIMPLIFY_TOLERANCE_DEGREES)
+        properties['shape'] = 'thin'
+        properties['lengthKm'] = round(length_km(spine_lonlat), 2)
+        return {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': spine_lonlat,
+            },
+            'properties': properties,
+        }
+
+    properties['shape'] = 'compact'
+    properties['sizeKm'] = round(2 * radius_km, 3) if radius_km > 0 else round(polygon_size_km(ring), 3)
     return {
         'type': 'Feature',
         'geometry': {
@@ -134,7 +183,8 @@ def download_glaciers():
     print(f'  {len(elements)} elements returned')
 
     features = [f for f in (to_feature(e) for e in elements) if f]
-    print(f'  {len(features)} usable OSM features')
+    thin = sum(1 for f in features if f['properties'].get('shape') == 'thin')
+    print(f'  {len(features)} usable OSM features ({thin} labelled as thin/elongated)')
 
     fallback_features = load_fallback_points(features, PLACES_PATH, FALLBACK_GAZETTEER_TYPES)
     print(f'  {len(fallback_features)} gazetteer glaciers with no matching OSM feature, added as points')

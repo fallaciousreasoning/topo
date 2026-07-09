@@ -7,23 +7,27 @@ import { sizeBasedVisibility } from "./labelSizing";
 
 const GLACIERS_URL = '/data/glaciers.json'
 
-// Small glaciers only reveal themselves once zoomed in close; the biggest
-// icefields (~5km characteristic size) show from a wider view. See labelSizing.ts.
+// Nothing shows below zoom 10 - glaciers only reveal once you're reasonably
+// zoomed in, then stay visible with no upper cap. Small glaciers need to be
+// zoomed in further still; the biggest icefields (~5km characteristic size)
+// show from zoom 10 itself. See labelSizing.ts.
+const GLACIER_MINZOOM = 10
+
 const GLACIER_SIZE_STOPS: [number, number][] = [
-    [0.3, 12],
-    [0.6, 11],
-    [1.2, 10],
-    [2.5, 9],
-    [5, 8],
+    [0.3, 14],
+    [0.6, 13],
+    [1.2, 12],
+    [2.5, 11],
+    [5, 10],
 ]
 
 // Scales glacier label text to roughly fit inside each polygon's real-world size,
 // using the standard "constant real-world size" MapLibre trick: an exponential
 // (base 2) interpolation over zoom means the computed value doubles every zoom
-// level, tracking how the polygon itself grows on screen. Approximate, not exact -
-// MapLibre doesn't expose real glyph metrics to style expressions, and a single
-// "characteristic size" can't capture an odd-shaped tongue-shaped glacier - but it
-// keeps long names on small glaciers from looming way outside their outline.
+// level, tracking how the polygon itself grows on screen. sizeKm is now the
+// diameter of the largest circle that actually fits inside the polygon (see
+// polygon_shape.py) rather than a bounding-box guess, so this is a much closer
+// fit than a plain "characteristic size" for irregular shapes.
 const METERS_PER_PIXEL_AT_Z0_EQUATOR = 156543.03392
 const REPRESENTATIVE_COS_LAT = Math.cos(43.5 * Math.PI / 180) // NZ glaciers cluster around -42 to -44
 const PIXELS_PER_KM_AT_Z0 = 1000 / (METERS_PER_PIXEL_AT_Z0_EQUATOR * REPRESENTATIVE_COS_LAT)
@@ -69,13 +73,14 @@ export default {
             type: 'geojson',
             data,
         }}>
-            {/* Single-way glaciers - real Polygon geometry, so MapLibre places the
-                label inside the shape automatically. Text is sized to roughly fit. */}
+            {/* Roughly compact single-way glaciers - real Polygon geometry, so MapLibre
+                places the label inside the shape automatically. Text is sized to fit the
+                largest circle that actually fits inside the polygon. */}
             <Layer layer={{
                 id: 'glaciers-label-polygon',
                 type: 'symbol',
                 source: 'glaciers',
-                minzoom: 8,
+                minzoom: GLACIER_MINZOOM,
                 filter: ['all',
                     ['==', ['geometry-type'], 'Polygon'],
                     sizeBasedVisibility('sizeKm', GLACIER_SIZE_STOPS),
@@ -83,12 +88,39 @@ export default {
                 layout: {
                     'text-field': ['get', 'name'],
                     'text-size': ['interpolate', ['linear'], ['zoom'],
-                        9, fitTextSizeAtZoom(9, 0.6),
-                        11, fitTextSizeAtZoom(11, 0.8),
-                        14, fitTextSizeAtZoom(14, 1),
+                        10, fitTextSizeAtZoom(10, 0.6),
+                        12, fitTextSizeAtZoom(12, 0.8),
+                        15, fitTextSizeAtZoom(15, 1),
                     ],
                     'text-font': ['Open Sans Italic'],
                     'text-letter-spacing': 0.08,
+                },
+                paint: {
+                    'text-color': '#1c5c8c',
+                    'text-halo-color': 'rgba(255, 255, 255, 0.85)',
+                    'text-halo-width': 1.2,
+                }
+            }} />
+            {/* Elongated tongue-shaped glaciers, where no circle big enough for readable
+                text fits inside the polygon - labelled along a derived spine line instead,
+                the same way ridges/rivers are. */}
+            <Layer layer={{
+                id: 'glaciers-label-line',
+                type: 'symbol',
+                source: 'glaciers',
+                minzoom: GLACIER_MINZOOM,
+                filter: ['==', ['geometry-type'], 'LineString'],
+                layout: {
+                    'symbol-placement': 'line',
+                    'text-field': ['get', 'name'],
+                    'text-size': ['interpolate', ['linear'], ['get', 'lengthKm'],
+                        0.4, 11,
+                        2, 14,
+                        6, 18,
+                    ],
+                    'text-font': ['Open Sans Italic'],
+                    'text-letter-spacing': 0.08,
+                    'text-max-angle': 85,
                 },
                 paint: {
                     'text-color': '#1c5c8c',
@@ -102,14 +134,14 @@ export default {
                 id: 'glaciers-label-point',
                 type: 'symbol',
                 source: 'glaciers',
-                minzoom: 9,
+                minzoom: GLACIER_MINZOOM,
                 filter: ['==', ['geometry-type'], 'Point'],
                 layout: {
                     'text-field': ['get', 'name'],
                     'text-size': ['interpolate', ['linear'], ['zoom'],
-                        9, 9,
-                        11, 11.5,
-                        14, 14,
+                        10, 9,
+                        12, 11.5,
+                        15, 14,
                     ],
                     'text-font': ['Open Sans Italic'],
                     'text-letter-spacing': 0.08,
