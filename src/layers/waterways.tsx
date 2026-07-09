@@ -3,7 +3,7 @@ import type { OverlayDefinition } from "./config";
 import Layer from "../map/Layer";
 import Source from "../map/Source";
 import { usePromise } from "../hooks/usePromise";
-import { sizeBasedVisibility } from "./labelSizing";
+import { sizeBasedVisibility, realWorldPixels } from "./labelSizing";
 
 const WATERWAYS_URL = '/data/waterways.json'
 
@@ -51,7 +51,10 @@ export default {
                 filter: sizeBasedVisibility('lengthKm', WATERWAY_SIZE_STOPS),
                 layout: {
                     'symbol-placement': 'line',
-                    'symbol-spacing': 400,
+                    // One label per feature, not a repeat every so many pixels - see the
+                    // matching comment in ridges.tsx. 300km comfortably covers the longest
+                    // named waterway (199.7km).
+                    'symbol-spacing': realWorldPixels(300),
                     'symbol-sort-key': ['*', -1, ['get', 'lengthKm']],
                     'text-field': ['get', 'name'],
                     'text-size': ['interpolate', ['linear'], ['zoom'],
