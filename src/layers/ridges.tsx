@@ -3,9 +3,48 @@ import type { OverlayDefinition } from "./config";
 import Layer from "../map/Layer";
 import Source from "../map/Source";
 import { usePromise } from "../hooks/usePromise";
-import { sizeBasedVisibility, realWorldPixels } from "./labelSizing";
+import { sizeBasedVisibility } from "./labelSizing";
 
 const RIDGES_URL = '/data/ridges.json'
+
+// Scales text to roughly fit within the feature's own on-screen length, using the
+// standard "constant real-world size" trick (see labelSizing.ts/glaciers.tsx) but
+// also dividing by the name's character count - a bilingual name like "Ben Ohau
+// Range / Te Tari-o-Mauka-Atua" (38 chars) needs much more contiguous straight
+// line to fit than a short one like "Ben Ohau Range" (14 chars) at the same
+// text-size, and OSM often splits one real range into several ways of very
+// different lengths carrying different name variants. Sizing by length alone
+// (the old approach) meant the long-named segments needed a straight run they
+// usually didn't have, so they silently failed to place while short segments of
+// the very same range worked fine.
+const METERS_PER_PIXEL_AT_Z0_EQUATOR = 156543.03392
+const REPRESENTATIVE_COS_LAT = Math.cos(43.5 * Math.PI / 180) // NZ ridges cluster around -42 to -44
+const PIXELS_PER_KM_AT_Z0 = 1000 / (METERS_PER_PIXEL_AT_Z0_EQUATOR * REPRESENTATIVE_COS_LAT)
+const GLYPH_WIDTH_FACTOR = 0.6 // average glyph width as a fraction of font-size, uppercase non-italic
+const FILL_FRACTION = 0.65 // target text width as a fraction of the feature's own on-screen length
+const SIZE_TO_FONT_K = PIXELS_PER_KM_AT_Z0 * FILL_FRACTION / GLYPH_WIDTH_FACTOR
+
+const MIN_TEXT_SIZE = 11
+const MAX_TEXT_SIZE = 26
+
+// GeoJSON sources get tiled internally, and a long feature only ever offers as
+// much straight line as fits within a single tile - the rest of its length is
+// somewhere else entirely, clipped into a different tile. Sizing off the
+// feature's *full* lengthKm (as if that much straight line were available in
+// one place) is what let the long-named Ben Ohau Range segments (37.2km)
+// demand far more contiguous pixels than any one tile could actually offer,
+// even though the short-named segments of the very same range (12.7km) fit
+// fine. Capping the length used for sizing keeps every feature's assumed
+// budget within what a single tile can plausibly provide.
+const MAX_SIZING_LENGTH_KM = 8
+
+// MapLibre only allows a "zoom" expression as the direct top-level input to
+// interpolate/step, not buried under another operator like min/max - so clamping
+// happens inside each stop's own output expression instead of wrapping the whole
+// interpolate (same pattern as glaciers.tsx).
+const fitLineTextSizeAtZoom = (zoom: number, shrink = 1) => ['max', MIN_TEXT_SIZE, ['min', MAX_TEXT_SIZE,
+    ['*', shrink, ['/', ['*', ['min', ['get', 'lengthKm'], MAX_SIZING_LENGTH_KM], SIZE_TO_FONT_K * Math.pow(2, zoom)], ['length', ['get', 'name']]]],
+]] as const
 
 // Small spurs only reveal themselves once zoomed in close. Everything hides
 // below zoom 10 except the Southern Alps itself (168km after simplification,
@@ -45,46 +84,104 @@ export default {
             type: 'geojson',
             data,
         }}>
+            {/* TEMPORARY - visualises the actual ridge line geometry for debugging.
+                Remove once done inspecting. */}
+            {/* <Layer layer={{
+                id: 'ridges-debug-line',
+                type: 'line',
+                source: 'ridges',
+                filter: ['==', ['geometry-type'], 'LineString'],
+                paint: {
+                    'line-color': '#e91e63',
+                    'line-width': 1.5,
+                    'line-opacity': 0.8,
+                }
+            }} /> */}
+            {/* Below zoom 10 the only thing revealed at all is the Southern Alps (see
+                RIDGE_SIZE_STOPS) - it gets its own dedicated layer, rather than sharing
+                one text-size expression with the zoom>=10 layer below, because of an
+                empirically confirmed MapLibre quirk: merging this layer's simple 2-stop
+                sizing into the *same* interpolate/step tree as the other layer's
+                length/name-fit formula (even zoom-isolated via an outer 'step', and even
+                when the far-away stops are replaced with harmless constants) makes
+                placement fail ~100% of the time at zoom 6-7 - reproducible with the
+                original pre-existing formula too, so this was a latent bug, not something
+                introduced by later tuning. Keeping the expressions in fully separate layer
+                objects avoids whatever cross-contamination causes that. */}
             <Layer layer={{
-                id: 'ridges-label',
+                id: 'ridges-label-alps',
                 type: 'symbol',
                 source: 'ridges',
                 minzoom: 6,
+                maxzoom: 10,
                 filter: ['all',
                     ['==', ['get', 'source'], 'osm'],
                     sizeBasedVisibility('lengthKm', RIDGE_SIZE_STOPS),
                 ],
                 layout: {
-                    // Below zoom 10 the only thing revealed at all is the Southern Alps
-                    // (see RIDGE_SIZE_STOPS). Line-placement needs a long-enough straight
-                    // run of screen pixels to lay text along, and at that scale the whole
-                    // 168km line only spans ~50-170px - not reliably enough for any label,
-                    // so placement success became a coin flip depending on exact pan
-                    // position. A point anchor doesn't have that problem (it just needs
-                    // one point in view), so switch modes entirely below zoom 10 - since
-                    // nothing else is visible there anyway, this only affects the Alps.
-                    'symbol-placement': ['step', ['zoom'], 'point', 10, 'line'],
-                    // LINZ's raster maps place each range name exactly once - a human
-                    // cartographer chose the spot. A fixed-pixel symbol-spacing repeats the
-                    // label every so many pixels, which for a long range means several
-                    // copies visible at once. symbol-spacing can't be a per-feature (data)
-                    // expression, only zoom, so this uses a fixed real-world distance
-                    // (250km) comfortably bigger than the longest ridge (168km) rather than
-                    // each feature's own length - meaning every feature gets one label, not
-                    // that every feature's spacing is individually tuned.
-                    'symbol-spacing': realWorldPixels(250),
-                    'symbol-sort-key': ['*', -1, ['get', 'lengthKm']],
-                    // Point placement (below zoom 10 - see symbol-placement above) doesn't
-                    // need a long straight run to lay text along like line-placement does,
-                    // so the full bilingual name fits fine even at low zoom - keep it on one
-                    // line rather than the default wrap (line-placement ignores this).
-                    'text-field': ['get', 'name'],
+                    // Line-placement needs a long-enough straight run of screen pixels to
+                    // lay text along, and at this scale the whole 168km line only spans
+                    // ~50-170px - not reliably enough for any label, so placement success
+                    // became a coin flip depending on exact pan position. line-center
+                    // doesn't have that problem (it just needs one point in view, anchored
+                    // at the line's midpoint rather than plain 'point' mode's first-vertex
+                    // anchor). (Plain 'point' mode is more reliable still at this zoom, but
+                    // renders the text upright rather than following the line's angle,
+                    // which looks detached from the ridge - line-center is worth the
+                    // occasional placement miss to keep the text sitting on the line.)
+                    'symbol-placement': 'line-center',
+                    // The full bilingual name "Southern Alps / Kā Tiritiri o te Moana" (38
+                    // chars) doesn't fit along the line at any legible size at this zoom -
+                    // tested empirically to fail placement 100% of the time above ~10px
+                    // text. Falling back to the short English name (only Southern Alps and
+                    // Mount Cook Range actually differ from their full `name` - every other
+                    // ridge's nameEn just duplicates it, so this is a no-op for any other
+                    // feature that might ever reach this layer) leaves enough room to
+                    // render at a normal, legible size.
+                    'text-field': ['coalesce', ['get', 'nameEn'], ['get', 'name']],
                     'text-max-width': 40,
                     'text-size': ['interpolate', ['linear'], ['zoom'],
                         6, 15,
-                        9, ['interpolate', ['linear'], ['get', 'lengthKm'], 1, 12, 10, 15, 50, 21],
-                        11, ['interpolate', ['linear'], ['get', 'lengthKm'], 1, 14, 10, 18, 50, 23],
-                        14, ['interpolate', ['linear'], ['get', 'lengthKm'], 1, 18, 10, 23, 50, 29],
+                        9, 19,
+                    ],
+                    'text-transform': 'uppercase',
+                    'text-font': ['Open Sans Medium'],
+                    'text-letter-spacing': 0.08,
+                    'text-max-angle': 130,
+                    // Nothing else is visible at this zoom, so there's nothing to usefully
+                    // collide with - except a mountain peak label that happens to sit at
+                    // the same anchor, which was silently swallowing it.
+                    'text-allow-overlap': true,
+                    'text-ignore-placement': true,
+                },
+                paint: {
+                    'text-color': '#2b1c0d',
+                    'text-halo-color': 'rgba(255, 255, 255, 0.85)',
+                    'text-halo-width': 1.2,
+                }
+            }} />
+            <Layer layer={{
+                id: 'ridges-label',
+                type: 'symbol',
+                source: 'ridges',
+                minzoom: 10,
+                filter: ['all',
+                    ['==', ['get', 'source'], 'osm'],
+                    sizeBasedVisibility('lengthKm', RIDGE_SIZE_STOPS),
+                ],
+                layout: {
+                    'symbol-placement': 'line',
+                    // Deliberately left at MapLibre's default (250px) rather than the smaller
+                    // real-world-constant spacing tried earlier - a tighter spacing packed
+                    // repeats of the same label close enough together to collide with each
+                    // other, which was silently costing Ben Ohau Range and similar ranges
+                    // placements that the wider default spacing doesn't.
+                    'symbol-sort-key': ['*', -1, ['get', 'lengthKm']],
+                    'text-field': ['get', 'name'],
+                    'text-max-width': 40,
+                    'text-size': ['interpolate', ['linear'], ['zoom'],
+                        11, fitLineTextSizeAtZoom(11, 1),
+                        14, fitLineTextSizeAtZoom(14, 1),
                     ],
                     // LINZ's own raster maps set range/ridge names in caps, upright (not
                     // italic), in a dark warm brown - sampled directly from their tiles.
@@ -94,14 +191,12 @@ export default {
                     'text-transform': 'uppercase',
                     'text-font': ['Open Sans Medium'],
                     'text-letter-spacing': 0.08,
-                    'text-max-angle': 85,
-                    // Below zoom 10 the Southern Alps is the only feature this layer ever
-                    // shows, so there's nothing for it to usefully collide with - except a
-                    // mountain peak label that happens to sit at the same point-placement
-                    // anchor, which was silently swallowing it. Skip collision there;
-                    // restore normal decluttering at zoom 10+ where many labels compete.
-                    'text-allow-overlap': ['step', ['zoom'], true, 10, false],
-                    'text-ignore-placement': ['step', ['zoom'], true, 10, false],
+                    // Raised from 85 - Ben Ohau Range (and likely other genuinely zigzaggy
+                    // ranges) has enough real jaggedness, even after simplification, to trip
+                    // the default threshold and fail to place at all. A higher ceiling lets
+                    // curvier real shapes still render, at the cost of allowing sharper bends
+                    // in the text for the ranges that do use the full range of this value.
+                    'text-max-angle': 130,
                 },
                 paint: {
                     'text-color': '#2b1c0d',

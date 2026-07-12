@@ -19,7 +19,7 @@ import json
 
 from osm_features import (
     bbox_clause, fetch_overpass, first, simplify, length_km,
-    load_fallback_points, SIMPLIFY_TOLERANCE_DEGREES,
+    load_fallback_points,
 )
 
 CACHE_DIR = '.cache/ridges'
@@ -37,7 +37,12 @@ QUERY = f"""
 out tags geom;
 """.strip()
 
-
+# Finer than osm_features.SIMPLIFY_TOLERANCE_DEGREES (~440m) - ridges reveal at
+# their own zoom (see RIDGE_SIZE_STOPS in ridges.tsx) rather than all at once,
+# so most of them have plenty of screen-pixel budget to carry the extra detail
+# without failing MapLibre's line-placement angle check. Deliberately not the
+# shared default, which stays coarser for valleys/waterways.
+BASE_TOLERANCE_DEGREES = 0.0012
 
 # Only the Southern Alps (234km raw) is long enough to need this - the next
 # longest named ridge in the dataset is Coromandel Range at 136.8km, still a
@@ -53,8 +58,8 @@ LONG_OUTLIER_THRESHOLD_KM = 180
 def adaptive_tolerance(raw_coordinates):
     raw_length_km = length_km(raw_coordinates)
     if raw_length_km <= LONG_OUTLIER_THRESHOLD_KM:
-        return SIMPLIFY_TOLERANCE_DEGREES
-    return SIMPLIFY_TOLERANCE_DEGREES * (raw_length_km / 5)
+        return BASE_TOLERANCE_DEGREES
+    return BASE_TOLERANCE_DEGREES * (raw_length_km / 5)
 
 
 def to_feature(element):
