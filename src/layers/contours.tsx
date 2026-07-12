@@ -7,13 +7,12 @@ import { LINZ_BASEMAPS_KEY } from "./config";
 
 
 const far = [200, 1000]
-const mid = [100, 500]
 const close = [20, 100]
 export const contourTiles = demSource.contourProtocolUrl({
     multiplier: 1,
     thresholds: {
         10: far,
-        11: mid,
+        11: far,
         12: close,
         13: close,
         14: close,
@@ -21,7 +20,7 @@ export const contourTiles = demSource.contourProtocolUrl({
     },
     // used to color contour lines differently where they cross a glacier
     glacierUrlPattern: `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}`,
-    glacierMaxzoom: 15,
+    glacierMaxzoom: 12,
 })
 
 const abortController = new AbortController()
