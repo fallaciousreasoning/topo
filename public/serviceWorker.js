@@ -1,6 +1,10 @@
 const CACHE_VERSION = 1;
 const CACHE_NAME = `nz-topo-cache-v${CACHE_VERSION}`;
 
+// Used to hand shared files off from the share-target POST to the page it redirects to.
+const SHARE_TARGET_CACHE = 'nz-topo-share-target';
+const SHARE_TARGET_PREFIX = '/shared-file-';
+
 // Decide whether we should try and save data.
 const shouldConserveData = () => {
   const connection = navigator.connection;
@@ -117,7 +121,27 @@ const rules = {
   'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.tg': cacheThenNetwork,
 }
 
+// Stashes files POSTed via the OS share sheet into Cache Storage, keyed under
+// SHARE_TARGET_PREFIX, so the page we redirect to can pick them up.
+const handleShareTarget = async (request) => {
+  const formData = await request.formData();
+  const files = formData.getAll('gpx').filter(f => f instanceof File && f.name);
+
+  const cache = await caches.open(SHARE_TARGET_CACHE);
+  await Promise.all(files.map((file, i) => cache.put(
+    `${SHARE_TARGET_PREFIX}${i}`,
+    new Response(file, { headers: { 'X-File-Name': encodeURIComponent(file.name) } })
+  )));
+};
+
 self.addEventListener('fetch', function (e) {
+  const url = new URL(e.request.url);
+  if (e.request.method === 'POST' && url.pathname === '/share-target/') {
+    e.respondWith(Response.redirect('/?share-target=gpx', 303));
+    e.waitUntil(handleShareTarget(e.request));
+    return;
+  }
+
   for (const rule in rules) {
     const regex = new RegExp(rule);
     if (regex.test(e.request.url)) {

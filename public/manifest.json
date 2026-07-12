@@ -86,5 +86,18 @@
     "start_url": "/",
     "display": "fullscreen",
     "background_color": "#25a33c",
-    "theme_color": "#25a33c"
+    "theme_color": "#25a33c",
+    "share_target": {
+        "action": "/share-target/",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "files": [
+                {
+                    "name": "gpx",
+                    "accept": ["application/gpx+xml", "application/gpx", "application/octet-stream", ".gpx"]
+                }
+            ]
+        }
+    }
 }

@@ -5,6 +5,7 @@ import TopoMap from './TopoMap'
 import { Context } from './routing/router'
 import './tailwind.pcss'
 import SearchSection from './sections/SearchSection'
+import { consumeSharedGPXFiles } from './utils/shareTarget'
 
 function App() {
     return <Context>
@@ -14,6 +15,8 @@ function App() {
 }
 
 createRoot(document.body).render(<App />)
+
+consumeSharedGPXFiles()
 
 function requestPersistentStorage() {
     navigator.storage?.persist()

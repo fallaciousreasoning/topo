@@ -11,7 +11,7 @@ import { cacherPromise } from "../caches/cachingProtocol";
 import { demOverlaySource } from "../layers/contours";
 import Button from "../components/Button";
 import { LayerSettingDescriptor } from "../layers/config";
-import { importGPXFile } from "../utils/importGPX";
+import { importAndSaveGPXFile } from "../utils/importGPX";
 import { exportGPX, downloadGPX } from "../utils/exportGPX";
 import db from "../caches/indexeddb";
 import { downloadHunting, clearHuntingCache, getHuntingCacheSize, getHuntingDownloadSize } from "../layers/hunting";
@@ -84,14 +84,9 @@ export default function SettingsSection() {
         const file = e.target.files?.[0]
         if (!file) return
         try {
-            const result = await importGPXFile(file)
-            for (const track of result.tracks) await db.updateTrack(track)
-            for (const point of result.points) await db.updatePoint(point)
+            const summary = await importAndSaveGPXFile(file)
             if (fileInputRef.current) fileInputRef.current.value = ''
-            const parts = []
-            if (result.tracks.length > 0) parts.push(`${result.tracks.length} track(s)`)
-            if (result.points.length > 0) parts.push(`${result.points.length} point(s)`)
-            alert(`Successfully imported ${parts.join(' and ')}`)
+            alert(`Successfully imported ${summary}`)
         } catch (error) {
             alert(`Failed to import GPX: ${error instanceof Error ? error.message : 'Unknown error'}`)
         }
