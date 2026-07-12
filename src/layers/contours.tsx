@@ -13,8 +13,8 @@ export const contourTiles = demSource.contourProtocolUrl({
     multiplier: 1,
     thresholds: {
         10: far,
-        11: close,
-        12: mid,
+        11: mid,
+        12: close,
         13: close,
         14: close,
         15: close,
