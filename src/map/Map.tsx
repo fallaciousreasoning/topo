@@ -75,6 +75,7 @@ export default function MapContext(props: React.PropsWithChildren) {
     }
 
     setMap(map);
+    ;(window as any).debugMap = map;
 
     return () => {
       map.off('style.load', onStyleLoad);

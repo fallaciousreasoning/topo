@@ -28,6 +28,45 @@ const getWaterways = (): Promise<GeoJSON.FeatureCollection> => {
     return waterwaysPromise
 }
 
+// Shared layout/paint for every zoom-banded label layer below - only minzoom,
+// maxzoom and text-size actually differ between bands.
+const baseLayout = {
+    'symbol-placement': 'line',
+    // See the matching comment in ridges.tsx - a shorter real-world repeat
+    // distance than the feature's own length trades "LINZ shows each name
+    // once" for a much better chance the label actually shows up somewhere
+    // in the current view.
+    'symbol-spacing': realWorldPixels(70),
+    'symbol-sort-key': ['*', -1, ['get', 'lengthKm']],
+    'text-field': ['get', 'name'],
+    'text-font': ['Open Sans Italic'],
+    'text-letter-spacing': 0.06,
+    'text-max-angle': 85,
+} as const
+
+const basePaint = {
+    'text-color': '#1c5c8c',
+    'text-halo-color': 'rgba(255, 255, 255, 0.85)',
+    'text-halo-width': 1.2,
+} as const
+
+// Each band gets its own layer with a *zoom-constant* (lengthKm-only) text-size,
+// rather than one shared layer with a single zoom-interpolated text-size across
+// all bands. This works around an empirically confirmed MapLibre quirk: a
+// zoom-interpolate whose *later* stop computes too large a value can silently
+// reject line-placement at an *earlier*, currently-active zoom, even when that
+// zoom's own value would fit fine on its own. Maitland Stream (14.5km) fell
+// exactly into this trap at zoom 11 purely because of the zoom-14 stop's value,
+// despite zoom 11's own computed size being reasonable in isolation. Splitting
+// by real minzoom/maxzoom on separate layers (rather than interpolating within
+// one) sidesteps this entirely, at the cost of a size step at each band boundary
+// instead of continuous growth.
+const BANDS: { minzoom: number, maxzoom?: number, sizeStops: [number, number][] }[] = [
+    { minzoom: 7, maxzoom: 11, sizeStops: [[0.2, 8], [1, 10], [10, 12], [50, 15]] },
+    { minzoom: 11, maxzoom: 14, sizeStops: [[0.2, 10], [1, 12], [10, 14], [50, 18]] },
+    { minzoom: 14, sizeStops: [[0.2, 12], [1, 15], [10, 18], [50, 23]] },
+]
+
 export default {
     id: 'waterways',
     name: 'River & Stream Names',
@@ -43,35 +82,23 @@ export default {
             type: 'geojson',
             data,
         }}>
-            <Layer layer={{
-                id: 'waterways-label',
-                type: 'symbol',
-                source: 'waterways',
-                minzoom: 7,
-                filter: sizeBasedVisibility('lengthKm', WATERWAY_SIZE_STOPS),
-                layout: {
-                    'symbol-placement': 'line',
-                    // One label per feature, not a repeat every so many pixels - see the
-                    // matching comment in ridges.tsx. 300km comfortably covers the longest
-                    // named waterway (199.7km).
-                    'symbol-spacing': realWorldPixels(300),
-                    'symbol-sort-key': ['*', -1, ['get', 'lengthKm']],
-                    'text-field': ['get', 'name'],
-                    'text-size': ['interpolate', ['linear'], ['zoom'],
-                        9, ['interpolate', ['linear'], ['get', 'lengthKm'], 0.2, 8, 1, 10, 10, 14, 50, 18],
-                        11, ['interpolate', ['linear'], ['get', 'lengthKm'], 0.2, 10, 1, 12, 10, 17, 50, 21],
-                        14, ['interpolate', ['linear'], ['get', 'lengthKm'], 0.2, 12, 1, 15, 10, 21, 50, 27],
-                    ],
-                    'text-font': ['Open Sans Italic'],
-                    'text-letter-spacing': 0.06,
-                    'text-max-angle': 85,
-                },
-                paint: {
-                    'text-color': '#1c5c8c',
-                    'text-halo-color': 'rgba(255, 255, 255, 0.85)',
-                    'text-halo-width': 1.2,
-                }
-            }} />
+            {BANDS.map(({ minzoom, maxzoom, sizeStops }) => (
+                <Layer key={minzoom} layer={{
+                    id: `waterways-label-z${minzoom}`,
+                    type: 'symbol',
+                    source: 'waterways',
+                    minzoom,
+                    ...(maxzoom !== undefined ? { maxzoom } : {}),
+                    filter: sizeBasedVisibility('lengthKm', WATERWAY_SIZE_STOPS),
+                    layout: {
+                        ...baseLayout,
+                        'text-size': ['interpolate', ['linear'], ['get', 'lengthKm'],
+                            ...sizeStops.flatMap(([size, textSize]) => [size, textSize]),
+                        ],
+                    },
+                    paint: basePaint,
+                }} />
+            ))}
         </Source>
     }
 } as OverlayDefinition

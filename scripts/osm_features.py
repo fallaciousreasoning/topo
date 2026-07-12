@@ -126,6 +126,14 @@ def load_fallback_points(osm_features, places_path, fallback_types):
     is community-mapped, so it has gaps). For any gazetteer entry of a type in
     fallback_types with no matching OSM name, return a Point feature instead,
     so it still shows up as a label even without real line/polygon geometry.
+
+    The gazetteer itself sometimes carries more than one name record for the
+    same real-world feature at the exact same coordinates - typically a
+    current official name alongside a superseded older spelling (e.g. "Naumann
+    Range" / "Neumann Range"). Matching is therefore done per-coordinate, not
+    just per-name: if any name recorded at a given point matches an OSM
+    feature, every other name at that same point is treated as already covered
+    too, rather than being added as a duplicate point label.
     """
     if not os.path.exists(places_path):
         print(f'  {places_path} not found, skipping gazetteer fallback points')
@@ -138,20 +146,35 @@ def load_fallback_points(osm_features, places_path, fallback_types):
     for feature in osm_features:
         matched_names |= name_variants(feature['properties']['name'])
 
+    candidates = [
+        place for place in places
+        if place.get('type') in fallback_types and in_nz_bbox(place['lat'], place['lon'])
+    ]
+
+    covered_coordinates = {
+        (round(place['lon'], 5), round(place['lat'], 5))
+        for place in candidates
+        if place['name'] in matched_names
+    }
+
     fallback_features = []
-    for place in places:
-        if place.get('type') not in fallback_types:
+    seen_coordinates = set()
+    for place in candidates:
+        coordinates = (round(place['lon'], 5), round(place['lat'], 5))
+        if coordinates in covered_coordinates:
             continue
-        if place['name'] in matched_names:
+        # Also collapse duplicate gazetteer name records for the same feature
+        # that *aren't* covered by OSM - only the first name at a given point
+        # becomes a fallback label, not one per alternate spelling.
+        if coordinates in seen_coordinates:
             continue
-        if not in_nz_bbox(place['lat'], place['lon']):
-            continue
+        seen_coordinates.add(coordinates)
 
         fallback_features.append({
             'type': 'Feature',
             'geometry': {
                 'type': 'Point',
-                'coordinates': [round(place['lon'], 5), round(place['lat'], 5)],
+                'coordinates': list(coordinates),
             },
             'properties': {
                 'name': place['name'],
