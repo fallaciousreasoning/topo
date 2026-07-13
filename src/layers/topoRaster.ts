@@ -39,6 +39,9 @@ export function createTopoRasterSources(blend: number) {
       tiles: [hillshade50],
       tileSize: 128,
       minzoom: 12,
+      // Temporary: stop fetching past z16, MapLibre will overzoom (stretch) the z16 tiles
+      // for higher map zooms instead.
+      maxzoom: 16,
     },
     topo250: {
       id: "topo250",
