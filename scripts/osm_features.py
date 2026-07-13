@@ -97,6 +97,17 @@ def simplify(points, epsilon):
 SIMPLIFY_TOLERANCE_DEGREES = 0.004
 
 
+def polygon_size_km(ring):
+    """"Characteristic size" (sqrt of bbox width * height) of a lon/lat ring - a
+    cheap stand-in for true shape size, used to scale polygon labels."""
+    lons = [c[0] for c in ring]
+    lats = [c[1] for c in ring]
+    mid_lat = (min(lats) + max(lats)) / 2
+    width_km = (max(lons) - min(lons)) * 111.32 * math.cos(math.radians(mid_lat))
+    height_km = (max(lats) - min(lats)) * 110.57
+    return math.sqrt(max(width_km, 0.01) * max(height_km, 0.01))
+
+
 def length_km(coordinates):
     """Great-circle length of a line, used to prioritise long features over short ones."""
     R = 6371.0

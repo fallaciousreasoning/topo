@@ -1,21 +1,25 @@
 import { BaseLayerDefinition, OverlayDefinition } from "./config";
 import contours from "./contours";
+import geologicalFeatures from "./geologicalFeatures";
 import glaciers from "./glaciers";
 import hillshade from "./hillshade";
 import hunting from "./hunting";
 import huts from "./huts";
+import landforms from "./landforms";
 import linzAerial from "./linzAerial";
 import linzVector from "./linzVector";
 import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
 import points from "./points";
+import protectedAreas from "./protectedAreas";
 import ridges from "./ridges";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import utmGrid from "./utmGrid";
 import tracksLayer from "./TracksLayer";
 import valleys from "./valleys";
+import waterFeatures from "./waterFeatures";
 import waterways from "./waterways";
 
 export const extraData = {
@@ -44,6 +48,10 @@ export const overlays: OverlayDefinition[] = [
     glaciers,
     valleys,
     waterways,
+    landforms,
+    waterFeatures,
+    geologicalFeatures,
+    protectedAreas,
     tracksLayer,
     hunting,
 ]
