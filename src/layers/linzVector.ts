@@ -167,7 +167,7 @@ export default {
         },
         "paint": {
             "fill-antialias": false,
-            "fill-color": "rgba(204, 222, 195, 1)",
+            "fill-color": "rgba(218, 222, 188, 1)",
             "fill-outline-color": "rgba(210, 210, 210, 0.27)"
         },
         "source": "topoVector",
@@ -192,7 +192,7 @@ export default {
             "visibility": "visible"
         },
         "paint": {
-            "fill-color": "rgba(199, 228, 183, 1)",
+            "fill-color": "rgba(214, 220, 183, 1)",
             "fill-outline-color": {
                 "stops": [
                     [
@@ -238,11 +238,11 @@ export default {
                 "stops": [
                     [
                         6,
-                        "rgba(157, 201, 139, 1)"
+                        "rgba(198, 213, 178, 1)"
                     ],
                     [
                         11,
-                        "rgba(194, 222, 171, 1)"
+                        "rgba(215, 224, 192, 1)"
                     ]
                 ]
             },
@@ -416,19 +416,19 @@ export default {
                 "stops": [
                     [
                         6,
-                        "rgba(153, 191, 140, 1)"
+                        "rgba(207, 212, 175, 1)"
                     ],
                     [
                         9,
-                        "rgba(150, 185, 136, 1)"
+                        "rgba(204, 206, 171, 1)"
                     ],
                     [
                         11,
-                        "rgba(144, 183, 125, 1)"
+                        "rgba(198, 204, 160, 1)"
                     ],
                     [
                         14,
-                        "rgba(154, 191, 133, 1)"
+                        "rgba(208, 212, 168, 1)"
                     ]
                 ]
             },

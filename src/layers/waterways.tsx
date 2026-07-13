@@ -3,9 +3,16 @@ import type { OverlayDefinition } from "./config";
 import Layer from "../map/Layer";
 import Source from "../map/Source";
 import { usePromise } from "../hooks/usePromise";
+import { useHideBaseMapLayers } from "../hooks/useHideBaseMapLayers";
 import { sizeBasedVisibility, realWorldPixels } from "./labelSizing";
 
 const WATERWAYS_URL = '/data/waterways.json'
+
+// LINZ's base map labels named rivers (e.g. "Omeoroa River") itself, straight
+// off the water_lines source-layer - hidden while this overlay is on so a
+// river's name doesn't show twice. It has no equivalent stream-names layer,
+// so streams don't need the same treatment.
+const LINZ_RIVER_NAME_LAYERS = ['All-Waterway-River-Names']
 
 // Short minor streams only reveal themselves once zoomed in past 12; long major
 // rivers show from a wide view. Continuous by length rather than the river/stream
@@ -75,6 +82,7 @@ export default {
     cacheable: false,
     source: () => {
         const { result: data } = usePromise(getWaterways, [])
+        useHideBaseMapLayers(LINZ_RIVER_NAME_LAYERS)
 
         if (!data) return null
 
