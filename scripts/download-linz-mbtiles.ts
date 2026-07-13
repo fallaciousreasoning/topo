@@ -48,16 +48,30 @@ function totalSizeFrom(response: Response, startByte: number): number | undefine
     return length ? startByte + parseInt(length, 10) : undefined;
 }
 
+/**
+ * The export URL is itself a redirect to a presigned, short-lived S3 URL.
+ * CloudFront appears to cache that redirect's tiny JSON body and will
+ * evaluate a Range header against the *cached* body rather than forwarding
+ * it upstream, so a Range request sent straight to the export URL can 416
+ * even though the real file is huge. Follow the redirect ourselves first,
+ * un-ranged, then send the Range header to the actual S3 URL it resolves to.
+ */
 async function fetchRange(url: string, startByte: number): Promise<Response> {
-    const response = await fetch(url, {
-        headers: startByte > 0 ? { Range: `bytes=${startByte}-` } : {},
-    });
-    if (response.status === 404) {
+    const redirect = await fetch(url, { redirect: 'manual' });
+    if (redirect.status === 404) {
         throw new Error('Export not found (404) - check the tileset id is correct.');
     }
-    if (response.status === 403) {
+    if (redirect.status === 403) {
         throw new Error('Request rejected (403) - check LINZ_BASEMAPS_KEY is valid and has export access.');
     }
+    const location = redirect.headers.get('location');
+    if (!location) {
+        throw new Error(`Expected a redirect from the export endpoint, got ${redirect.status} ${redirect.statusText}`);
+    }
+
+    const response = await fetch(location, {
+        headers: startByte > 0 ? { Range: `bytes=${startByte}-` } : {},
+    });
     if (!response.ok) {
         throw new Error(`Unexpected response ${response.status} ${response.statusText}`);
     }
