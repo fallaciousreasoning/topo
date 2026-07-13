@@ -238,6 +238,24 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
               <span>{hut.numberOfBunks}</span>
             </div>
           )}
+          {hut.hutbaggerRating !== undefined && (
+            <div className="mb-2">
+              <span className="font-bold">Hut Bagger rating: </span>
+              <span>
+                {repeatString('★', Math.round(hut.hutbaggerRating))}
+                {repeatString('☆', 5 - Math.round(hut.hutbaggerRating))}
+                {hut.hutbaggerRatingCount !== undefined && (
+                  <span className="text-gray-500 text-sm"> ({hut.hutbaggerRatingCount})</span>
+                )}
+              </span>
+            </div>
+          )}
+          {hut.elevationM !== undefined && (
+            <div className="mb-2">
+              <span className="font-bold">Elevation: </span>
+              <span>{hut.elevationM}m</span>
+            </div>
+          )}
           {hut.bookable !== undefined && (
             <div className="mb-2">
               <span className="font-bold">Bookable: </span>
@@ -266,6 +284,28 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
               <span>{hut.place}</span>
             </div>
           )}
+          {hut.hutbaggerWaterSource && (
+            <div className="mb-2">
+              <span className="font-bold">Water source: </span>
+              <span>{hut.hutbaggerWaterSource}</span>
+            </div>
+          )}
+          {hut.hutbaggerAmenities && hut.hutbaggerAmenities.length > 0 && (
+            <div className="mb-2">
+              <span className="font-bold">Amenities (Hut Bagger):</span>
+              <ul className="list-disc ml-6 mt-1">
+                {hut.hutbaggerAmenities.map((amenity, i) => (
+                  <li key={i}>{amenity}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {hut.hutbaggerNotes && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-1">History</h5>
+              <TopoText text={hut.hutbaggerNotes} />
+            </div>
+          )}
           {/* Gallery images */}
           {hut.gallery && hut.gallery.length > 0 && (() => {
             const galleryImages = hut.gallery.map((image, i) => {
@@ -290,8 +330,35 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
 
             return <ImageGallery images={galleryImages} className="mb-4" />;
           })()}
-          {hut.staticLink && (
-            <div className="mt-4">
+          {hut.hutbaggerPhotos && hut.hutbaggerPhotos.length > 0 && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-2">Hut Bagger photos</h5>
+              <ImageGallery
+                images={hut.hutbaggerPhotos.map((image, i) => ({
+                  url: image.url,
+                  alt: image.caption || `${hut.name} photo ${i + 1}`,
+                  caption: image.caption,
+                }))}
+              />
+            </div>
+          )}
+          {hut.hutbaggerComments && hut.hutbaggerComments.length > 0 && (
+            <div className="mb-4">
+              <h5 className="font-semibold mb-2">Comments</h5>
+              <div className="flex flex-col gap-3">
+                {hut.hutbaggerComments.map((comment, i) => (
+                  <div key={i} className="border-l-2 border-gray-200 pl-3">
+                    <div className="text-sm text-gray-500">
+                      {comment.user}{comment.user && comment.date && ' • '}{comment.date}
+                    </div>
+                    <div>{comment.text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="mt-4 flex flex-col gap-1">
+            {hut.staticLink && (
               <a
                 href={hut.staticLink}
                 target="_blank"
@@ -300,8 +367,18 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
               >
                 View on DOC website
               </a>
-            </div>
-          )}
+            )}
+            {hut.hutbaggerUrl && (
+              <a
+                href={hut.hutbaggerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                View on Hut Bagger
+              </a>
+            )}
+          </div>
         </div>
       )}
 

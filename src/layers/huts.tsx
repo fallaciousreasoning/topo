@@ -13,10 +13,16 @@ export interface HutGalleryImage {
     caption?: string;
 }
 
+export interface HutBaggerComment {
+    user?: string;
+    date?: string;
+    text: string;
+}
+
 export interface Hut {
-    assetId: number;
+    assetId?: number;
     name: string;
-    status: string;
+    status?: string;
     region?: string;
     lat: number;
     lon: number;
@@ -34,6 +40,18 @@ export interface Hut {
     staticLink?: string;
     place?: string;
     type?: string;
+    // Hut Bagger (hutbagger.co.nz) data
+    hutbaggerUrl?: string;
+    hutbaggerRating?: number;
+    hutbaggerRatingCount?: number;
+    hutbaggerNotes?: string;
+    hutbaggerAmenities?: string[];
+    hutbaggerWaterSource?: string;
+    hutbaggerPhotos?: HutGalleryImage[];
+    hutbaggerComments?: HutBaggerComment[];
+    topo50Ref?: string;
+    nztmRef?: string;
+    elevationM?: number;
 }
 
 let hutsPromise: Promise<Hut[]>
