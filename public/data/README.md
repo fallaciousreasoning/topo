@@ -45,8 +45,66 @@ Named rivers and streams (`waterway=river`/`waterway=stream`) from OpenStreetMap
 than the ~3.5k rivers. No gazetteer fallback here - OSM's waterway coverage is already dense enough,
 and the gazetteer's own stream count (~17k) would dwarf everything else in this dataset.
 
+## `landforms.json`
+
+    python scripts/update_landforms.py
+
+Named cliffs, reefs, islands, bays, saddles, passes and plateaus - each has a well-established,
+specific OSM tag (`natural=cliff`, `natural=reef`, `place=island`/`islet`, `natural=bay`,
+`natural=saddle`, `mountain_pass=yes`, `natural=plateau`), fetched the same way as `ridges.json`,
+with a gazetteer fallback per type.
+
+`basin`, `canyon`, `knoll`, `peninsula`, `isthmus`, `cape` and `point` gazetteer entries have no
+OSM tag specific enough to query for, so they're shipped directly as Point features straight from
+`places.json`, no Overpass lookup.
+
+## `waterFeatures.json`
+
+    python scripts/update_water_features.py
+
+Named lakes (`natural=water`+`water=lake`, Polygon), wetlands (`natural=wetland`, Polygon),
+waterfalls (`waterway=waterfall`), springs (`natural=spring`) and hot springs
+(`natural=hot_spring`) from OpenStreetMap, with a gazetteer fallback per type.
+
+`pool` and `ford` gazetteer entries have no specific OSM tag, shipped as plain Points.
+
+## `geologicalFeatures.json`
+
+    python scripts/update_geological_features.py
+
+Named volcanoes (`natural=volcano`) and cave entrances (`natural=cave_entrance` - also covers the
+gazetteer's `cave` type) from OpenStreetMap, with a gazetteer fallback per type.
+
+`crater` gazetteer entries have no specific OSM tag, shipped as plain Points.
+
+## `protectedAreas.json`
+
+    python scripts/update_protected_areas.py
+
+Named reserves, parks and historic sites (`boundary=protected_area`/`leisure=nature_reserve`) from
+OpenStreetMap - unlike the other scripts here, this one folds a whole cluster of gazetteer types
+(`scenic reserve`, `recreation reserve`, `historic site`, `government purpose reserve`, `forest`,
+`historic reserve`, `scientific reserve`, `national park`, `conservation park`, `nature reserve`,
+`marine reserve`, `wildlife management area`, `sanctuary area`) into one `reserve` output type,
+since OSM's tagging doesn't reliably distinguish between them. Most of the largest, best-known
+parks (Fiordland, Tongariro, Aoraki/Mount Cook, ...) are OSM multipolygon relations rather than
+simple ways, reduced to a Point at the relation's bounding-box centre, same as `glaciers.json`.
+
+## Excluded gazetteer types
+
+The NZGB Gazetteer (`places.json`) has ~100 distinct place `type`s in total. Beyond what's listed
+above, deliberately not covered: administrative places (`locality`, `suburb`, `town`, `city`,
+`village`, `local authority`) and `peak`/`trig station` are already shown by the LINZ vector base
+map itself; infrastructure (`railway station`, `railway line`, `road`, `bridge`, `building`) is
+likewise already on the base map; offshore bathymetric features (`seamount`, `guyot`, `trough`,
+`bank`, `shoal`, `fracture zone`, `sea valley`) have no real relevance to a land-based hiking map
+and barely any OSM coverage to query for; and generic/junk types (`site`, `place`, `area`,
+`facility`, `amenity area`, `historic antarctic`) are too vague to mean anything as a distinct
+overlay.
+
 ## Shared code
 
-`update_ridges.py`, `update_glaciers.py`, `update_valleys.py`, and `update_waterways.py` all pull
-their Overpass fetching, RDP line simplification, and gazetteer-fallback logic from
-`scripts/osm_features.py`.
+`update_ridges.py`, `update_glaciers.py`, `update_valleys.py`, `update_waterways.py`,
+`update_landforms.py`, `update_water_features.py`, `update_geological_features.py`, and
+`update_protected_areas.py` all pull their Overpass fetching, RDP line simplification, and
+gazetteer-fallback logic from `scripts/osm_features.py`.

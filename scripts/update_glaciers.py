@@ -27,7 +27,7 @@ import json
 import math
 
 import polygon_shape
-from osm_features import bbox_clause, fetch_overpass, first, simplify, length_km, load_fallback_points
+from osm_features import bbox_clause, fetch_overpass, first, simplify, length_km, load_fallback_points, polygon_size_km
 
 CACHE_DIR = '.cache/glaciers'
 PLACES_PATH = './public/data/places.json'
@@ -67,17 +67,6 @@ def shared_properties(tags):
     if tags.get('wikidata'):
         properties['wikidata'] = tags['wikidata']
     return properties
-
-
-def polygon_size_km(ring):
-    """Fallback "characteristic size" (sqrt of bbox width * height) for the rare
-    case the medial axis analysis below can't find any inscribed circle at all."""
-    lons = [c[0] for c in ring]
-    lats = [c[1] for c in ring]
-    mid_lat = (min(lats) + max(lats)) / 2
-    width_km = (max(lons) - min(lons)) * 111.32 * math.cos(math.radians(mid_lat))
-    height_km = (max(lats) - min(lats)) * 110.57
-    return math.sqrt(max(width_km, 0.01) * max(height_km, 0.01))
 
 
 def path_length_km(path_xy):
