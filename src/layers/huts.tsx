@@ -13,12 +13,6 @@ export interface HutGalleryImage {
     caption?: string;
 }
 
-export interface HutBaggerComment {
-    user?: string;
-    date?: string;
-    text: string;
-}
-
 export interface Hut {
     assetId?: number;
     name: string;
@@ -42,13 +36,10 @@ export interface Hut {
     type?: string;
     // Hut Bagger (hutbagger.co.nz) data
     hutbaggerUrl?: string;
-    hutbaggerRating?: number;
-    hutbaggerRatingCount?: number;
     hutbaggerNotes?: string;
     hutbaggerAmenities?: string[];
     hutbaggerWaterSource?: string;
     hutbaggerPhotos?: HutGalleryImage[];
-    hutbaggerComments?: HutBaggerComment[];
     topo50Ref?: string;
     nztmRef?: string;
     elevationM?: number;

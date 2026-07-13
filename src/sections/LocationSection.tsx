@@ -238,18 +238,6 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
               <span>{hut.numberOfBunks}</span>
             </div>
           )}
-          {hut.hutbaggerRating !== undefined && (
-            <div className="mb-2">
-              <span className="font-bold">Hut Bagger rating: </span>
-              <span>
-                {repeatString('★', Math.round(hut.hutbaggerRating))}
-                {repeatString('☆', 5 - Math.round(hut.hutbaggerRating))}
-                {hut.hutbaggerRatingCount !== undefined && (
-                  <span className="text-gray-500 text-sm"> ({hut.hutbaggerRatingCount})</span>
-                )}
-              </span>
-            </div>
-          )}
           {hut.elevationM !== undefined && (
             <div className="mb-2">
               <span className="font-bold">Elevation: </span>
@@ -340,21 +328,6 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
                   caption: image.caption,
                 }))}
               />
-            </div>
-          )}
-          {hut.hutbaggerComments && hut.hutbaggerComments.length > 0 && (
-            <div className="mb-4">
-              <h5 className="font-semibold mb-2">Comments</h5>
-              <div className="flex flex-col gap-3">
-                {hut.hutbaggerComments.map((comment, i) => (
-                  <div key={i} className="border-l-2 border-gray-200 pl-3">
-                    <div className="text-sm text-gray-500">
-                      {comment.user}{comment.user && comment.date && ' • '}{comment.date}
-                    </div>
-                    <div>{comment.text}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
           <div className="mt-4 flex flex-col gap-1">

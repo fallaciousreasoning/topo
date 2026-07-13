@@ -46,8 +46,8 @@ def discover_hut_urls():
 
 def extract_gblhut(html):
     """The hut detail page embeds a `window.gblHut = {...};` JSON blob with
-    everything the Vue frontend needs (location, amenities, ratings, comments,
-    photos, and a link back to the matching DOC page if one exists)."""
+    everything the Vue frontend needs (location, amenities, photos, and a
+    link back to the matching DOC page if one exists)."""
     m = re.search(r'window\.gblHut = (\{.*\});', html)
     if not m:
         return None
@@ -81,17 +81,6 @@ def normalize(data, url):
             photo['caption'] = p['comment']
         photos.append(photo)
 
-    comments = []
-    for c in data.get('comments') or []:
-        if not c.get('comment'):
-            continue
-        user = c.get('user') or {}
-        comments.append({
-            'user': user.get('name'),
-            'date': c.get('date'),
-            'text': c.get('comment'),
-        })
-
     return {
         'hutbaggerUrl': url,
         'hutbaggerName': data.get('name'),
@@ -104,11 +93,8 @@ def normalize(data, url):
         'topo50Ref': loc.get('topo50'),
         'nztmRef': loc.get('nztm'),
         'elevationM': data.get('elevation'),
-        'hutbaggerRating': data.get('rating'),
-        'hutbaggerRatingCount': len(data.get('ratings') or []),
         'hutbaggerNotes': data.get('notes') or None,
         'hutbaggerPhotos': photos,
-        'hutbaggerComments': comments,
         'lat': float(loc['lat']) if loc.get('lat') else None,
         'lon': float(loc['long']) if loc.get('long') else None,
         'docHutLink': data.get('docHutLink') or None,
@@ -245,8 +231,7 @@ def update_huts():
             and haversine_metres(other['lat'], other['lon'], hut['lat'], hut['lon']) <= DEDUPE_MAX_METRES
         ), None)
         if dupe:
-            if len(hut.get('hutbaggerComments') or []) + len(hut.get('hutbaggerPhotos') or []) > \
-                    len(dupe.get('hutbaggerComments') or []) + len(dupe.get('hutbaggerPhotos') or []):
+            if len(hut.get('hutbaggerPhotos') or []) > len(dupe.get('hutbaggerPhotos') or []):
                 deduped[deduped.index(dupe)] = hut
         else:
             deduped.append(hut)
