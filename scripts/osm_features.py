@@ -54,6 +54,37 @@ def first(value):
     return value.split(';')[0]
 
 
+CARDINAL_DIRECTIONS = {
+    'n': 0, 'north': 0,
+    'ne': 45, 'northeast': 45, 'north-east': 45,
+    'e': 90, 'east': 90,
+    'se': 135, 'southeast': 135, 'south-east': 135,
+    's': 180, 'south': 180,
+    'sw': 225, 'southwest': 225, 'south-west': 225,
+    'w': 270, 'west': 270,
+    'nw': 315, 'northwest': 315, 'north-west': 315,
+}
+
+
+def parse_direction(value):
+    """
+    Parse OSM's direction=* tag into a compass bearing in degrees (0-359).
+    Accepts a plain bearing ("119"), a ;-separated list (takes the first, same
+    as ref:linz:place_id), or a cardinal/intercardinal name ("north-west").
+    Returns None if the value can't be parsed.
+    """
+    value = first(value)
+    if not value:
+        return None
+    value = value.strip().lower()
+    if value in CARDINAL_DIRECTIONS:
+        return CARDINAL_DIRECTIONS[value]
+    try:
+        return round(float(value)) % 360
+    except ValueError:
+        return None
+
+
 def simplify(points, epsilon):
     """
     Ramer-Douglas-Peucker simplification.

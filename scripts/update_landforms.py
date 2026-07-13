@@ -15,6 +15,11 @@ each have a well-established, specific OSM tag:
   pass      -> mountain_pass=yes node (Point)
   plateau   -> natural=plateau way (Polygon)
 
+Many saddle/pass nodes also carry a direction=* tag - the compass bearing to
+cross the pass - captured as properties.direction so the map layer can rotate
+the col symbol to actually run across the ridge, instead of every one facing
+the same fixed way.
+
 As with update_ridges.py/update_glaciers.py/update_valleys.py, any gazetteer
 entry of one of these types with no matching OSM name is added as a Point
 fallback feature.
@@ -29,7 +34,7 @@ point.
 import json
 
 from osm_features import (
-    bbox_clause, fetch_overpass, first, simplify, length_km, polygon_size_km,
+    bbox_clause, fetch_overpass, first, parse_direction, simplify, length_km, polygon_size_km,
     load_fallback_points, SIMPLIFY_TOLERANCE_DEGREES,
 )
 
@@ -94,6 +99,10 @@ def shared_properties(tags, output_type):
         properties['linzPlaceId'] = first(tags['ref:linz:place_id'])
     if tags.get('wikidata'):
         properties['wikidata'] = tags['wikidata']
+    if output_type in ('saddle', 'pass') and tags.get('direction'):
+        direction = parse_direction(tags['direction'])
+        if direction is not None:
+            properties['direction'] = direction
     return properties
 
 

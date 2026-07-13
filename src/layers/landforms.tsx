@@ -34,6 +34,12 @@ const textPaint = {
     'text-halo-width': 1.2,
 } as const
 
+// Only types with a matching LINZ Topo50 sprite icon get one - everything else
+// stays text-only rather than reusing an icon that would misrepresent it.
+// saddle/pass share the same "col" symbol LINZ itself uses for both (see e.g.
+// "Engineer Col" on the raster maps - two opposing arcs).
+const ICON_POINT_TYPES: [string, ...string[]] = ['saddle', 'pass']
+
 export default {
     id: 'landforms',
     name: 'Landform Names',
@@ -58,6 +64,19 @@ export default {
                 paint: {
                     'fill-color': '#a08a4a',
                     'fill-opacity': 0.15,
+                }
+            }} />
+            {/* Cliff edges get LINZ Topo50's own hachured cliff symbol, tiled along
+                the line - all LineString features in this dataset are cliffs. */}
+            <Layer layer={{
+                id: 'landforms-line-cliff',
+                type: 'line',
+                source: 'landforms',
+                minzoom: LANDFORMS_MINZOOM,
+                filter: ['==', ['geometry-type'], 'LineString'],
+                paint: {
+                    'line-pattern': 'cliff_edge',
+                    'line-width': 16,
                 }
             }} />
             <Layer layer={{
@@ -105,9 +124,49 @@ export default {
                 type: 'symbol',
                 source: 'landforms',
                 minzoom: LANDFORMS_MINZOOM,
-                filter: ['==', ['geometry-type'], 'Point'],
+                filter: ['all',
+                    ['==', ['geometry-type'], 'Point'],
+                    ['!', ['in', ['get', 'type'], ['literal', ICON_POINT_TYPES]]],
+                ],
                 layout: {
                     'text-field': ['get', 'name'],
+                    'text-size': ['interpolate', ['linear'], ['zoom'],
+                        11, 11,
+                        15, 14,
+                    ],
+                    'text-font': ['Open Sans Italic'],
+                    'text-letter-spacing': 0.06,
+                },
+                paint: textPaint,
+            }} />
+            <Layer layer={{
+                id: 'landforms-label-point-icon',
+                type: 'symbol',
+                source: 'landforms',
+                minzoom: LANDFORMS_MINZOOM,
+                filter: ['all',
+                    ['==', ['geometry-type'], 'Point'],
+                    ['in', ['get', 'type'], ['literal', ICON_POINT_TYPES]],
+                ],
+                layout: {
+                    'icon-image': 'saddle_pnt',
+                    'icon-size': 1.2,
+                    // Anchored at the icon's own centre (not 'bottom') so it rotates in
+                    // place around the actual saddle coordinate, rather than swinging
+                    // its base around that point as it turns to face different ways.
+                    'icon-anchor': 'center',
+                    // Most saddle/pass nodes carry OSM's direction=* tag - the compass
+                    // bearing of travel *through* the pass (i.e. along the valley/road),
+                    // not the ridge itself. The col symbol's two arcs need to open along
+                    // the ridge, which runs transverse to that - hence the +90. Falls
+                    // back to unrotated for the ~15% with no direction tag. 'map'
+                    // alignment keeps it correct relative to true north as the map
+                    // itself is panned/rotated.
+                    'icon-rotate': ['+', 90, ['coalesce', ['get', 'direction'], 0]],
+                    'icon-rotation-alignment': 'map',
+                    'text-field': ['get', 'name'],
+                    'text-anchor': 'top',
+                    'text-offset': [0, 1.1],
                     'text-size': ['interpolate', ['linear'], ['zoom'],
                         11, 11,
                         15, 14,

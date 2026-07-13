@@ -32,6 +32,11 @@ const textPaint = {
     'text-halo-width': 1.2,
 } as const
 
+// Only "historic site" has a matching LINZ Topo50 sprite icon - the OSM-derived
+// "reserve" bucket (most of this dataset) has no reliable subtype to icon by,
+// and the other gazetteer-only subtypes have no equivalent symbol.
+const ICON_POINT_TYPES: [string, ...string[]] = ['historic site']
+
 export default {
     id: 'protectedAreas',
     name: 'Reserve & Park Names',
@@ -96,9 +101,37 @@ export default {
                 type: 'symbol',
                 source: 'protectedAreas',
                 minzoom: PROTECTED_AREAS_MINZOOM,
-                filter: ['==', ['geometry-type'], 'Point'],
+                filter: ['all',
+                    ['==', ['geometry-type'], 'Point'],
+                    ['!', ['in', ['get', 'type'], ['literal', ICON_POINT_TYPES]]],
+                ],
                 layout: {
                     'text-field': ['get', 'name'],
+                    'text-size': ['interpolate', ['linear'], ['zoom'],
+                        11, 10,
+                        15, 14,
+                    ],
+                    'text-font': ['Open Sans Italic'],
+                    'text-letter-spacing': 0.06,
+                },
+                paint: textPaint,
+            }} />
+            <Layer layer={{
+                id: 'protected-areas-label-point-icon',
+                type: 'symbol',
+                source: 'protectedAreas',
+                minzoom: PROTECTED_AREAS_MINZOOM,
+                filter: ['all',
+                    ['==', ['geometry-type'], 'Point'],
+                    ['in', ['get', 'type'], ['literal', ICON_POINT_TYPES]],
+                ],
+                layout: {
+                    'icon-image': 'historic_site_pnt',
+                    'icon-size': 1.2,
+                    'icon-anchor': 'bottom',
+                    'text-field': ['get', 'name'],
+                    'text-anchor': 'center',
+                    'text-offset': [0, 0.6],
                     'text-size': ['interpolate', ['linear'], ['zoom'],
                         11, 10,
                         15, 14,
