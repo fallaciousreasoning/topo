@@ -12,7 +12,7 @@ export default {
     cacheable: false,
     source: <Layer key="hillshade" layer={{
         id: 'hillshade', type: 'hillshade', source: 'terrainSource', paint: {
-            "hillshade-exaggeration": 0.1,
+            "hillshade-exaggeration": 0.12,
         }
     }} />
 } as OverlayDefinition

@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 """
-Strips vector source-layers (by default just `contours`) out of a LINZ
-topographic mbtiles export and writes the result to a new .mbtiles file.
+Strips vector data this app no longer needs from a LINZ topographic mbtiles
+export, and writes the result to a new .mbtiles file:
 
-This app renders its own contours client-side from a DEM (see
-src/layers/demSource.ts), so the `contours` layer baked into the LINZ vector
-export is dead weight - stripping it cuts the file size noticeably without
-changing anything the map actually shows.
+- The whole `contours` source-layer is dropped - this app renders its own
+  contours client-side from a DEM (see src/layers/demSource.ts), so LINZ's
+  copy baked into the vector export is dead weight.
+- Individual point features are dropped from the `pois` and `place_labels`
+  layers where they duplicate a type this app now renders itself, in its own
+  overlays sourced from OpenStreetMap (see src/layers/landforms.tsx,
+  waterFeatures.tsx, geologicalFeatures.tsx) - springs, cave entrances,
+  waterfalls, fords, wetlands, bays, islands, lakes, peninsulas. Scoped
+  tightly to those two layers, which exist purely to place a point label/icon
+  - never touches the shape/fill layers (water_polygons, land, etc), which
+  render regardless of name and stay untouched.
 
 Usage:
     python3 scripts/strip_contours.py <input.mbtiles> <output.mbtiles> [--layer contours]
@@ -26,38 +33,81 @@ import mapbox_vector_tile
 
 BATCH_SIZE = 2000
 
+# Individual features dropped from otherwise-kept layers, matched by
+# (field, value) pairs - a feature is dropped if any pair matches its
+# properties. Both layers are pure point label/icon layers (see module
+# docstring), so removing a feature here removes it from every style rule
+# that might reference it, generic "has name" fallback markers included.
+FEATURE_FILTERS = {
+    'pois': {
+        ('natural', 'spring'),
+        ('natural', 'cave_entrance'),
+        ('waterway', 'waterfall'),
+        ('waterway', 'ford'),
+        ('wetland', 'swamp'),
+    },
+    'place_labels': {
+        ('water', 'bay'),
+        ('place', 'island'),
+        ('place', 'lake'),
+        ('natural', 'peninsula'),
+    },
+}
 
-def strip_layers(data: bytes, layers_to_strip: set) -> bytes | None:
-    """Remove the given source-layers from a (possibly gzipped) MVT tile.
 
-    Returns the original bytes unchanged if none of the layers are present,
-    or None if stripping them leaves the tile with no layers at all.
+def matches_any(properties: dict, rules: set) -> bool:
+    return any(properties.get(field) == value for field, value in rules)
+
+
+def strip_layers(data: bytes, layers_to_drop: set, feature_filters: dict) -> tuple[bytes | None, int]:
+    """Remove the given source-layers, and any features matching
+    feature_filters, from a (possibly gzipped) MVT tile.
+
+    Returns (data, 0) unchanged if nothing in the tile is affected, or
+    (None, 0) if stripping leaves the tile with no layers at all.
     """
     is_gzipped = data[:2] == b'\x1f\x8b'
     raw = gzip.decompress(data) if is_gzipped else data
 
     tile = mapbox_vector_tile.decode(raw)
-    if not any(layer in tile for layer in layers_to_strip):
-        return data
+    touches_drop = any(layer in tile for layer in layers_to_drop)
+    touches_filter = any(layer in tile for layer in feature_filters)
+    if not touches_drop and not touches_filter:
+        return data, 0
 
-    for layer in layers_to_strip:
+    for layer in layers_to_drop:
         tile.pop(layer, None)
 
+    filtered_count = 0
+    for layer, rules in feature_filters.items():
+        if layer not in tile:
+            continue
+        features = tile[layer]['features']
+        kept = [f for f in features if not matches_any(f['properties'], rules)]
+        filtered_count += len(features) - len(kept)
+        if kept:
+            tile[layer] = dict(tile[layer], features=kept)
+        else:
+            tile.pop(layer, None)
+
     if not tile:
-        return None
+        return None, filtered_count
 
     formatted = [dict(value, name=name) for name, value in tile.items()]
     encoded = mapbox_vector_tile.encode(formatted)
-    return gzip.compress(encoded, 6) if is_gzipped else encoded
+    result = gzip.compress(encoded, 6) if is_gzipped else encoded
+    return result, filtered_count
 
 
 def _worker(task):
-    z, x, y, data, layers = task
-    return z, x, y, strip_layers(data, layers)
+    z, x, y, data, layers_to_drop, feature_filters = task
+    new_data, filtered_count = strip_layers(data, layers_to_drop, feature_filters)
+    return z, x, y, new_data, filtered_count
 
 
-def strip_metadata_layers(value: str, layers_to_strip: set) -> str:
-    """Drop the stripped layers from the `json` metadata's vector_layers list."""
+def strip_metadata_layers(value: str, layers_to_drop: set) -> str:
+    """Drop fully-removed layers from the `json` metadata's vector_layers list.
+    Layers only touched by feature_filters still exist, so keep their entry."""
     try:
         parsed = json.loads(value)
     except (TypeError, json.JSONDecodeError):
@@ -67,7 +117,7 @@ def strip_metadata_layers(value: str, layers_to_strip: set) -> str:
     if not vector_layers:
         return value
 
-    parsed['vector_layers'] = [l for l in vector_layers if l.get('id') not in layers_to_strip]
+    parsed['vector_layers'] = [l for l in vector_layers if l.get('id') not in layers_to_drop]
     return json.dumps(parsed)
 
 
@@ -85,7 +135,7 @@ def create_output_db(path: str) -> sqlite3.Connection:
     return conn
 
 
-def strip_contours(input_path: str, output_path: str, layers_to_strip: set):
+def strip_mbtiles(input_path: str, output_path: str, layers_to_drop: set, feature_filters: dict):
     src = sqlite3.connect(input_path)
     src_cur = src.cursor()
 
@@ -95,18 +145,20 @@ def strip_contours(input_path: str, output_path: str, layers_to_strip: set):
     src_cur.execute('SELECT name, value FROM metadata')
     for name, value in src_cur.fetchall():
         if name == 'json':
-            value = strip_metadata_layers(value, layers_to_strip)
+            value = strip_metadata_layers(value, layers_to_drop)
         dst_cur.execute('INSERT INTO metadata (name, value) VALUES (?, ?)', (name, value))
     dst.commit()
 
     src_cur.execute('SELECT count(*) FROM tiles')
     total = src_cur.fetchone()[0]
-    print(f'Stripping [{", ".join(sorted(layers_to_strip))}] from {total} tiles...')
+    filter_desc = ', '.join(f'{layer}[{len(rules)} rules]' for layer, rules in feature_filters.items())
+    print(f'Dropping layers [{", ".join(sorted(layers_to_drop))}], filtering [{filter_desc}] across {total} tiles...')
 
     src_cur.execute('SELECT zoom_level, tile_column, tile_row, tile_data FROM tiles')
 
     done = 0
-    dropped = 0
+    dropped_tiles = 0
+    filtered_features = 0
     start = time.time()
     with multiprocessing.Pool() as pool:
         while True:
@@ -114,10 +166,11 @@ def strip_contours(input_path: str, output_path: str, layers_to_strip: set):
             if not batch:
                 break
 
-            tasks = [(z, x, y, data, layers_to_strip) for z, x, y, data in batch]
-            for z, x, y, new_data in pool.imap_unordered(_worker, tasks, chunksize=32):
+            tasks = [(z, x, y, data, layers_to_drop, feature_filters) for z, x, y, data in batch]
+            for z, x, y, new_data, filtered_count in pool.imap_unordered(_worker, tasks, chunksize=32):
+                filtered_features += filtered_count
                 if new_data is None:
-                    dropped += 1
+                    dropped_tiles += 1
                     continue
                 dst_cur.execute(
                     'INSERT INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?, ?, ?, ?)',
@@ -137,7 +190,7 @@ def strip_contours(input_path: str, output_path: str, layers_to_strip: set):
 
     in_size = os.path.getsize(input_path)
     out_size = os.path.getsize(output_path)
-    print(f'Dropped {dropped} now-empty tiles.')
+    print(f'Dropped {dropped_tiles} now-empty tiles, filtered {filtered_features} individual features.')
     print(f'Done. {input_path} ({in_size / 1e6:.0f} MB) -> {output_path} ({out_size / 1e6:.0f} MB)')
 
 
@@ -146,11 +199,11 @@ def main():
     parser.add_argument('input', help='Source .mbtiles file')
     parser.add_argument('output', help='Destination .mbtiles file to write (overwritten if it exists)')
     parser.add_argument('--layer', action='append', dest='layers',
-                         help='Vector source-layer to strip (repeatable). Defaults to "contours".')
+                         help='Vector source-layer to drop entirely (repeatable). Defaults to "contours".')
     args = parser.parse_args()
 
-    layers_to_strip = set(args.layers) if args.layers else {'contours'}
-    strip_contours(args.input, args.output, layers_to_strip)
+    layers_to_drop = set(args.layers) if args.layers else {'contours'}
+    strip_mbtiles(args.input, args.output, layers_to_drop, FEATURE_FILTERS)
 
 
 if __name__ == '__main__':

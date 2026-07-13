@@ -28,10 +28,24 @@ export default function SearchSection() {
             lon
         })
 
-        map.flyTo({
-            animate: true,
-            center: [lon, lat]
-        })
+        // r.bbox is a real line/polygon extent (see src/search/places.ts) for
+        // places with actual shape data, rather than a degenerate point-sized
+        // box - fit the view to it so e.g. selecting "Fiordland National Park"
+        // or "Lake Taupō" shows the whole thing, not just its centre point at
+        // whatever zoom the map already happened to be at.
+        const [west, south, east, north] = r.bbox ?? [lon, lat, lon, lat]
+        if (west !== east || south !== north) {
+            map.fitBounds([west, south, east, north], {
+                animate: true,
+                padding: 60,
+                maxZoom: 16,
+            })
+        } else {
+            map.flyTo({
+                animate: true,
+                center: [lon, lat]
+            })
+        }
     }
 
     React.useEffect(() => {

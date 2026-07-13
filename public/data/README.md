@@ -90,12 +90,23 @@ since OSM's tagging doesn't reliably distinguish between them. Most of the large
 parks (Fiordland, Tongariro, Aoraki/Mount Cook, ...) are OSM multipolygon relations rather than
 simple ways, reduced to a Point at the relation's bounding-box centre, same as `glaciers.json`.
 
+## `peaks.json`
+
+    python scripts/update_peaks.py
+
+Gazetteer `peak` entries not already covered by the curated nz-mountains/climbnz dataset
+`src/layers/mountains.tsx` fetches live (climbnz only documents peaks notable enough to have
+climbing route info - ~1700 of the gazetteer's ~7300 named peaks). No Overpass lookup - a peak is
+already exactly a point at the gazetteer's own resolution, so there's no line/polygon upgrade to
+be had the way there is for the OSM-backed datasets above. `mountains.tsx` merges this file's
+features in alongside the climbnz ones at render time, as plain points with no route/photo data.
+
 ## Excluded gazetteer types
 
 The NZGB Gazetteer (`places.json`) has ~100 distinct place `type`s in total. Beyond what's listed
 above, deliberately not covered: administrative places (`locality`, `suburb`, `town`, `city`,
-`village`, `local authority`) and `peak`/`trig station` are already shown by the LINZ vector base
-map itself; infrastructure (`railway station`, `railway line`, `road`, `bridge`, `building`) is
+`village`, `local authority`) and `trig station` are already shown by the LINZ vector base map
+itself; infrastructure (`railway station`, `railway line`, `road`, `bridge`, `building`) is
 likewise already on the base map; offshore bathymetric features (`seamount`, `guyot`, `trough`,
 `bank`, `shoal`, `fracture zone`, `sea valley`) have no real relevance to a land-based hiking map
 and barely any OSM coverage to query for; and generic/junk types (`site`, `place`, `area`,
