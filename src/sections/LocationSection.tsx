@@ -232,7 +232,7 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
               <span>{hut.hutCategory}</span>
             </div>
           )}
-          {hut.numberOfBunks && (
+          {!!hut.numberOfBunks && (
             <div className="mb-2">
               <span className="font-bold">Bunks: </span>
               <span>{hut.numberOfBunks}</span>
