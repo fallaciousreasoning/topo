@@ -36,7 +36,7 @@ import PointSection from "./sections/PointSection";
 import DownloadsSection from "./sections/DownloadsSection";
 import Mountains from "./layers/mountains";
 import SectionContainer from "./sections/SectionContainer";
-import { OVERLAY_FLOOR_ID } from "./map/overlayFloor";
+import { HILLSHADE_FLOOR_ID, CONTOUR_FLOOR_ID, OVERLAY_FLOOR_ID } from "./map/overlayFloor";
 
 const initialTopoBlend = getLayerSetting('topo-raster', 'hillshadeBlend', hillshadeBlendSetting.default)
 const sources = baseLayers.flatMap((b) => {
@@ -106,13 +106,31 @@ function Layers() {
     <>
       <Terrain />
       {layers}
-      {/* Permanent, invisible marker sitting right above the base map and below
-          every overlay layer added below. Overlays that just want to render on
-          top of whatever's already there can keep using a plain addLayer() (no
-          beforeId), but an overlay that always needs to sit at the very bottom
-          of the overlay stack - contours, see contours.tsx - can pass
-          beforeId={OVERLAY_FLOOR_ID} to insert itself immediately above the
-          base map, no matter what order overlays were toggled on in. */}
+      {/* Permanent, invisible markers sitting right above the base map, fixing
+          three stacking slots below every other overlay - bottom to top:
+          hillshade, then contours (drawn over the hillshade so shading never
+          dulls the contour lines), then everything else. Overlays that just
+          want to render on top of whatever's already there can keep using a
+          plain addLayer() (no beforeId); one that needs a fixed slot passes
+          the anchor immediately above that slot as its beforeId - see
+          overlayFloor.ts, hillshade.tsx and contours.tsx. This holds no
+          matter what order overlays were toggled on in. */}
+      <Layer
+        layer={{
+          id: HILLSHADE_FLOOR_ID,
+          type: "background",
+          layout: { visibility: "none" },
+          paint: {},
+        }}
+      />
+      <Layer
+        layer={{
+          id: CONTOUR_FLOOR_ID,
+          type: "background",
+          layout: { visibility: "none" },
+          paint: {},
+        }}
+      />
       <Layer
         layer={{
           id: OVERLAY_FLOOR_ID,
