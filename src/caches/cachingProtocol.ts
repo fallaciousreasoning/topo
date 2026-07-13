@@ -1,6 +1,7 @@
 import { addProtocol, getData } from './protocols'
 import { getSetting, addListener as addSettingsListener } from '../utils/settings'
 import { isRasterUrl, loadRasterTileWithFallback } from './rasterFallback'
+import { loadVectorTileWithFallback } from './vectorFallback'
 
 interface NetworkInformation {
     saveData: boolean,
@@ -78,7 +79,7 @@ addProtocol('maybe-cache', async (params, abortController) => {
 
     const data = isRasterUrl(url)
         ? await loadRasterTileWithFallback(url, fetchExact)
-        : await fetchExact(url)
+        : await loadVectorTileWithFallback(url, fetchExact)
 
     return data ? { data } : failed
 })

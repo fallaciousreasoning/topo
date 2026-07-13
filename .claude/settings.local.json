@@ -28,7 +28,10 @@
       "Bash(magick z15.png -crop 128x128+0+0 -filter point -resize 512x512 z15_crop1.png)",
       "Bash(magick z16.png -crop 256x256+0+0 -filter point -resize 768x768 z16_crop1.png)",
       "Bash(magick z13.png -crop 128x128+64+64 -filter point -resize 512x512 z13_crop1.png)",
-      "Bash(magick z12.png -crop 128x128+0+64 -filter point -resize 512x512 z12_crop1.png)"
+      "Bash(magick z12.png -crop 128x128+0+64 -filter point -resize 512x512 z12_crop1.png)",
+      "Bash(git -C /home/jay/dev/topo log --oneline -- src/caches/rasterFallback.ts)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('pbf'\\)\\)\")"
     ],
     "deny": [],
     "ask": []

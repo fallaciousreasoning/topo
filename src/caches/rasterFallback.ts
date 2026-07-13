@@ -1,39 +1,12 @@
 // Shared by cachingProtocol.ts (main thread) and compositeWorker.ts (worker) so that a
 // missing raster tile (cache miss + network failure) can fall back to a cropped, upscaled
-// slice of an ancestor tile instead of leaving a hole in the map. Not used for vector tiles:
-// there's no sensible way to "zoom in" on a slice of vector geometry.
+// slice of an ancestor tile instead of leaving a hole in the map. See vectorFallback.ts for
+// the equivalent (geometry clip + rescale, run in a worker) for vector tiles.
 
-const TILE_PATH = /\/(\d+)\/(\d+)\/(\d+)(\.[a-zA-Z0-9]+)/
+import { parentUrl, parseTileUrl } from './tileUrl'
 
 export function isRasterUrl(url: string): boolean {
     return /\.(png|jpe?g|webp|avif)(?:\?|$)/i.test(url)
-}
-
-interface TileCoords {
-    z: number
-    x: number
-    y: number
-    ext: string
-    index: number
-    matchLength: number
-}
-
-function parseTileUrl(url: string): TileCoords | null {
-    const match = url.match(TILE_PATH)
-    if (!match || match.index === undefined) return null
-    return {
-        z: parseInt(match[1], 10),
-        x: parseInt(match[2], 10),
-        y: parseInt(match[3], 10),
-        ext: match[4],
-        index: match.index,
-        matchLength: match[0].length,
-    }
-}
-
-function parentUrl(url: string, coords: TileCoords): string {
-    const replacement = `/${coords.z - 1}/${coords.x >> 1}/${coords.y >> 1}${coords.ext}`
-    return url.slice(0, coords.index) + replacement + url.slice(coords.index + coords.matchLength)
 }
 
 async function cropQuadrant(data: ArrayBuffer, right: boolean, bottom: boolean): Promise<ArrayBuffer> {
