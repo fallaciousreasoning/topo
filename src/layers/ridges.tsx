@@ -24,8 +24,12 @@ const GLYPH_WIDTH_FACTOR = 0.6 // average glyph width as a fraction of font-size
 const FILL_FRACTION = 0.65 // target text width as a fraction of the feature's own on-screen length
 const SIZE_TO_FONT_K = PIXELS_PER_KM_AT_Z0 * FILL_FRACTION / GLYPH_WIDTH_FACTOR
 
+// Capped to line up with the max sizes used by comparable line labels
+// elsewhere (landforms' cliffs top out at 21, valleys typically top out
+// around 21 too) - this used to go up to 26, well past every other layer's
+// ceiling, so ridge names stood out as oversized next to everything else.
 const MIN_TEXT_SIZE = 11
-const MAX_TEXT_SIZE = 26
+const MAX_TEXT_SIZE = 21
 
 // GeoJSON sources get tiled internally, and a long feature only ever offers as
 // much straight line as fits within a single tile - the rest of its length is
@@ -214,7 +218,13 @@ export default {
                 layout: {
                     'text-field': ['get', 'name'],
                     'text-transform': 'uppercase',
-                    'text-size': 19,
+                    // Was a flat 19px, well above the other point-label layers at their
+                    // equivalent zooms (landforms 11-14, glaciers 9-14, valleys 15) - scaled
+                    // by zoom instead so it lines up with them rather than standing out.
+                    'text-size': ['interpolate', ['linear'], ['zoom'],
+                        9, 12,
+                        14, 16,
+                    ],
                     'text-font': ['Open Sans Medium'],
                     'text-letter-spacing': 0.08,
                 },

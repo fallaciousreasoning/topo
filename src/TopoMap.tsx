@@ -21,6 +21,7 @@ import MountainsSection from "./sections/MountainsSection";
 import SearchSection from "./sections/SearchSection";
 import SettingsSection from "./sections/SettingsSection";
 import MapLabel from "./components/MapLabel";
+import SelectedShapeHighlight from "./components/SelectedShapeHighlight";
 import MapCursor from "./components/MapCursor";
 import StatusBar from "./controls/StatusBar";
 import LocationSection from "./sections/LocationSection";
@@ -187,6 +188,7 @@ export default function TopoMap() {
       {sources}
       <TopoRasterBlendSync />
       <Layers />
+      <SelectedShapeHighlight />
       <MapLabel />
       <Drawing />
     </Map>

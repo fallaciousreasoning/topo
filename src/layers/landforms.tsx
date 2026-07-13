@@ -4,6 +4,9 @@ import Layer from "../map/Layer";
 import Source from "../map/Source";
 import { usePromise } from "../hooks/usePromise";
 import { sizeBasedVisibility } from "./labelSizing";
+import { useLayerHandler } from "../hooks/useLayerClickHandler";
+import { useRouteUpdater } from "../routing/router";
+import { useMap } from "../map/Map";
 
 const LANDFORMS_URL = '/data/landforms.json'
 
@@ -48,6 +51,50 @@ export default {
     cacheable: false,
     source: () => {
         const { result: data } = usePromise(getLandforms, [])
+        const updateRoute = useRouteUpdater()
+        const { map } = useMap()
+
+        useLayerHandler('click', 'landforms-fill-polygon', e => {
+            const feature = e.features?.[0]
+            const name = feature?.properties?.name
+            if (!name) return
+            updateRoute({
+                page: `location/${e.lngLat.lat}/${e.lngLat.lng}/${encodeURIComponent(name)}`
+            })
+        })
+        useLayerHandler('mouseenter', 'landforms-fill-polygon', () => {
+            map.getCanvas().style.cursor = 'pointer'
+        })
+        useLayerHandler('mouseleave', 'landforms-fill-polygon', () => {
+            map.getCanvas().style.cursor = ''
+        })
+
+        // Not every landform has OSM polygon/line geometry backing it (some are
+        // gazetteer-only, rendered as a plain point) - those never hit the
+        // fill-polygon layer above, so they need their own click handling.
+        const handlePointClick = (e: any) => {
+            const feature = e.features?.[0]
+            const name = feature?.properties?.name
+            if (!name || feature.geometry.type !== 'Point') return
+            const [lng, lat] = feature.geometry.coordinates
+            updateRoute({
+                page: `location/${lat}/${lng}/${encodeURIComponent(name)}`
+            })
+        }
+        useLayerHandler('click', 'landforms-label-point', handlePointClick)
+        useLayerHandler('click', 'landforms-label-point-icon', handlePointClick)
+        useLayerHandler('mouseenter', 'landforms-label-point', () => {
+            map.getCanvas().style.cursor = 'pointer'
+        })
+        useLayerHandler('mouseleave', 'landforms-label-point', () => {
+            map.getCanvas().style.cursor = ''
+        })
+        useLayerHandler('mouseenter', 'landforms-label-point-icon', () => {
+            map.getCanvas().style.cursor = 'pointer'
+        })
+        useLayerHandler('mouseleave', 'landforms-label-point-icon', () => {
+            map.getCanvas().style.cursor = ''
+        })
 
         if (!data) return null
 
