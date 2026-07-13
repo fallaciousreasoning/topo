@@ -16,8 +16,8 @@ Glaciers mapped as a single way become either:
 
 Glaciers mapped as a multipolygon relation (most of the larger, better-known
 ones - Tasman, Hooker, Fox, ...) have their "outer" member ways stitched back
-into a real ring (see assemble_rings/largest_outer_ring below) and go through
-the same thin/compact shape analysis as a single-way glacier. Inner rings
+into a real ring (see osm_features.largest_outer_ring) and go through the
+same thin/compact shape analysis as a single-way glacier. Inner rings
 (holes - nunataks poking through the ice) are ignored; irrelevant for sizing
 or labelling. If a relation's members don't assemble into a usable ring at
 all (Overpass returned an incomplete set, inconsistent roles, etc.) it falls
@@ -31,7 +31,10 @@ import json
 import math
 
 import polygon_shape
-from osm_features import bbox_clause, fetch_overpass, first, simplify, length_km, load_fallback_points, polygon_size_km
+from osm_features import (
+    bbox_clause, fetch_overpass, first, simplify, length_km, load_fallback_points, polygon_size_km,
+    largest_outer_ring, relation_bounds_point,
+)
 
 CACHE_DIR = '.cache/glaciers'
 PLACES_PATH = './public/data/places.json'
@@ -82,62 +85,6 @@ def shared_properties(tags):
 
 def path_length_km(path_xy):
     return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(path_xy, path_xy[1:]))
-
-
-def assemble_rings(paths):
-    """
-    Stitch open paths (each a list of [lon, lat], as returned by Overpass for
-    one member way) that share endpoints into closed rings. A multipolygon's
-    outer boundary is often split across many ways (see Hooker Glacier: 30
-    "outer" segments) rather than one single closed way, so they need to be
-    chained end-to-end - reversing a segment where necessary - before they're
-    usable as a polygon ring.
-    """
-    segments = [list(p) for p in paths if len(p) >= 2]
-    rings = []
-    while segments:
-        ring = segments.pop(0)
-        changed = True
-        while changed and ring[0] != ring[-1]:
-            changed = False
-            for i, seg in enumerate(segments):
-                if seg[0] == ring[-1]:
-                    ring.extend(seg[1:])
-                elif seg[-1] == ring[-1]:
-                    ring.extend(reversed(seg[:-1]))
-                elif seg[-1] == ring[0]:
-                    ring[0:0] = seg[:-1]
-                elif seg[0] == ring[0]:
-                    ring[0:0] = list(reversed(seg[1:]))
-                else:
-                    continue
-                segments.pop(i)
-                changed = True
-                break
-        rings.append(ring)
-    return rings
-
-
-def largest_outer_ring(relation, ways_by_id):
-    """
-    Assemble a relation's "outer" member ways into one or more closed rings
-    and return the largest (by point count - a cheap proxy for extent, good
-    enough to pick the main body over a stray disconnected fragment). Returns
-    None if the members don't assemble into any usable closed ring at all.
-    """
-    outer_paths = [
-        ways_by_id[member['ref']]
-        for member in relation.get('members', [])
-        if member.get('role') == 'outer' and member.get('type') == 'way' and member['ref'] in ways_by_id
-    ]
-    if not outer_paths:
-        return None
-
-    rings = [r for r in assemble_rings(outer_paths) if len(r) >= 4 and r[0] == r[-1]]
-    if not rings:
-        return None
-
-    return max(rings, key=len)
 
 
 def ring_to_feature(ring, properties):
@@ -217,18 +164,15 @@ def relation_to_feature(element, ways_by_id):
         if feature:
             return feature
 
-    bounds = element.get('bounds')
-    if not bounds:
+    point = relation_bounds_point(element)
+    if not point:
         return None
-
-    lon = round((bounds['minlon'] + bounds['maxlon']) / 2, 5)
-    lat = round((bounds['minlat'] + bounds['maxlat']) / 2, 5)
 
     return {
         'type': 'Feature',
         'geometry': {
             'type': 'Point',
-            'coordinates': [lon, lat],
+            'coordinates': point,
         },
         'properties': shared_properties(element.get('tags', {})),
     }

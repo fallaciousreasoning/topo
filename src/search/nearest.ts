@@ -1,4 +1,4 @@
-import { getDistance } from "../utils/distance";
+import { getDistance, distanceToGeometry } from "../utils/distance";
 import { getPlaces, type Place } from "./places";
 import db from "../caches/indexeddb";
 
@@ -12,12 +12,14 @@ export const closestPlace = (
   let closest: Place | undefined;
 
   for (const place of places) {
-    const distance = getDistance(
-      lat,
-      lon,
-      parseFloat(place.lat),
-      parseFloat(place.lon),
-    );
+    // Places with real line/polygon geometry (see src/search/places.ts) are
+    // measured against their actual shape - 0 if lat/lon falls inside a
+    // polygon, or the distance to the nearest edge/point otherwise - rather
+    // than against a bbox-centre point that can be well away from the shape
+    // itself for an irregular feature (e.g. a dogleg lake).
+    const distance = place.geometry
+      ? distanceToGeometry(lat, lon, place.geometry)
+      : getDistance(lat, lon, parseFloat(place.lat), parseFloat(place.lon));
     if (distance < minDistance || !closest) {
       minDistance = distance;
       closest = place;

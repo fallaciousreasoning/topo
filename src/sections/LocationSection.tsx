@@ -3,7 +3,7 @@ import { useRouteUpdater } from "../routing/router";
 import { useMap } from "../map/Map";
 import { getElevation } from "../layers/contours";
 import { closestPlace, findPlace } from "../search/nearest";
-import { getPlaces } from "../search/places";
+import { getPlaces, findPlaceByExactName, hasRealShape } from "../search/places";
 import db from "../caches/indexeddb";
 import { Point } from "../tracks/point";
 import round from "../utils/round";
@@ -17,6 +17,7 @@ import { getHuntingBlockByName, HuntingBlock } from "../layers/hunting";
 import TopoText from "../components/TopoText";
 import { repeatString } from "../utils/array";
 import ImageGallery from "../components/ImageGallery";
+import { setSelectedShape } from "../utils/selectedShapeSignal";
 
 const joinBits = (bits: (string | number | boolean | null | undefined)[]) => bits
     .filter(b => b)
@@ -66,12 +67,24 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
       getPlaces().then(places => closestPlace(lat, lng, places, 0.1)).catch(() => null),
     ])
       .then(([point, underlyingPlace]) => {
-        const placeLat = underlyingPlace ? parseFloat(underlyingPlace.lat) : lat;
-        const placeLng = underlyingPlace ? parseFloat(underlyingPlace.lon) : lng;
+        // closestPlace is a blind nearest-neighbour lookup within 100m, with no
+        // idea whether it's actually the feature that was clicked - a lake's
+        // centroid, for instance, can easily be nearer to an unrelated place
+        // (a reserve, a differently-spelled duplicate, ...) than to the lake's
+        // own gazetteer entry. Only trust it when we don't already have a name
+        // from the click itself, or when it's clearly the same feature
+        // (exact match, or a prefix match to allow for mountains.tsx appending
+        // "(1234m)" to the name).
+        const isSamePlace = !!underlyingPlace && !!name &&
+          (underlyingPlace.name === name || name.startsWith(underlyingPlace.name));
+        const resolvedPlace = !name || isSamePlace ? underlyingPlace : undefined;
+
+        const placeLat = resolvedPlace ? parseFloat(resolvedPlace.lat) : lat;
+        const placeLng = resolvedPlace ? parseFloat(resolvedPlace.lon) : lng;
 
         return Promise.all([
           getElevation([placeLat, placeLng], zoom).catch(() => null),
-          Promise.resolve(underlyingPlace ?? (name ? { name } : null)),
+          Promise.resolve(resolvedPlace ?? (name ? { name } : null)),
           Promise.resolve(point),
         ]);
       })
@@ -79,6 +92,27 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
         setElevation(elevationValue);
         setPlace(placeData);
         setExistingPoint(point);
+
+        // Outline the actual shape (see SelectedShapeHighlight) instead of
+        // just a pin, whenever the resolved place has real polygon/line
+        // geometry. Doing this here (rather than only where navigation is
+        // triggered - SearchSection, LongPressLookup) is what makes it work
+        // on a fresh page load/refresh too, since this effect re-resolves
+        // the place from scratch on mount regardless of how the location
+        // page was reached.
+        if (placeData && hasRealShape(placeData)) {
+          setSelectedShape(lat, lng, placeData.geometry);
+        } else if (name) {
+          // closestPlace's proximity threshold can miss a large, irregular
+          // polygon entirely (see findPlaceByExactName) even though we
+          // already have an exact name for it - fall back to a name-only
+          // lookup just for the shape.
+          findPlaceByExactName(name).then(exact => {
+            setSelectedShape(lat, lng, exact && hasRealShape(exact) ? exact.geometry! : null);
+          });
+        } else {
+          setSelectedShape(lat, lng, null);
+        }
 
         // Fetch full hut details if this is a hut
         if (placeData?.type === "hut" && placeData?.name) {

@@ -3,6 +3,7 @@ import React from "react"
 import Source from "../map/Source"
 import Layer from "../map/Layer"
 import { useMap } from "../map/Map"
+import { useMatchingSelectedShape } from "../utils/selectedShapeSignal"
 
 export default function () {
     const params = useParams()
@@ -13,7 +14,12 @@ export default function () {
     const locationMatch = isLocationPage ? params.page?.match(/^location\/([-\d.]+)\/([-\d.]+)/) : null
     const lat = locationMatch ? parseFloat(locationMatch[1]) : null
     const lng = locationMatch ? parseFloat(locationMatch[2]) : null
-    const show = lat !== null && lng !== null
+
+    // A polygon/line result gets its own outline (see SelectedShapeHighlight)
+    // instead of a pin - the outline alone conveys its real shape better
+    // than pin-plus-outline together would.
+    const highlightedShape = useMatchingSelectedShape(lat, lng)
+    const show = lat !== null && lng !== null && !highlightedShape
 
     React.useEffect(() => {
         if (!map) return

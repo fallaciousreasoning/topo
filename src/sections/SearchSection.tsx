@@ -34,7 +34,8 @@ export default function SearchSection() {
         // or "Lake Taupō" shows the whole thing, not just its centre point at
         // whatever zoom the map already happened to be at.
         const [west, south, east, north] = r.bbox ?? [lon, lat, lon, lat]
-        if (west !== east || south !== north) {
+        const hasRealShape = west !== east || south !== north
+        if (hasRealShape) {
             map.fitBounds([west, south, east, north], {
                 animate: true,
                 padding: 60,
@@ -46,6 +47,11 @@ export default function SearchSection() {
                 center: [lon, lat]
             })
         }
+
+        // Shape highlighting (see SelectedShapeHighlight) is set by
+        // LocationSection's own place resolution, triggered by the
+        // updateRoute above - keeping it there (rather than also setting it
+        // here) is what makes it work on a page refresh/direct link too.
     }
 
     React.useEffect(() => {

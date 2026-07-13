@@ -2,8 +2,14 @@ import { convertNZMGReferenceToLatLng, convertTopo50ReferenceToLatLng } from '..
 import { getPlaces, type Place } from './places';
 import db from '../caches/indexeddb';
 
+// Many NZ place names carry macrons (Wānaka, Tītahi, Pōneke, ...), but most
+// people don't bother typing them - normalize both sides so "wanaka" still
+// matches "Lake Wānaka".
+const stripDiacritics = (value: string) =>
+    value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 const getMatch = (queryParts: string[], place: Place) => {
-    const lowerName = place.name.toLowerCase();
+    const lowerName = stripDiacritics(place.name.toLowerCase());
     let rank = 0
     let lastMatchIndex: number | undefined = undefined
 
@@ -25,7 +31,7 @@ const getMatch = (queryParts: string[], place: Place) => {
 }
 
 const searchNzPlaces = async (query: string, maxResults = 100): Promise<Place[]> => {
-    const lowerQuery = query.toLowerCase()
+    const lowerQuery = stripDiacritics(query.toLowerCase())
     const lowerQueryParts = lowerQuery.split(' ').filter(p => p)
 
     const places = await getPlaces()
@@ -53,7 +59,7 @@ const searchMapReferences = async (query: string): Promise<Place[]> => {
 }
 
 const searchPoints = async (query: string, maxResults = 100): Promise<Place[]> => {
-    const lowerQuery = query.toLowerCase()
+    const lowerQuery = stripDiacritics(query.toLowerCase())
     const lowerQueryParts = lowerQuery.split(' ').filter(p => p)
 
     const points = await db.getPoints()

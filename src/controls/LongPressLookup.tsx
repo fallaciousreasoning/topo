@@ -86,16 +86,23 @@ export default function LongPressLookup() {
             const lon = e.lngLat.lng
 
             const closestPoint = await findPlace(lat, lon)
-
-            const useLat = parseFloat(closestPoint?.lat ?? '') || lat
-            const useLon = parseFloat(closestPoint?.lon ?? '') || lon
             const name = closestPoint?.name
 
+            // Use the actual press point, not closestPoint's own coordinates -
+            // for a place with real polygon geometry (a lake, a park, ...) that's
+            // just a bbox centre, which can be well away from wherever was
+            // actually pressed (see src/search/places.ts's placesFromGeoJson).
+            // closestPoint is only trusted for the name.
             updateRoute({
                 page: name
-                    ? `location/${useLat}/${useLon}/${encodeURIComponent(name)}`
-                    : `location/${useLat}/${useLon}`
+                    ? `location/${lat}/${lon}/${encodeURIComponent(name)}`
+                    : `location/${lat}/${lon}`
             })
+
+            // Shape highlighting (see SelectedShapeHighlight) is set by
+            // LocationSection's own place resolution, triggered by the
+            // updateRoute above - keeping it there (rather than also setting
+            // it here) is what makes it work on a page refresh too.
         }
 
         const cancelHandler = () => {

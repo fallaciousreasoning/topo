@@ -4,8 +4,33 @@ import Layer from "../map/Layer";
 import Source from "../map/Source";
 import { usePromise } from "../hooks/usePromise";
 import { sizeBasedVisibility } from "./labelSizing";
+import { useLayerHandler } from "../hooks/useLayerClickHandler";
+import { useRouteUpdater } from "../routing/router";
+import { useMap } from "../map/Map";
+import { ringCentroid } from "../utils/polygonCentroid";
 
 const WATER_FEATURES_URL = '/data/waterFeatures.json'
+
+// MapLibre's default Polygon label placement anchors at the "pole of
+// inaccessibility" (the widest inscribed circle), not the true centroid - for
+// a dogleg-shaped lake (Wakatipu, Wanaka, ...) that puts the label off in
+// whichever lobe happens to be widest rather than in the middle of the lake.
+// Lakes are simple enough shapes (unlike glaciers - see polygon_shape.py) that
+// a plain area centroid reads better, so labels are placed on a derived point
+// source instead of relying on the polygon geometry's automatic placement.
+function lakeCentroids(data: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
+    return {
+        type: 'FeatureCollection',
+        features: data.features
+            .filter((f): f is GeoJSON.Feature<GeoJSON.Polygon> =>
+                f.geometry.type === 'Polygon' && f.properties?.type === 'lake')
+            .map(f => ({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: ringCentroid(f.geometry.coordinates[0]) },
+                properties: f.properties,
+            })),
+    }
+}
 
 const WATER_FEATURES_MINZOOM = 10
 
@@ -47,10 +72,57 @@ export default {
     cacheable: false,
     source: () => {
         const { result: data } = usePromise(getWaterFeatures, [])
+        const centroids = React.useMemo(() => data ? lakeCentroids(data) : null, [data])
+        const updateRoute = useRouteUpdater()
+        const { map } = useMap()
 
-        if (!data) return null
+        useLayerHandler('click', 'water-features-fill-polygon', e => {
+            const feature = e.features?.[0]
+            const name = feature?.properties?.name
+            if (!name) return
+            updateRoute({
+                page: `location/${e.lngLat.lat}/${e.lngLat.lng}/${encodeURIComponent(name)}`
+            })
+        })
+        useLayerHandler('mouseenter', 'water-features-fill-polygon', () => {
+            map.getCanvas().style.cursor = 'pointer'
+        })
+        useLayerHandler('mouseleave', 'water-features-fill-polygon', () => {
+            map.getCanvas().style.cursor = ''
+        })
 
-        return <Source id='waterFeatures' spec={{
+        // Not every water feature has OSM polygon geometry backing it (some are
+        // gazetteer-only, rendered as a plain point - e.g. a wetland with no
+        // matching OSM way) - those need their own click handling since they
+        // never hit the fill-polygon layer above.
+        const handlePointClick = (e: any) => {
+            const feature = e.features?.[0]
+            const name = feature?.properties?.name
+            if (!name || feature.geometry.type !== 'Point') return
+            const [lng, lat] = feature.geometry.coordinates
+            updateRoute({
+                page: `location/${lat}/${lng}/${encodeURIComponent(name)}`
+            })
+        }
+        useLayerHandler('click', 'water-features-label-point', handlePointClick)
+        useLayerHandler('click', 'water-features-label-point-icon', handlePointClick)
+        useLayerHandler('mouseenter', 'water-features-label-point', () => {
+            map.getCanvas().style.cursor = 'pointer'
+        })
+        useLayerHandler('mouseleave', 'water-features-label-point', () => {
+            map.getCanvas().style.cursor = ''
+        })
+        useLayerHandler('mouseenter', 'water-features-label-point-icon', () => {
+            map.getCanvas().style.cursor = 'pointer'
+        })
+        useLayerHandler('mouseleave', 'water-features-label-point-icon', () => {
+            map.getCanvas().style.cursor = ''
+        })
+
+        if (!data || !centroids) return null
+
+        return <>
+        <Source id='waterFeatures' spec={{
             type: 'geojson',
             data,
         }}>
@@ -64,27 +136,6 @@ export default {
                     'fill-color': ['match', ['get', 'type'], 'wetland', '#5c7a4a', '#1c5c8c'],
                     'fill-opacity': 0.15,
                 }
-            }} />
-            <Layer layer={{
-                id: 'water-features-label-polygon',
-                type: 'symbol',
-                source: 'waterFeatures',
-                minzoom: WATER_FEATURES_MINZOOM,
-                filter: ['all',
-                    ['==', ['geometry-type'], 'Polygon'],
-                    ['!=', ['get', 'type'], 'wetland'],
-                    sizeBasedVisibility('sizeKm', POLYGON_SIZE_STOPS),
-                ],
-                layout: {
-                    'text-field': ['get', 'name'],
-                    'text-size': ['interpolate', ['linear'], ['zoom'],
-                        10, 12,
-                        15, 19,
-                    ],
-                    'text-font': ['Open Sans Italic'],
-                    'text-letter-spacing': 0.06,
-                },
-                paint: textPaint,
             }} />
             {/* Wetlands get LINZ Topo50's own swamp/reed symbol, centred in the shape. */}
             <Layer layer={{
@@ -159,5 +210,30 @@ export default {
                 paint: textPaint,
             }} />
         </Source>
+        {/* Lake names, placed at each polygon's true area centroid rather than
+            MapLibre's default polygon anchor - see lakeCentroids/ringCentroid above. */}
+        <Source id='waterFeaturesLakeCentroids' spec={{
+            type: 'geojson',
+            data: centroids,
+        }}>
+            <Layer layer={{
+                id: 'water-features-label-polygon',
+                type: 'symbol',
+                source: 'waterFeaturesLakeCentroids',
+                minzoom: WATER_FEATURES_MINZOOM,
+                filter: sizeBasedVisibility('sizeKm', POLYGON_SIZE_STOPS),
+                layout: {
+                    'text-field': ['get', 'name'],
+                    'text-size': ['interpolate', ['linear'], ['zoom'],
+                        10, 12,
+                        15, 19,
+                    ],
+                    'text-font': ['Open Sans Italic'],
+                    'text-letter-spacing': 0.06,
+                },
+                paint: textPaint,
+            }} />
+        </Source>
+        </>
     }
 } as OverlayDefinition
