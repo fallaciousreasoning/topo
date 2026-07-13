@@ -150,7 +150,7 @@ export default {
                 ],
                 layout: {
                     'icon-image': 'saddle_pnt',
-                    'icon-size': 1.2,
+                    'icon-size': 1.44,
                     // Anchored at the icon's own centre (not 'bottom') so it rotates in
                     // place around the actual saddle coordinate, rather than swinging
                     // its base around that point as it turns to face different ways.
