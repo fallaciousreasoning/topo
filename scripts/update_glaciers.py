@@ -15,9 +15,13 @@ Glaciers mapped as a single way become either:
   length instead of being crammed into a small inscribed circle.
 
 Glaciers mapped as a multipolygon relation (most of the larger, better-known
-ones) are reduced to a Point at the relation's bounding-box centre instead of
-reassembling the full ring set - good enough for a label anchor, much simpler
-than multipolygon assembly.
+ones - Tasman, Hooker, Fox, ...) have their "outer" member ways stitched back
+into a real ring (see assemble_rings/largest_outer_ring below) and go through
+the same thin/compact shape analysis as a single-way glacier. Inner rings
+(holes - nunataks poking through the ice) are ignored; irrelevant for sizing
+or labelling. If a relation's members don't assemble into a usable ring at
+all (Overpass returned an incomplete set, inconsistent roles, etc.) it falls
+back to a Point at the relation's bounding-box centre instead.
 
 As with update_ridges.py, any gazetteer "glacier" entry with no matching OSM
 name is added as a Point fallback feature.
@@ -33,13 +37,20 @@ CACHE_DIR = '.cache/glaciers'
 PLACES_PATH = './public/data/places.json'
 FALLBACK_GAZETTEER_TYPES = {'glacier'}
 
+# The relations matched by the first two lines are fetched a second time via
+# `way(r.main)` to pull in every member way's full geometry (Overpass doesn't
+# inline relation members' coordinates otherwise) - those come back as bare,
+# untagged "way" elements alongside the real standalone natural=glacier ways.
 QUERY = f"""
 [out:json][timeout:180];
 (
   way["natural"="glacier"]["name"]({bbox_clause()});
   relation["natural"="glacier"]["name"]({bbox_clause()});
-);
-out tags geom;
+)->.main;
+(.main;);
+out body geom;
+way(r.main);
+out geom;
 """.strip()
 
 # Lighter than the ridge/valley tolerance - polygon outlines don't need to
@@ -73,19 +84,66 @@ def path_length_km(path_xy):
     return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(path_xy, path_xy[1:]))
 
 
-def way_to_feature(element):
-    geometry = element.get('geometry')
-    if not geometry or len(geometry) < 3:
+def assemble_rings(paths):
+    """
+    Stitch open paths (each a list of [lon, lat], as returned by Overpass for
+    one member way) that share endpoints into closed rings. A multipolygon's
+    outer boundary is often split across many ways (see Hooker Glacier: 30
+    "outer" segments) rather than one single closed way, so they need to be
+    chained end-to-end - reversing a segment where necessary - before they're
+    usable as a polygon ring.
+    """
+    segments = [list(p) for p in paths if len(p) >= 2]
+    rings = []
+    while segments:
+        ring = segments.pop(0)
+        changed = True
+        while changed and ring[0] != ring[-1]:
+            changed = False
+            for i, seg in enumerate(segments):
+                if seg[0] == ring[-1]:
+                    ring.extend(seg[1:])
+                elif seg[-1] == ring[-1]:
+                    ring.extend(reversed(seg[:-1]))
+                elif seg[-1] == ring[0]:
+                    ring[0:0] = seg[:-1]
+                elif seg[0] == ring[0]:
+                    ring[0:0] = list(reversed(seg[1:]))
+                else:
+                    continue
+                segments.pop(i)
+                changed = True
+                break
+        rings.append(ring)
+    return rings
+
+
+def largest_outer_ring(relation, ways_by_id):
+    """
+    Assemble a relation's "outer" member ways into one or more closed rings
+    and return the largest (by point count - a cheap proxy for extent, good
+    enough to pick the main body over a stray disconnected fragment). Returns
+    None if the members don't assemble into any usable closed ring at all.
+    """
+    outer_paths = [
+        ways_by_id[member['ref']]
+        for member in relation.get('members', [])
+        if member.get('role') == 'outer' and member.get('type') == 'way' and member['ref'] in ways_by_id
+    ]
+    if not outer_paths:
         return None
 
-    ring = [[round(pt['lon'], 5), round(pt['lat'], 5)] for pt in geometry]
-    if ring[0] != ring[-1]:
-        ring.append(ring[0])
+    rings = [r for r in assemble_rings(outer_paths) if len(r) >= 4 and r[0] == r[-1]]
+    if not rings:
+        return None
+
+    return max(rings, key=len)
+
+
+def ring_to_feature(ring, properties):
     ring = simplify(ring, SIMPLIFY_TOLERANCE_DEGREES)
     if len(ring) < 4:
         return None
-
-    properties = shared_properties(element.get('tags', {}))
 
     ring_xy, lon0, lat0, cos_lat = polygon_shape.project_ring(ring)
     bbox_diag_km = math.hypot(
@@ -133,13 +191,32 @@ def way_to_feature(element):
     }
 
 
-def relation_to_feature(element):
+def way_to_feature(element):
+    geometry = element.get('geometry')
+    if not geometry or len(geometry) < 3:
+        return None
+
+    ring = [[round(pt['lon'], 5), round(pt['lat'], 5)] for pt in geometry]
+    if ring[0] != ring[-1]:
+        ring.append(ring[0])
+
+    return ring_to_feature(ring, shared_properties(element.get('tags', {})))
+
+
+def relation_to_feature(element, ways_by_id):
     """
-    Multipolygon relations don't carry their own geometry from Overpass without
-    fetching and reassembling every member way's rings. Using the relation's
-    bounding-box centre as a Point is a much simpler stand-in - good enough for
-    a label anchor.
+    Try to stitch the relation's "outer" member ways into a real ring and run
+    it through the same thin/compact analysis as a single-way glacier. Falls
+    back to a Point at the relation's bounding-box centre - much simpler than
+    multipolygon assembly - if that doesn't produce a usable ring (Overpass
+    returned an incomplete member set, inconsistent roles, etc).
     """
+    ring = largest_outer_ring(element, ways_by_id)
+    if ring:
+        feature = ring_to_feature(list(ring), shared_properties(element.get('tags', {})))
+        if feature:
+            return feature
+
     bounds = element.get('bounds')
     if not bounds:
         return None
@@ -157,11 +234,15 @@ def relation_to_feature(element):
     }
 
 
-def to_feature(element):
-    if element['type'] == 'way':
+def to_feature(element, ways_by_id):
+    # Standalone glacier ways carry natural=glacier themselves; ways with no
+    # tags at all are here only because they're a relation's member, fetched
+    # purely to assemble that relation's ring (see largest_outer_ring) - not a
+    # feature in their own right.
+    if element['type'] == 'way' and element.get('tags', {}).get('natural') == 'glacier':
         return way_to_feature(element)
     if element['type'] == 'relation':
-        return relation_to_feature(element)
+        return relation_to_feature(element, ways_by_id)
     return None
 
 
@@ -171,9 +252,16 @@ def download_glaciers():
     elements = data['elements']
     print(f'  {len(elements)} elements returned')
 
-    features = [f for f in (to_feature(e) for e in elements) if f]
+    ways_by_id = {
+        e['id']: [[round(pt['lon'], 5), round(pt['lat'], 5)] for pt in e['geometry']]
+        for e in elements
+        if e['type'] == 'way' and e.get('geometry')
+    }
+
+    features = [f for f in (to_feature(e, ways_by_id) for e in elements) if f]
     thin = sum(1 for f in features if f['properties'].get('shape') == 'thin')
-    print(f'  {len(features)} usable OSM features ({thin} labelled as thin/elongated)')
+    points = sum(1 for f in features if f['geometry']['type'] == 'Point')
+    print(f'  {len(features)} usable OSM features ({thin} thin/elongated, {points} relations reduced to a point)')
 
     fallback_features = load_fallback_points(features, PLACES_PATH, FALLBACK_GAZETTEER_TYPES)
     print(f'  {len(fallback_features)} gazetteer glaciers with no matching OSM feature, added as points')
