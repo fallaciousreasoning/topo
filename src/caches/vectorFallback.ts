@@ -10,7 +10,9 @@ export async function loadVectorTileWithFallback(
     fetchExact: (url: string) => Promise<ArrayBuffer | null>,
 ): Promise<ArrayBuffer | null> {
     const direct = await fetchExact(url)
-    if (direct) return direct
+    // A 0-byte response (HTTP 204, no data at this exact tile) is truthy but not usable -
+    // treat it the same as a failed fetch so we still try ancestors instead of rendering blank.
+    if (direct && direct.byteLength > 0) return direct
 
     const coords = parseTileUrl(url)
     if (!coords || coords.z <= 0) return null

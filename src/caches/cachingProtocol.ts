@@ -55,7 +55,11 @@ addProtocol('maybe-cache', async (params, abortController) => {
     async function fetchFromNetwork(u: string): Promise<ArrayBuffer | null> {
         try {
             const { data } = await getData({ ...params, url: 'https://' + u }, abortController)
-            if (cacheLayers.has(layer)) {
+            // Don't persist empty (HTTP 204) responses: a tile can legitimately return no data
+            // for reasons that aren't permanent (rate limiting, a transient server hiccup), and
+            // caching that would pin "confirmed empty" forever, blocking both a later retry and
+            // (for vector tiles) the ancestor fallback below.
+            if (cacheLayers.has(layer) && data.byteLength > 0) {
                 await cacher.saveTile(layer, u, new Blob([data]))
             }
             return data
