@@ -36,6 +36,7 @@ import PointSection from "./sections/PointSection";
 import DownloadsSection from "./sections/DownloadsSection";
 import Mountains from "./layers/mountains";
 import SectionContainer from "./sections/SectionContainer";
+import { OVERLAY_FLOOR_ID } from "./map/overlayFloor";
 
 const initialTopoBlend = getLayerSetting('topo-raster', 'hillshadeBlend', hillshadeBlendSetting.default)
 const sources = baseLayers.flatMap((b) => {
@@ -105,6 +106,21 @@ function Layers() {
     <>
       <Terrain />
       {layers}
+      {/* Permanent, invisible marker sitting right above the base map and below
+          every overlay layer added below. Overlays that just want to render on
+          top of whatever's already there can keep using a plain addLayer() (no
+          beforeId), but an overlay that always needs to sit at the very bottom
+          of the overlay stack - contours, see contours.tsx - can pass
+          beforeId={OVERLAY_FLOOR_ID} to insert itself immediately above the
+          base map, no matter what order overlays were toggled on in. */}
+      <Layer
+        layer={{
+          id: OVERLAY_FLOOR_ID,
+          type: "background",
+          layout: { visibility: "none" },
+          paint: {},
+        }}
+      />
       {overlays
         .filter((e) => routeParams.overlays.includes(e.id))
         .map((o) =>

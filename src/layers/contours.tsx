@@ -4,6 +4,7 @@ import Layer from '../map/Layer'
 import Source from '../map/Source'
 import { demSource, elevationScheme, maxContourZoom } from "./demSource";
 import { LINZ_BASEMAPS_KEY } from "./config";
+import { OVERLAY_FLOOR_ID } from "../map/overlayFloor";
 
 
 const far = [200, 1000]
@@ -48,7 +49,11 @@ export default {
             maxzoom: maxContourZoom,
             scheme: elevationScheme
         }}>
-            <Layer layer={{
+            {/* beforeId keeps contours pinned to the very bottom of the overlay
+                stack (directly above the base map, below every other overlay),
+                regardless of what order overlays were toggled on in - see
+                overlayFloor.ts. */}
+            <Layer beforeId={OVERLAY_FLOOR_ID} layer={{
                 id: 'contour-lines',
                 type: 'line',
                 source: 'contour-source',
@@ -62,7 +67,7 @@ export default {
                     "line-width": ["match", ["get", "level"], 1, 2, 0.7],
                 }
             }} />
-            <Layer layer={{
+            <Layer beforeId={OVERLAY_FLOOR_ID} layer={{
                 id: 'contour-labels',
                 type: 'symbol',
                 source: 'contour-source',
