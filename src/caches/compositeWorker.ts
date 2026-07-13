@@ -8,6 +8,7 @@
 // default in this project, which can't be code-split, so a dynamic import() here would
 // fail the build.
 import cacher from './opfs'
+import { isRasterUrl, loadRasterTileWithFallback } from './rasterFallback'
 
 export interface CompositeRequest {
     type: 'COMPOSITE_TILE'
@@ -53,21 +54,27 @@ async function fetchTile(url: string, shouldCache: boolean, signal: AbortSignal)
     if (url.startsWith('maybe-cache://')) {
         const [hostPathAndQuery, layer] = url.slice('maybe-cache://'.length).split('#')
 
-        const fetchFromNetwork = async (): Promise<ArrayBuffer | null> => {
-            try {
-                const res = await fetch('https://' + hostPathAndQuery, { signal })
-                const data = await res.arrayBuffer()
-                if (shouldCache && layer) cacher.saveTile(layer, hostPathAndQuery, new Blob([data]))
-                return data
-            } catch {
-                return null
+        const fetchExact = (u: string): Promise<ArrayBuffer | null> => {
+            const fetchFromNetwork = async (): Promise<ArrayBuffer | null> => {
+                try {
+                    const res = await fetch('https://' + u, { signal })
+                    const data = await res.arrayBuffer()
+                    if (shouldCache && layer) cacher.saveTile(layer, u, new Blob([data]))
+                    return data
+                } catch {
+                    return null
+                }
             }
+
+            const cachePromise = cacher.loadTile(layer, u)
+                .then(blob => blob && new Response(blob).arrayBuffer())
+
+            return firstNonNull([cachePromise, fetchFromNetwork()])
         }
 
-        const cachePromise = cacher.loadTile(layer, hostPathAndQuery)
-            .then(blob => blob && new Response(blob).arrayBuffer())
-
-        return firstNonNull([cachePromise, fetchFromNetwork()])
+        return isRasterUrl(hostPathAndQuery)
+            ? loadRasterTileWithFallback(hostPathAndQuery, fetchExact)
+            : fetchExact(hostPathAndQuery)
     }
 
     try {

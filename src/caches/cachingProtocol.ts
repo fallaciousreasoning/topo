@@ -1,5 +1,6 @@
 import { addProtocol, getData } from './protocols'
 import { getSetting, addListener as addSettingsListener } from '../utils/settings'
+import { isRasterUrl, loadRasterTileWithFallback } from './rasterFallback'
 
 interface NetworkInformation {
     saveData: boolean,
@@ -50,11 +51,11 @@ addProtocol('maybe-cache', async (params, abortController) => {
 
     const cacher = await cacherPromise.then(r => r.default)
 
-    async function fetchFromNetwork(): Promise<ArrayBuffer | null> {
+    async function fetchFromNetwork(u: string): Promise<ArrayBuffer | null> {
         try {
-            const { data } = await getData({ ...params, url: 'https://' + url }, abortController)
+            const { data } = await getData({ ...params, url: 'https://' + u }, abortController)
             if (cacheLayers.has(layer)) {
-                await cacher.saveTile(layer, url, new Blob([data]))
+                await cacher.saveTile(layer, u, new Blob([data]))
             }
             return data
         } catch {
@@ -62,19 +63,22 @@ addProtocol('maybe-cache', async (params, abortController) => {
         }
     }
 
-    if (hasGoodConnection()) {
-        const cachePromise = cacher.loadTile(layer, url)
-            .then(blob => blob && new Response(blob).arrayBuffer())
-        const data = await firstNonNull([cachePromise, fetchFromNetwork()])
-        return data ? { data } : failed
+    async function fetchExact(u: string): Promise<ArrayBuffer | null> {
+        if (hasGoodConnection()) {
+            const cachePromise = cacher.loadTile(layer, u)
+                .then(blob => blob && new Response(blob).arrayBuffer())
+            return firstNonNull([cachePromise, fetchFromNetwork(u)])
+        }
+
+        const cached = await cacher.loadTile(layer, u)
+        if (cached) return new Response(cached).arrayBuffer()
+
+        return fetchFromNetwork(u)
     }
 
-    const cached = await cacher.loadTile(layer, url)
+    const data = isRasterUrl(url)
+        ? await loadRasterTileWithFallback(url, fetchExact)
+        : await fetchExact(url)
 
-    if (cached) {
-        return { data: await new Response(cached).arrayBuffer() }
-    }
-
-    const data = await fetchFromNetwork()
     return data ? { data } : failed
 })
