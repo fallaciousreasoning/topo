@@ -1,13 +1,9 @@
 import { Cache } from "./cache";
 import { tileX, tileY } from "../tilebundle";
+import { parseTileCoords } from "./tileCoords";
+import { saveTileViaWorker } from "./opfsWriteProtocol";
 
 const isSupported = () => typeof navigator !== 'undefined' && typeof navigator.storage?.getDirectory === 'function'
-
-function parseTileCoords(id: string): { z: string, x: string, y: string, ext: string } | null {
-    const match = id.match(/\/(\d+)\/(\d+)\/(\d+)\.([a-z]+)(?:\?|$)/)
-    if (!match) return null
-    return { z: match[1], x: match[2], y: match[3], ext: match[4] }
-}
 
 // Most tile reads/writes come in runs sharing the same layer/z/x (e.g. extracting a bundle, or
 // downloading a viewport column), so caching the last-resolved x-directory handle turns a
@@ -60,19 +56,16 @@ const opfsCache: Cache = {
         }
     },
 
+    // Writes are handed off to opfsWriteWorker, which uses FileSystemSyncAccessHandle - only
+    // available inside a Worker, and much cheaper per-write than the createWritable() swap-file
+    // dance this used to do on the main thread (measured via a CPU profile to be ~20% of main
+    // thread time during a bundle download, since that's hundreds of thousands of tiles).
     async saveTile(layer, id, data) {
         if (!isSupported()) return
         const coords = parseTileCoords(id)
         if (!coords) return
-        try {
-            const xDir = await getXDir(layer, coords.z, coords.x, true)
-            const fileHandle = await xDir.getFileHandle(`${coords.y}.${coords.ext}`, { create: true })
-            const writable = await fileHandle.createWritable()
-            await writable.write(data)
-            await writable.close()
-        } catch {
-            // OPFS unsupported or write failed, skip caching
-        }
+        const bytes = data instanceof Blob ? new Uint8Array(await data.arrayBuffer()) : data
+        await saveTileViaWorker(layer, id, bytes)
     },
 
     async clearLayer(layer) {

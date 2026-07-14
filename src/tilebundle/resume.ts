@@ -62,9 +62,16 @@ export async function removeDownload(download: Download): Promise<void> {
  *
  * If cancelled via `cancelDownload`, any tiles already written for it are deleted and the
  * download record itself is removed, rather than being left in an error state.
+ *
+ * A no-op if this download id is already running — callers like `ResumeDownloads` (which
+ * re-resumes anything still marked 'downloading' on every mount, e.g. after a dev-mode HMR
+ * remount while a download is in flight) can otherwise fire a second concurrent fetch for the
+ * same id. `activeDownloads` would then just overwrite the first run's controller, orphaning it
+ * with no way to cancel it — it keeps fetching and writing tiles in the background indefinitely.
  */
 export async function runDownload(download: Download, onProgress?: (progress: number) => void): Promise<void> {
     if (download.id == null) throw new Error('Cannot run a download without an id')
+    if (activeDownloads.has(download.id)) return
 
     const controller = new AbortController()
     activeDownloads.set(download.id, controller)
@@ -73,6 +80,19 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
     // so they don't stomp on each other's fields (e.g. a progress write undoing a checkpoint write).
     let current: Download = { ...download, status: 'downloading', error: undefined }
     await db.updateDownload(current)
+
+    // Persisting progress/checkpoint state is best-effort and always reads the latest `current`
+    // when it actually runs, so it's safe to drop a persist request that arrives while another is
+    // still in flight rather than queueing it — on a slow/contended device (e.g. a phone under
+    // thermal throttling), IndexedDB writes can take longer than the interval between progress
+    // ticks, and without this guard each tick fires an unawaited `db.updateDownload` regardless of
+    // whether earlier ones have resolved, so they pile up with no bound for the life of the download.
+    let dbWriteInFlight = false
+    const persistCurrent = () => {
+        if (dbWriteInFlight) return
+        dbWriteInFlight = true
+        db.updateDownload(current).finally(() => { dbWriteInFlight = false })
+    }
 
     let lastWriteTime = 0
     let lastBytes = 0
@@ -83,12 +103,12 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
         if (now - lastWriteTime > PROGRESS_WRITE_INTERVAL_MS) {
             lastWriteTime = now
             current = { ...current, progress: p, bytesDownloaded: bytes }
-            db.updateDownload(current)
+            persistCurrent()
         }
     }
     const persistCheckpoint = (offset: number) => {
         current = { ...current, resumeOffset: offset }
-        db.updateDownload(current)
+        persistCurrent()
     }
 
     try {
