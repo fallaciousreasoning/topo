@@ -12,7 +12,7 @@ export default {
             "attribution": "© 2022 Toitū Te Whenua - CC BY 4.0",
             "type": "vector",
             "tiles": [
-                `https://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}`
+                `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}#topoVector`
             ],
             "minzoom": 0,
             "maxzoom": 15

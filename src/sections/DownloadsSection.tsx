@@ -252,6 +252,7 @@ export default function DownloadsSection() {
     const topoRecord  = (region: { id: string; polygon: [number, number][] }) =>
         recordFor(region.polygon, 'topo-raster')
     const elevRecord  = recordFor(NZ_REGION.polygon, 'dem')
+    const vectorRecord = recordFor(NZ_REGION.polygon, 'topoVector')
 
     const islands = NZ_REGIONS.filter(r => r.group === 'island' && r.id !== 'nz')
     const customAreas = downloads.filter(d => d.regionId === null)
@@ -269,6 +270,15 @@ export default function DownloadsSection() {
                     region={NZ_REGION}
                     layerId="dem"
                     record={elevRecord}
+                />
+            </Card>
+
+            <h4 className="font-semibold text-base mt-4 mb-1">Topo Vector Data</h4>
+            <Card>
+                <RegionRow
+                    region={NZ_REGION}
+                    layerId="topoVector"
+                    record={vectorRecord}
                 />
             </Card>
 

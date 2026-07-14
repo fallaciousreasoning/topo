@@ -31,7 +31,8 @@
       "Bash(magick z12.png -crop 128x128+0+64 -filter point -resize 512x512 z12_crop1.png)",
       "Bash(git -C /home/jay/dev/topo log --oneline -- src/caches/rasterFallback.ts)",
       "Bash(echo \"exit: $?\")",
-      "Bash(node -e \"console.log\\(require.resolve\\('pbf'\\)\\)\")"
+      "Bash(node -e \"console.log\\(require.resolve\\('pbf'\\)\\)\")",
+      "Bash(rclone copy *)"
     ],
     "deny": [],
     "ask": []

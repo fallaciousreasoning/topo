@@ -1,7 +1,7 @@
 import db, { Download } from '../caches/indexeddb'
 import { cacherPromise } from '../caches/cachingProtocol'
 import { NZ_REGIONS } from './regions'
-import { getBundleUrl, downloadBundle } from './download'
+import { getBundleUrl, getBundleTileExt, downloadBundle } from './download'
 import { downloadViewportTiles, polygonBbox, bboxesOverlap } from './viewport'
 
 const PROGRESS_WRITE_INTERVAL_MS = 200
@@ -99,7 +99,7 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
             tilesWritten = await downloadBundle(
                 getBundleUrl(download.layerId, region.code, download.maxZoom),
                 download.layerId,
-                'png',
+                getBundleTileExt(download.layerId),
                 throttledProgress,
                 controller.signal,
                 download.resumeOffset ?? 0,
