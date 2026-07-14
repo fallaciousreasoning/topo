@@ -86,8 +86,8 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
                         />
                     </div>
                     <span className="text-xs text-gray-500 whitespace-nowrap">
-                        {Math.round(displayProgress * 100)}% · {friendlyBytes(record?.bytesDownloaded ?? 0, 1)}
-                        {totalBytes != null ? ` / ${friendlyBytes(totalBytes, 1)}` : ''}
+                        {Math.round(displayProgress * 100)}% · {friendlyBytes(record?.bytesDownloaded ?? 0)}
+                        {totalBytes != null ? ` / ${friendlyBytes(totalBytes)}` : ''}
                     </span>
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"
@@ -193,7 +193,7 @@ function CustomAreaRow({ download }: { download: Download }) {
                         />
                     </div>
                     <span className="text-xs text-gray-500 whitespace-nowrap">
-                        {Math.round(download.progress * 100)}% · {friendlyBytes(download.bytesDownloaded ?? 0, 1)}
+                        {Math.round(download.progress * 100)}% · {friendlyBytes(download.bytesDownloaded ?? 0)}
                     </span>
                     <button
                         className="text-xs text-gray-400 hover:text-red-500 transition"

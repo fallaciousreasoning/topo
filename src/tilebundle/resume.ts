@@ -1,7 +1,8 @@
 import db, { Download } from '../caches/indexeddb'
 import { cacherPromise } from '../caches/cachingProtocol'
 import { NZ_REGIONS } from './regions'
-import { getBundleUrl, getBundleTileExt, downloadBundle } from './download'
+import { getBundleUrl, getBundleTileExt } from './download'
+import { downloadBundleViaWorker } from '../caches/tileWorkerProtocol'
 import { downloadViewportTiles, polygonBbox, bboxesOverlap } from './viewport'
 
 const PROGRESS_WRITE_INTERVAL_MS = 200
@@ -116,7 +117,7 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
         if (download.regionId !== null) {
             const region = NZ_REGIONS.find(r => r.id === download.regionId)
             if (!region) throw new Error(`Unknown region: ${download.regionId}`)
-            tilesWritten = await downloadBundle(
+            tilesWritten = await downloadBundleViaWorker(
                 getBundleUrl(download.layerId, region.code, download.maxZoom),
                 download.layerId,
                 getBundleTileExt(download.layerId),

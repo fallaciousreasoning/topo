@@ -1,7 +1,7 @@
 import { Cache } from "./cache";
 import { tileX, tileY } from "../tilebundle";
 import { parseTileCoords } from "./tileCoords";
-import { saveTileViaWorker } from "./opfsWriteProtocol";
+import { saveTileViaWorker } from "./tileWorkerProtocol";
 
 const isSupported = () => typeof navigator !== 'undefined' && typeof navigator.storage?.getDirectory === 'function'
 
