@@ -123,14 +123,8 @@ async function saveTile(layer: string, path: string, data: Uint8Array): Promise<
 /** How many tiles to write between persisting a resumable checkpoint. */
 const CHECKPOINT_TILE_INTERVAL = 100
 
-// How many writes to have in flight at once. The network read loop below stalls once this many
-// are pending (see the `await Promise.race(inFlight)` backpressure at the bottom of the loop), so
-// on a device where each write takes meaningfully longer (slower flash storage, contention with
-// other work), the download becomes write-bound rather than network-bound even on a fast
-// connection. Raised from 8 - each write is a handful of small IPC round-trips to the browser's
-// storage backend rather than raw disk throughput, so more of them overlapping in flight should
-// help even when the per-write latency itself is fixed.
-const WRITE_CONCURRENCY = 24
+/** How many writes to have in flight at once, so disk I/O doesn't stall the network read. */
+const WRITE_CONCURRENCY = 8
 
 /** How often to post a progress update back to the main thread, regardless of tile count. */
 const PROGRESS_INTERVAL_MS = 200
