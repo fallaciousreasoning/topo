@@ -142,7 +142,15 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
             signal: controller.signal,
             headers: resumeOffset > 0 ? { Range: `bytes=${resumeOffset}-` } : undefined,
         })
+        console.log('[tileWorker] fetch response:', {
+            id, url, resumeOffset, status: response.status, ok: response.ok,
+            contentLength: response.headers.get('content-length'),
+        })
         if (!response.ok && response.status !== 206) {
+            // A resume (resumeOffset > 0) sends a Range request - if the server no longer likes
+            // that range (e.g. a 416, or the bundle at this URL has since changed size), this is
+            // where it shows up, and it'll fail on every retry until the stale resumeOffset/record
+            // is cleared, since retrying just resends the same bad Range header.
             throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
 
@@ -174,18 +182,35 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
         let confirmedSinceCheckpoint = 0
         let lastProgressTime = 0
 
+        // Writes complete in whatever order the OPFS backend gets to them, not necessarily the
+        // order they were dispatched in - with WRITE_CONCURRENCY > 1, a later tile can finish
+        // before an earlier one. A checkpoint offset has to be the byte position of a genuinely
+        // contiguous confirmed prefix of the file (so a resumed Range request lands exactly on a
+        // tile-record boundary); simply summing bytes in completion order doesn't guarantee that -
+        // it can count a later tile's bytes while an earlier one is still in flight, producing an
+        // offset that doesn't correspond to any real record boundary (the resumed fetch then
+        // starts mid-record and `decodeHeader` throws "Invalid magic"). `writeQueue` tracks
+        // dispatch order so bytes only ever advance once every earlier tile is confirmed too.
+        const writeQueue: { recordBytes: number, done: boolean }[] = []
+
         for await (const { z, x, y, data } of parseTileStream(reader)) {
             if (controller.signal.aborted) throw new DOMException('Download cancelled', 'AbortError')
 
             const recordBytes = HEADER_SIZE + data.length
+            const entry = { recordBytes, done: false }
+            writeQueue.push(entry)
+
             let tracked: Promise<void>
             tracked = saveTile(layerId, `/${z}/${x}/${y}.${tileExt}`, data).then(() => {
                 inFlight.delete(tracked)
-                confirmedBytes += recordBytes
-                if (++confirmedSinceCheckpoint >= CHECKPOINT_TILE_INTERVAL) {
-                    confirmedSinceCheckpoint = 0
-                    const checkpoint: DownloadCheckpointResponse = { type: 'DOWNLOAD_CHECKPOINT', id, offset: confirmedBytes }
-                    self.postMessage(checkpoint)
+                entry.done = true
+                while (writeQueue.length > 0 && writeQueue[0].done) {
+                    confirmedBytes += writeQueue.shift()!.recordBytes
+                    if (++confirmedSinceCheckpoint >= CHECKPOINT_TILE_INTERVAL) {
+                        confirmedSinceCheckpoint = 0
+                        const checkpoint: DownloadCheckpointResponse = { type: 'DOWNLOAD_CHECKPOINT', id, offset: confirmedBytes }
+                        self.postMessage(checkpoint)
+                    }
                 }
             })
             inFlight.add(tracked)
@@ -211,9 +236,11 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
         self.postMessage(done)
     } catch (err) {
         if (controller.signal.aborted) {
+            console.log('[tileWorker] download aborted:', { id, url, resumeOffset })
             const aborted: DownloadAbortedResponse = { type: 'DOWNLOAD_ABORTED', id }
             self.postMessage(aborted)
         } else {
+            console.error('[tileWorker] download failed:', { id, url, resumeOffset }, err)
             const error: DownloadErrorResponse = { type: 'DOWNLOAD_ERROR', id, error: String(err) }
             self.postMessage(error)
         }

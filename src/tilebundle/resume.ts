@@ -77,6 +77,11 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
     const controller = new AbortController()
     activeDownloads.set(download.id, controller)
 
+    console.log('[runDownload] starting:', {
+        id: download.id, layerId: download.layerId, regionId: download.regionId,
+        resumeOffset: download.resumeOffset, previousError: download.error,
+    })
+
     // All incremental DB writes below build on this, rather than the original `download` snapshot,
     // so they don't stomp on each other's fields (e.g. a progress write undoing a checkpoint write).
     let current: Download = { ...download, status: 'downloading', error: undefined }
@@ -142,6 +147,10 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
         if (controller.signal.aborted) {
             await removeDownload(download)
         } else {
+            console.error('[runDownload] failed:', {
+                id: download.id, layerId: download.layerId, regionId: download.regionId,
+                resumeOffset: download.resumeOffset,
+            }, err)
             current = { ...current, status: 'error', error: String(err) }
             await db.updateDownload(current)
         }

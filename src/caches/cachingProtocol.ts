@@ -2,13 +2,22 @@ import { addProtocol, getData } from './protocols'
 import { getSetting, addListener as addSettingsListener } from '../utils/settings'
 import { isRasterUrl, loadRasterTileWithFallback } from './rasterFallback'
 import { loadVectorTileWithFallback } from './vectorFallback'
+import opfsCache from './opfs'
 
 interface NetworkInformation {
     saveData: boolean,
     effectiveType: 'slow-2g' | '2g' | '3g' | '4g',
 }
 
-export const cacherPromise = import('./opfs')
+// A plain resolved-Promise wrapper (rather than `import('./opfs')`) so the shape callers already
+// rely on (`cacherPromise.then(r => r.default)`) doesn't change - opfs.ts is also statically
+// imported elsewhere (viewport.ts), so the dynamic import never actually achieved any real
+// code-splitting anyway (Vite warns about exactly this). Worse, mixing a dynamic and static
+// import of the same module - one that itself reaches a `new Worker(new URL(...))` - triggered a
+// Rollup production-build bug (`Parse error @:1:1` in vite:reporter's generateBundle, from a
+// corrupted chunk) as soon as a new static importer of opfs.ts was added elsewhere. Removing the
+// dynamic import sidesteps it entirely.
+export const cacherPromise = Promise.resolve({ default: opfsCache })
 const failed = { data: null }
 
 let cacheLayers = new Set<string>(getSetting('cacheLayers'))
