@@ -106,7 +106,11 @@ async function saveTile(layer: string, path: string, data: Uint8Array): Promise<
         try {
             accessHandle.write(data, { at: 0 })
             accessHandle.truncate(data.byteLength)
-            accessHandle.flush()
+            // No explicit flush(): per spec/MDN it's only needed to force disk persistence at a
+            // specific moment, and the OS handling it in its own time is fine for a best-effort
+            // tile cache (worst case on a crash: an unflushed tile just gets re-downloaded).
+            // Forcing a real disk sync on every single tile - hundreds of thousands per bundle -
+            // was likely a big, needless cost on slower phone storage.
         } finally {
             accessHandle.close()
         }
@@ -119,8 +123,14 @@ async function saveTile(layer: string, path: string, data: Uint8Array): Promise<
 /** How many tiles to write between persisting a resumable checkpoint. */
 const CHECKPOINT_TILE_INTERVAL = 100
 
-/** How many writes to have in flight at once, so disk I/O doesn't stall the network read. */
-const WRITE_CONCURRENCY = 8
+// How many writes to have in flight at once. The network read loop below stalls once this many
+// are pending (see the `await Promise.race(inFlight)` backpressure at the bottom of the loop), so
+// on a device where each write takes meaningfully longer (slower flash storage, contention with
+// other work), the download becomes write-bound rather than network-bound even on a fast
+// connection. Raised from 8 - each write is a handful of small IPC round-trips to the browser's
+// storage backend rather than raw disk throughput, so more of them overlapping in flight should
+// help even when the per-write latency itself is fixed.
+const WRITE_CONCURRENCY = 24
 
 /** How often to post a progress update back to the main thread, regardless of tile count. */
 const PROGRESS_INTERVAL_MS = 200
