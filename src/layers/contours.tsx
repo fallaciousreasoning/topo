@@ -11,6 +11,13 @@ const far = [200, 1000]
 const close = [20, 100]
 export const contourTiles = demSource.contourProtocolUrl({
     multiplier: 1,
+    // maplibre-contour has a bug where the highest zoom key present in this
+    // map has its major-interval value silently corrupted to null after the
+    // first tile request at that zoom, which drops every index-contour label
+    // ("100m elevations") from that point on - see the level>0 filter below.
+    // Explicit entries all the way to maxContourZoom keep that corrupted key
+    // pinned to a zoom nobody actually reaches, instead of 15/16 (in heavy
+    // everyday use).
     thresholds: {
         10: far,
         11: far,
@@ -18,6 +25,11 @@ export const contourTiles = demSource.contourProtocolUrl({
         13: close,
         14: close,
         15: close,
+        16: close,
+        17: close,
+        18: close,
+        19: close,
+        20: close,
     },
     // used to color contour lines differently where they cross a glacier
     glacierUrlPattern: `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}`,
