@@ -6,7 +6,20 @@
 
 ## `places.json`
 
-    curl 'https://raw.githubusercontent.com/fallaciousreasoning/nz-place-search/master/data/min_nz_places.json' > places.json
+    python scripts/update_places.py
+
+The official NZGB Gazetteer, pulled directly from LINZ Data Service (layer 51681, "NZ Place Names
+(NZGB)") - supersedes the previous approach of `curl`ing a static snapshot from a third-party
+GitHub mirror (`fallaciousreasoning/nz-place-search`).
+
+LINZ's own `feat_type` values are lowercased and used as-is (`valley`, `bay`, `scenic reserve`,
+...), except two remappings where LINZ splits a single category this app treats as one into two
+very unevenly sized official types: `hill` -> `peak` (LINZ's literal `Peak` type has only 5 entries
+nationwide; `Hill` - 9k+ entries - is what this app's peaks overlay has always actually meant by
+"peak") and `pass` -> `saddle` (same story: LINZ's literal `Saddle` type has only 5 entries; `Pass`
+- ~800 - is the real saddle/col dataset). `pass` remains available as its own distinct type too
+(used only by OSM `mountain_pass=yes` features in `update_landforms.py`) - this remapping only
+affects how *gazetteer* entries land, not that OSM-sourced type.
 
 ## `ridges.json`
 
@@ -54,6 +67,11 @@ specific OSM tag (`natural=cliff`, `natural=reef`, `place=island`/`islet`, `natu
 `natural=saddle`, `mountain_pass=yes`, `natural=plateau`), fetched the same way as `ridges.json`,
 with a gazetteer fallback per type.
 
+Saddles are also fetched from LINZ Data Service (layer 50334, "NZ Saddle Points, Topo 1:50k") -
+LINZ is preferred over OSM where both cover the same named saddle (the OSM node is dropped, see
+`osm_features.remove_covered`), with OSM filling in any saddle LINZ doesn't have and the gazetteer
+filling in anything neither does.
+
 `basin`, `canyon`, `knoll`, `peninsula`, `isthmus`, `cape` and `point` gazetteer entries have no
 OSM tag specific enough to query for, so they're shipped directly as Point features straight from
 `places.json`, no Overpass lookup.
@@ -74,6 +92,11 @@ waterfalls (`waterway=waterfall`), springs (`natural=spring`) and hot springs
 
 Named volcanoes (`natural=volcano`) and cave entrances (`natural=cave_entrance` - also covers the
 gazetteer's `cave` type) from OpenStreetMap, with a gazetteer fallback per type.
+
+Cave entrances are also fetched from LINZ Data Service (layer 50253, "NZ Cave Points, Topo 1:50k")
+- LINZ is preferred over OSM where both cover the same named cave (the OSM node is dropped, see
+`osm_features.remove_covered`), with OSM filling in any cave LINZ doesn't have and the gazetteer
+filling in anything neither does.
 
 `crater` gazetteer entries have no specific OSM tag, shipped as plain Points.
 
@@ -119,3 +142,8 @@ overlay.
 `update_landforms.py`, `update_water_features.py`, `update_geological_features.py`, and
 `update_protected_areas.py` all pull their Overpass fetching, RDP line simplification, and
 gazetteer-fallback logic from `scripts/osm_features.py`.
+
+`update_places.py`, `update_landforms.py` and `update_geological_features.py` pull authoritative
+LINZ Data Service layers via `scripts/linz_features.py`'s `fetch_wfs`, and use
+`osm_features.remove_covered` to drop an OSM feature whenever a same-named LINZ feature already
+covers it.

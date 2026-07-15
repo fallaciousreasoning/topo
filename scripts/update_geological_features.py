@@ -13,8 +13,14 @@ well-established, specific OSM tag:
                    gazetteer's "cave" type, which the gazetteer generally uses
                    for the same real-world feature as "cave_entrance"
 
+Cave entrances are additionally sourced from LINZ Data Service layer 50253
+("NZ Cave Points, Topo 1:50k"). Where a LINZ cave point and an OSM node share
+a name (see osm_features.remove_covered), the OSM one is dropped in favour of
+LINZ's - authoritative LINZ data is preferred over OSM throughout this
+pipeline where both cover the same feature.
+
 As with update_ridges.py/update_glaciers.py/update_valleys.py, any gazetteer
-entry with no matching OSM name is added as a Point fallback feature.
+entry with no matching OSM/LINZ name is added as a Point fallback feature.
 
 `crater` has no OSM tag specific enough to query for, so it's shipped directly
 as Point features straight from the gazetteer, no OSM lookup.
@@ -22,10 +28,13 @@ as Point features straight from the gazetteer, no OSM lookup.
 
 import json
 
-from osm_features import bbox_clause, fetch_overpass, first, load_fallback_points
+from linz_features import fetch_wfs
+from osm_features import bbox_clause, fetch_overpass, first, load_fallback_points, remove_covered
 
 CACHE_DIR = '.cache/geological_features'
 PLACES_PATH = './public/data/places.json'
+
+LINZ_CAVE_LAYER = 50253
 
 OSM_TYPES = {
     'volcano': 'node["natural"="volcano"]["name"]',
@@ -84,6 +93,23 @@ def to_feature(element):
     }
 
 
+def linz_cave_feature(feature):
+    return {
+        'type': 'Feature',
+        'geometry': feature['geometry'],
+        'properties': {
+            'name': feature['properties']['name'],
+            'type': 'cave_entrance',
+            'source': 'linz',
+        },
+    }
+
+
+def linz_caves():
+    data = fetch_wfs(LINZ_CAVE_LAYER, CACHE_DIR, cql_filter='name IS NOT NULL')
+    return [linz_cave_feature(f) for f in data['features']]
+
+
 def gazetteer_only_features():
     features = []
     for gazetteer_type in sorted(GAZETTEER_ONLY_TYPES):
@@ -101,6 +127,17 @@ def download_geological_features():
 
     features = [f for f in (to_feature(e) for e in elements) if f]
     print(f'  {len(features)} usable OSM features')
+
+    print('Fetching cave points from LINZ Data Service...')
+    linz_cave_features = linz_caves()
+    print(f'  {len(linz_cave_features)} named LINZ cave points')
+
+    osm_caves = [f for f in features if f['properties']['type'] == 'cave_entrance']
+    deduped_osm_caves = remove_covered(osm_caves, linz_cave_features)
+    print(f'  {len(osm_caves) - len(deduped_osm_caves)} OSM cave entrances dropped as duplicates of a LINZ point')
+
+    features = [f for f in features if f['properties']['type'] != 'cave_entrance']
+    features += deduped_osm_caves + linz_cave_features
 
     fallback_features = []
     for output_type, gazetteer_types in FALLBACK_GAZETTEER_TYPES.items():
