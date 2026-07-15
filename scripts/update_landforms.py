@@ -20,9 +20,16 @@ cross the pass - captured as properties.direction so the map layer can rotate
 the col symbol to actually run across the ridge, instead of every one facing
 the same fixed way.
 
+Saddles are additionally sourced from LINZ Data Service layer 50334 ("NZ
+Saddle Points, Topo 1:50k") - LINZ's own orientatn field maps to the same
+properties.direction. Where a LINZ saddle point and an OSM node share a name
+(see osm_features.remove_covered), the OSM one is dropped in favour of LINZ's
+- authoritative LINZ data is preferred over OSM throughout this pipeline
+where both cover the same feature.
+
 As with update_ridges.py/update_glaciers.py/update_valleys.py, any gazetteer
-entry of one of these types with no matching OSM name is added as a Point
-fallback feature.
+entry of one of these types with no matching OSM/LINZ name is added as a
+Point fallback feature.
 
 The remaining gazetteer landform types here have no OSM tag specific enough to
 query for (a "basin" or "point" isn't tagged as such in any consistent way) -
@@ -33,13 +40,16 @@ point.
 
 import json
 
+from linz_features import fetch_wfs
 from osm_features import (
     bbox_clause, fetch_overpass, first, parse_direction, simplify, length_km, polygon_size_km,
-    load_fallback_points, SIMPLIFY_TOLERANCE_DEGREES,
+    load_fallback_points, remove_covered, SIMPLIFY_TOLERANCE_DEGREES,
 )
 
 CACHE_DIR = '.cache/landforms'
 PLACES_PATH = './public/data/places.json'
+
+LINZ_SADDLE_LAYER = 50334
 
 # gazetteer type -> Overpass tag clause. Each clause's matches are tagged with
 # this same type string in the output, so gazetteer- and OSM-sourced features
@@ -157,6 +167,27 @@ def to_feature(element):
     return None
 
 
+def linz_saddle_feature(feature):
+    properties = {
+        'name': feature['properties']['name'],
+        'type': 'saddle',
+        'source': 'linz',
+    }
+    orientation = feature['properties'].get('orientatn')
+    if orientation is not None:
+        properties['direction'] = round(orientation) % 360
+    return {
+        'type': 'Feature',
+        'geometry': feature['geometry'],
+        'properties': properties,
+    }
+
+
+def linz_saddles():
+    data = fetch_wfs(LINZ_SADDLE_LAYER, CACHE_DIR, cql_filter='name IS NOT NULL')
+    return [linz_saddle_feature(f) for f in data['features']]
+
+
 def gazetteer_only_features():
     """Ship every gazetteer entry of a type with no OSM tag directly as a Point -
     reuses load_fallback_points' own-coordinate dedup logic by passing it no OSM
@@ -177,6 +208,17 @@ def download_landforms():
 
     features = [f for f in (to_feature(e) for e in elements) if f]
     print(f'  {len(features)} usable OSM features')
+
+    print('Fetching saddle points from LINZ Data Service...')
+    linz_saddle_features = linz_saddles()
+    print(f'  {len(linz_saddle_features)} named LINZ saddle points')
+
+    osm_saddles = [f for f in features if f['properties']['type'] == 'saddle']
+    deduped_osm_saddles = remove_covered(osm_saddles, linz_saddle_features)
+    print(f'  {len(osm_saddles) - len(deduped_osm_saddles)} OSM saddles dropped as duplicates of a LINZ point')
+
+    features = [f for f in features if f['properties']['type'] != 'saddle']
+    features += deduped_osm_saddles + linz_saddle_features
 
     fallback_features = []
     for gazetteer_type in sorted(OSM_TYPES.keys()):

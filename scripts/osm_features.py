@@ -299,6 +299,34 @@ def geometry_covers_point(geometry, lat, lon):
     return haversine_metres(lat, lon, point_lat, point_lon) < COVERAGE_RADIUS_METRES
 
 
+def remove_covered(candidates, authoritative_features):
+    """
+    Drop any candidate feature (typically OSM-sourced) that shares a name
+    (accent- and variant-insensitive, see name_variants/strip_diacritics)
+    with an authoritative_features entry - e.g. a LINZ-sourced feature -
+    sitting within COVERAGE_RADIUS_METRES of it (or containing it, for a
+    polygon authoritative feature; see geometry_covers_point). Used to prefer
+    an authoritative LINZ layer over OSM when both cover the same real-world
+    feature, the mirror image of how load_fallback_points prefers OSM over
+    the gazetteer.
+    """
+    matched_geometries = {}
+    for feature in authoritative_features:
+        for variant in name_variants(feature['properties']['name']):
+            matched_geometries.setdefault(strip_diacritics(variant), []).append(feature['geometry'])
+
+    def is_covered(feature):
+        geometries = []
+        for variant in name_variants(feature['properties']['name']):
+            geometries.extend(matched_geometries.get(strip_diacritics(variant), []))
+        if not geometries:
+            return False
+        point_lon, point_lat = representative_point(feature['geometry'])
+        return any(geometry_covers_point(g, point_lat, point_lon) for g in geometries)
+
+    return [f for f in candidates if not is_covered(f)]
+
+
 def load_fallback_points(osm_features, places_path, fallback_types):
     """
     Not every named gazetteer place has a matching OSM feature yet (OSM coverage
