@@ -11150,6 +11150,69 @@ export default {
         "source": "topoVector",
         "source-layer": "place_labels",
         "type": "symbol"
+    },
+    {
+        "filter": [
+            "all",
+            [
+                "==",
+                "kind",
+                "peak"
+            ]
+        ],
+        "id": "Height-Point",
+        "layout": {
+            "visibility": "visible"
+        },
+        "minzoom": 13,
+        "maxzoom": 18,
+        "paint": {
+            "circle-color": "rgba(47, 47, 46, 1)",
+            "circle-radius": 2
+        },
+        "source": "topoVector",
+        "source-layer": "contours",
+        "type": "circle"
+    },
+    {
+        "filter": [
+            "all",
+            [
+                "==",
+                "kind",
+                "peak"
+            ]
+        ],
+        "id": "Height-Point-Labels",
+        "layout": {
+            "icon-pitch-alignment": "auto",
+            "text-allow-overlap": false,
+            "text-anchor": "bottom-left",
+            "text-field": ["concat", "Pt ", ["get", "elevation"]],
+            "text-font": [
+                "Open Sans Italic"
+            ],
+            "text-ignore-placement": false,
+            "text-justify": "auto",
+            "text-offset": [0.2, -0.2],
+            "text-optional": false,
+            "text-size": {
+                "stops": [[13, 8], [15, 11]]
+            },
+            "text-variable-anchor": ["bottom-left", "bottom-right"],
+            "visibility": "visible"
+        },
+        "minzoom": 13,
+        "maxzoom": 18,
+        "paint": {
+            "text-halo-blur": 0.5,
+            "text-halo-color": "rgba(243, 243, 242, 0.75)",
+            "text-halo-width": 1,
+            "text-translate-anchor": "map"
+        },
+        "source": "topoVector",
+        "source-layer": "contours",
+        "type": "symbol"
     }
 ]
 } as BaseLayerDefinition;
