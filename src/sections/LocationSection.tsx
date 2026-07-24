@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouteUpdater } from "../routing/router";
 import { useMap } from "../map/Map";
 import { getElevation } from "../layers/contours";
+import { slopeAngleSource } from "../layers/slopeAngle";
 import { closestPlace, findPlace } from "../search/nearest";
 import { findContainingRegion } from "../search/regions";
 import { getPlaces, findPlaceByExactName, hasRealShape } from "../search/places";
@@ -9,6 +10,7 @@ import db from "../caches/indexeddb";
 import { Point } from "../tracks/point";
 import round from "../utils/round";
 import StatusBarButton from "../components/StatusBarButton";
+import LocationStats from "../components/LocationStats";
 import { shareLocation } from "../utils/share";
 import Section from "./Section";
 import { usePromise } from "../hooks/usePromise";
@@ -48,6 +50,7 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
   const updateRoute = useRouteUpdater();
   const { map } = useMap();
   const [elevation, setElevation] = useState<number | null>(null);
+  const [slopeAngle, setSlopeAngle] = useState<number | null>(null);
   const [place, setPlace] = useState<any | null>(null);
   const [existingPoint, setExistingPoint] = useState<Point | null>(null);
   const [hut, setHut] = useState<Hut | null>(null);
@@ -86,12 +89,14 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
 
         return Promise.all([
           getElevation([placeLat, placeLng], zoom).catch(() => null),
+          slopeAngleSource.calculatePointSlope(placeLat, placeLng, zoom).catch(() => null),
           Promise.resolve(resolvedPlace ?? (name ? { name } : null)),
           Promise.resolve(point),
         ]);
       })
-      .then(([elevationValue, placeData, point]) => {
+      .then(([elevationValue, slopeValue, placeData, point]) => {
         setElevation(elevationValue);
+        setSlopeAngle(slopeValue);
         setPlace(placeData);
         setExistingPoint(point);
 
@@ -204,11 +209,12 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
           </h3>
           <div className="text-xs text-gray-500">
             {round(lat, 6)}, {round(lng, 6)}
-            {elevation !== null && <span> • {round(elevation, 0)}m</span>}
+            <LocationStats
+              elevation={elevation}
+              slopeAngle={slopeAngle}
+              region={region && region.name !== place?.name ? region.name : undefined}
+            />
           </div>
-          {region && region.name !== place?.name && (
-            <div className="text-xs text-gray-500">{region.name}</div>
-          )}
         </div>
         <div className="flex gap-2">
           {existingPoint && (
