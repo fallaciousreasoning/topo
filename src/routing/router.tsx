@@ -2,10 +2,8 @@ import { useContext, useEffect, useState } from "react";
 import round from "../utils/round";
 import * as React from "react";
 import topoRaster from "../layers/topoRaster";
-import utmGrid from "../layers/utmGrid";
+import huts from "../layers/huts";
 import mountains from "../layers/mountains";
-import points from "../layers/points";
-import tracksLayer from "../layers/TracksLayer";
 
 const localStorageKey = "map-view-info";
 
@@ -29,7 +27,11 @@ const defaultRouteParams: RouteParams = {
   rotation: 0,
   pitch: 0,
   basemap: topoRaster.id,
-  overlays: [mountains.id, utmGrid.id, points.id, tracksLayer.id],
+  // Matches defaultOverlaysForBasemap's "other base layers" default (see
+  // layers/layerDefinition.ts) - topoRaster falls in that bucket too, so a
+  // brand new install (no localStorage yet) starts the same way switching
+  // to it for the first time would.
+  overlays: [huts.id, mountains.id],
   page: null,
 
   editingFeature: null,
