@@ -8,6 +8,7 @@ import { useParams } from '../routing/router'
 import { useSetting } from '../utils/settings'
 import { useTrackStats } from '../draw/trackStatsSignal'
 import { friendlyDistance } from '../utils/friendlyUnits'
+import LocationStats from '../components/LocationStats'
 
 export default function StatusBar() {
     const { map } = useMap()
@@ -220,16 +221,7 @@ export default function StatusBar() {
                     <span className="whitespace-nowrap">
                         {position ? `${round(position.lat, 6)}, ${round(position.lng, 6)}` : 'No position'}
                     </span>
-                    {elevation !== null && (
-                        <span className="whitespace-nowrap text-gray-600">
-                            Ele: {round(elevation, 0)}m
-                        </span>
-                    )}
-                    {slopeAngle !== null && (
-                        <span className="whitespace-nowrap text-gray-600">
-                            Angl: {round(slopeAngle, 1)}°
-                        </span>
-                    )}
+                    <LocationStats elevation={elevation} slopeAngle={slopeAngle} labeled className="whitespace-nowrap text-gray-600" />
                 </div>
             </div>
         </div>
