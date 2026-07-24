@@ -102,6 +102,13 @@ export default {
             type: 'geojson',
             data,
         }}>
+            {/* Kept invisible (rather than removed) so an island/bay/plateau
+                stays clickable (see the useLayerHandler above) and single-
+                clicking one still opens its location page - the fill itself
+                is redundant permanent clutter, since the base map already
+                shows these areas and a selected one's shape is drawn (in
+                red) via SelectedShapeHighlight once you've actually
+                navigated to it (see LocationSection.tsx/setSelectedShape). */}
             <Layer layer={{
                 id: 'landforms-fill-polygon',
                 type: 'fill',
@@ -110,7 +117,7 @@ export default {
                 filter: ['==', ['geometry-type'], 'Polygon'],
                 paint: {
                     'fill-color': '#a08a4a',
-                    'fill-opacity': 0.15,
+                    'fill-opacity': 0,
                 }
             }} />
             {/* Cliff edges get LINZ Topo50's own hachured cliff symbol, tiled along

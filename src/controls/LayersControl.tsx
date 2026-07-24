@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Control from './Control'
-import { baseLayers, overlays, defaultOverlaysForBasemap } from '../layers/layerDefinition'
+import { baseLayers, overlays, defaultOverlaysForBasemap, PER_BASEMAP_OVERLAY_IDS } from '../layers/layerDefinition'
 import { useParams, useRouteUpdater } from '../routing/router'
 import { useMap } from '../map/Map'
 import { getRememberedOverlays, rememberOverlaysForBasemap } from '../utils/settings'
@@ -26,18 +26,25 @@ export default function LayersControl() {
         }
     }
 
-    // Switching base layer remembers what was showing on the one we're
-    // leaving (so coming back to it later restores it), and either restores
-    // or picks a sensible default set of overlays for the one we're
-    // switching to (see defaultOverlaysForBasemap) - so overlays are
-    // remembered per base layer instead of just carrying over unchanged.
+    // Only PER_BASEMAP_OVERLAY_IDS (contours, hillshade, place names) are
+    // remembered per base layer - switching remembers what was showing for
+    // just those on the one we're leaving (so coming back to it later
+    // restores it), and either restores or picks a sensible default for just
+    // those on the one we're switching to (see defaultOverlaysForBasemap).
+    // Every other overlay (huts, mountains, tracks, hunting, ...) is shared
+    // - left exactly as it was, not reset or restored by the switch at all.
     const selectBasemap = (basemapId: string) => {
         if (basemapId === routeParams.basemap) return
 
-        rememberOverlaysForBasemap(routeParams.basemap, routeParams.overlays)
-        const nextOverlays = getRememberedOverlays(basemapId) ?? defaultOverlaysForBasemap(basemapId)
+        const isPerBasemap = (id: string) => PER_BASEMAP_OVERLAY_IDS.includes(id)
+        const sharedOverlays = routeParams.overlays.filter(id => !isPerBasemap(id))
+        const outgoingTracked = routeParams.overlays.filter(isPerBasemap)
 
-        updateParams({ basemap: basemapId, overlays: nextOverlays })
+        rememberOverlaysForBasemap(routeParams.basemap, outgoingTracked)
+        const incomingTracked = getRememberedOverlays(basemapId)
+            ?? defaultOverlaysForBasemap(basemapId).filter(isPerBasemap)
+
+        updateParams({ basemap: basemapId, overlays: [...sharedOverlays, ...incomingTracked] })
     }
 
     const handleOpacityChange = (layerId: string, opacity: number) => {
