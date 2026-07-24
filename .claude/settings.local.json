@@ -32,7 +32,8 @@
       "Bash(git -C /home/jay/dev/topo log --oneline -- src/caches/rasterFallback.ts)",
       "Bash(echo \"exit: $?\")",
       "Bash(node -e \"console.log\\(require.resolve\\('pbf'\\)\\)\")",
-      "Bash(rclone copy *)"
+      "Bash(rclone copy *)",
+      "Bash(sort -k5 -n)"
     ],
     "deny": [],
     "ask": []

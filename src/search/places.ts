@@ -49,10 +49,14 @@ const DUPLICATE_RADIUS_KM = 5
  * The same real-world feature (a lake, a reserve, ...) often appears twice -
  * once as a plain point from the remote gazetteer index (placesUrl), and
  * once with real polygon/line geometry from a local overlay dataset (see
- * placesFromGeoJson). Left alone, both show up as identically-named search
+ * placesFromGeoJson) - or, now that placesFromGeoJson also feeds
+ * OSM-sourced point-only data (localities.json), twice as a plain point from
+ * two different sources with no shape at all (e.g. "Lismore" from both
+ * placesUrl and OSM). Left alone, both show up as identically-named search
  * results, and picking the wrong one silently loses the "zoom to fit"
  * behaviour in SearchSection.tsx (it has no bbox to fit to). Collapse
- * same-named, nearby places down to whichever has real shape data.
+ * same-named, nearby places down to whichever has real shape data - or, if
+ * none of them do, down to just the first one.
  *
  * Grouping by exact name first (cheap, via a Map) keeps this to a handful of
  * comparisons per name rather than comparing all ~70k places pairwise - two
@@ -76,13 +80,26 @@ const dedupeByShape = (places: Place[]): Place[] => {
         }
         const shaped = group.filter(hasRealShape)
         result.push(...shaped)
-        result.push(...group.filter(place => {
+
+        const unshaped = group.filter(place => {
             if (hasRealShape(place)) return false
             return !shaped.some(s => getDistance(
                 parseFloat(place.lat), parseFloat(place.lon),
                 parseFloat(s.lat), parseFloat(s.lon),
             ) < DUPLICATE_RADIUS_KM)
-        }))
+        })
+        // None of these have shape data to prefer between - same
+        // nearby-and-same-name collapse as above, just against each other
+        // instead of against `shaped`, keeping whichever was encountered first.
+        const keptUnshaped: Place[] = []
+        for (const place of unshaped) {
+            const isDuplicate = keptUnshaped.some(k => getDistance(
+                parseFloat(place.lat), parseFloat(place.lon),
+                parseFloat(k.lat), parseFloat(k.lon),
+            ) < DUPLICATE_RADIUS_KM)
+            if (!isDuplicate) keptUnshaped.push(place)
+        }
+        result.push(...keptUnshaped)
     }
     return result
 }
@@ -91,10 +108,10 @@ const dedupeByShape = (places: Place[]): Place[] => {
  * each feature's real geometry for its bbox rather than treating it as a bare
  * point - so e.g. selecting "Fiordland National Park" or "Lake Taupō" fits the
  * map to its actual shape instead of just recentring on a coordinate. */
-const placesFromGeoJson = (url: string) => async (): Promise<Place[]> => {
+const placesFromGeoJson = (url: string, filter: (f: GeoJSON.Feature) => boolean = () => true) => async (): Promise<Place[]> => {
     const data: GeoJSON.FeatureCollection = await fetch(url).then(r => r.json())
     return data.features
-        .filter(f => f.properties?.name)
+        .filter(f => f.properties?.name && filter(f))
         .map(f => {
             const [west, south, east, north] = bboxOf(f.geometry)
             // A bbox centre can land well off a bent/hooked line (a ridge
@@ -142,6 +159,21 @@ export const getPlaces = () => {
             placesFromGeoJson('/data/geologicalFeatures.json'),
             placesFromGeoJson('/data/glaciers.json'),
             placesFromGeoJson('/data/ridges.json'),
+            // placesUrl (search.topos.nz) already carries the ~3500 gazetteer
+            // localities (small settlements etc) - only add localities.json's
+            // OSM-sourced features here, or every one of those would show up
+            // as a duplicate search result. This is specifically what makes
+            // community-mapped-only names (e.g. "Mount Potts Ski Field", a
+            // heli-ski area with no NZGB Gazetteer entry) searchable at all.
+            placesFromGeoJson('/data/localities.json', f => f.properties?.source === 'osm'),
+            // Note: NZ Land District region polygons (public/data/regions.json,
+            // scripts/update_regions.py) deliberately aren't a source here - a
+            // whole region is far too coarse to be a "place" in its own right
+            // (a search result for it, or a long-press match), so it's kept
+            // out of this general places pool entirely. See
+            // src/search/regions.ts's findContainingRegion for the one thing
+            // it's actually used for: annotating another place with the
+            // region it falls within.
         ])
     }
     return placesPromise
