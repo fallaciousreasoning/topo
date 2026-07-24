@@ -111,19 +111,48 @@ export default function LayersControl() {
                         Overlays
                     </h4>
                     <ul>
-                        {overlays.map(m => <li key={m.id} className="flex items-center justify-between gap-2">
-                            <label className='flex items-center gap-1 flex-1'>
-                                <input type="checkbox" checked={routeParams.overlays.includes(m.id)} onChange={e => toggleOverlay(m.id, e.target.checked)} />
-                                {m.name}
-                            </label>
-                            {m.defaultOpacity !== undefined && routeParams.overlays.includes(m.id) && (
-                                <button
-                                    onClick={() => openOpacityDialog(m.id, m.name, m.defaultOpacity!)}
-                                    className="text-blue-600 hover:text-blue-800 hover:underline text-xs cursor-pointer !bg-transparent !p-0 !h-auto"
-                                    title={`Adjust ${m.name} opacity`}
-                                >
-                                    {Math.round(getOpacity(m.id, m.defaultOpacity) * 100)}%
-                                </button>
+                        {overlays.map(m => <li key={m.id}>
+                            <div className="flex items-center justify-between gap-2">
+                                <label className='flex items-center gap-1 flex-1'>
+                                    <input type="checkbox" checked={routeParams.overlays.includes(m.id)} onChange={e => toggleOverlay(m.id, e.target.checked)} />
+                                    {m.name}
+                                </label>
+                                {m.defaultOpacity !== undefined && routeParams.overlays.includes(m.id) && (
+                                    <button
+                                        onClick={() => openOpacityDialog(m.id, m.name, m.defaultOpacity!)}
+                                        className="text-blue-600 hover:text-blue-800 hover:underline text-xs cursor-pointer !bg-transparent !p-0 !h-auto"
+                                        title={`Adjust ${m.name} opacity`}
+                                    >
+                                        {Math.round(getOpacity(m.id, m.defaultOpacity) * 100)}%
+                                    </button>
+                                )}
+                            </div>
+                            {m.legend && routeParams.overlays.includes(m.id) && (
+                                <div className="mt-1 mr-1">
+                                    <div
+                                        className="h-2 rounded"
+                                        style={{ background: m.legend.gradient }}
+                                        title={m.name}
+                                    />
+                                    <div className="relative h-3 text-[10px] text-gray-500">
+                                        {m.legend.stops.map(stop => (
+                                            <span
+                                                key={stop.label}
+                                                className="absolute top-0"
+                                                style={{
+                                                    left: `${stop.position}%`,
+                                                    transform: stop.position === 0
+                                                        ? 'none'
+                                                        : stop.position === 100
+                                                            ? 'translateX(-100%)'
+                                                            : 'translateX(-50%)'
+                                                }}
+                                            >
+                                                {stop.label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
                         </li>)}
                     </ul>

@@ -28,8 +28,19 @@ export type BaseLayerDefinition = {
     type: 'base',
 } & Pick<StyleSpecification, 'layers' | 'sources'> & LayerShared
 
+export type LegendStop = {
+    label: string
+    position: number // 0-100, percentage along the gradient
+}
+
+export type Legend = {
+    gradient: string
+    stops: LegendStop[]
+}
+
 export interface OverlayDefinition extends LayerShared {
     type: 'overlay',
     source: React.ReactNode | (() => React.ReactNode),
     defaultOpacity?: number
+    legend?: Legend
 }

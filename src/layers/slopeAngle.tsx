@@ -7,7 +7,25 @@ import { demSource } from "./demSource"
 
 // Import worker types
 import type { ElevationRequest, ElevationResponse, MainMessage, ProcessTileRequest, TileResponse, CalculatePointSlopeRequest, PointSlopeResponse, PointElevationRequest, PointElevationResponse } from './slopeWorker'
+import { colorStops } from './slopeColors'
 import { getElevation } from './contours'
+
+// Build a CSS gradient (and matching angle labels) from the slope angle color stops, for use as a legend
+const minAngle = colorStops[0].angle
+const maxAngle = colorStops[colorStops.length - 1].angle
+const stopPosition = (angle: number) => ((angle - minAngle) / (maxAngle - minAngle)) * 100
+
+const legend = {
+    gradient: `linear-gradient(to right, ${colorStops.map(stop => {
+        const { r, g, b, a } = stop.color
+        return `rgba(${r}, ${g}, ${b}, ${a / 255}) ${stopPosition(stop.angle)}%`
+    }).join(', ')})`,
+    stops: colorStops
+        .map(stop => ({
+            label: `${stop.angle}°`,
+            position: stopPosition(stop.angle)
+        }))
+}
 
 // Custom tile generator for slope angles using web worker
 class SlopeAngleTileSource {
@@ -456,6 +474,7 @@ export default {
     type: 'overlay',
     cacheable: false,
     defaultOpacity: 0.6,
+    legend,
     source: (
         <>
             <Source 
