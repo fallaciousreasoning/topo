@@ -131,10 +131,20 @@ export default {
                 type: 'fill',
                 source: 'waterFeatures',
                 minzoom: WATER_FEATURES_MINZOOM,
+                // Kept for both types (so a lake stays clickable - see the
+                // useLayerHandler below - and single-clicking one still
+                // opens its location page), but lakes render invisible:
+                // tinting every lake in NZ blue at this zoom was a lot of
+                // ink for not much extra information, and a lake's shape is
+                // already drawn (in red) via SelectedShapeHighlight once
+                // you've actually navigated to it (see LocationSection.tsx/
+                // setSelectedShape) - no need to also shade it in
+                // permanently. Wetlands are rarer and their green tint reads
+                // more like genuinely useful terrain info, so they keep theirs.
                 filter: ['==', ['geometry-type'], 'Polygon'],
                 paint: {
-                    'fill-color': ['match', ['get', 'type'], 'wetland', '#5c7a4a', '#1c5c8c'],
-                    'fill-opacity': 0.15,
+                    'fill-color': '#5c7a4a',
+                    'fill-opacity': ['match', ['get', 'type'], 'wetland', 0.15, 0],
                 }
             }} />
             {/* Wetlands get LINZ Topo50's own swamp/reed symbol, centred in the shape. */}

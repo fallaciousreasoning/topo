@@ -99,6 +99,13 @@ export default {
             type: 'geojson',
             data,
         }}>
+            {/* Kept invisible (rather than removed) so a reserve/park stays
+                clickable (see the useLayerHandler above) and single-clicking
+                one still opens its location page - the fill itself is
+                redundant permanent clutter, since the base map already shows
+                these areas and a selected one's shape is drawn (in red) via
+                SelectedShapeHighlight once you've actually navigated to it
+                (see LocationSection.tsx/setSelectedShape). */}
             <Layer layer={{
                 id: 'protected-areas-fill-polygon',
                 type: 'fill',
@@ -107,7 +114,7 @@ export default {
                 filter: ['==', ['geometry-type'], 'Polygon'],
                 paint: {
                     'fill-color': '#2d6a2d',
-                    'fill-opacity': 0.1,
+                    'fill-opacity': 0,
                 }
             }} />
             <Layer layer={{
