@@ -86,7 +86,13 @@ const searchPoints = async (query: string, maxResults = 100): Promise<Place[]> =
     return results
 }
 
+// Each source already caps itself at 100, but combined (points + NZ places +
+// map references) that can still add up to several hundred rows - cap the
+// combined list too, so SearchSection isn't rendering an enormous list for a
+// broad query.
+const MAX_RESULTS = 100
+
 export default async (query: string, sources = [searchPoints, searchNzPlaces, searchMapReferences]): Promise<Place[]> => {
     const results = await Promise.all(sources.map(s => s(query)));
-    return results.reduce((prev, next) => [...prev, ...next], [])
+    return results.reduce((prev, next) => [...prev, ...next], []).slice(0, MAX_RESULTS)
 }

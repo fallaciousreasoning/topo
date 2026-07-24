@@ -8,6 +8,7 @@ import huts from "./huts";
 import landforms from "./landforms";
 import linzAerial from "./linzAerial";
 import linzVector from "./linzVector";
+import localities from "./localities";
 import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
@@ -51,6 +52,7 @@ export const overlays: OverlayDefinition[] = [
     landforms,
     waterFeatures,
     geologicalFeatures,
+    localities,
     protectedAreas,
     tracksLayer,
     hunting,

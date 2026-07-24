@@ -124,12 +124,44 @@ already exactly a point at the gazetteer's own resolution, so there's no line/po
 be had the way there is for the OSM-backed datasets above. `mountains.tsx` merges this file's
 features in alongside the climbnz ones at render time, as plain points with no route/photo data.
 
+## `localities.json`
+
+    python scripts/update_localities.py
+
+Named localities (`place=locality`) from OpenStreetMap, with a gazetteer `locality` fallback.
+"Locality" is OSM's catch-all tag for a named place with no formal administrative status -
+in particular, this is the only way several named ski fields with no fixed lift infrastructure
+(e.g. Mount Potts Ski Field, a heli-ski/backcountry operation with no mappable lift/piste geometry)
+show up in OSM at all - there's no distinct "ski area" OSM tag or NZGB Gazetteer type to query for
+those instead. Administrative localities (small settlements, etc, both OSM- and gazetteer-sourced)
+inevitably come along for the ride too - see "Excluded gazetteer types" below for why that overlap
+with the base map is considered acceptable here even though it isn't for `suburb`/`town`/etc.
+
+## `regions.json`
+
+    python scripts/update_regions.py
+
+NZ Land District boundary *polygons*, from LINZ Data Service layer 50785 ("NZ Land Districts") - 12
+regions (North Auckland, South Auckland, Gisborne, Hawkes Bay, Taranaki, Wellington, Nelson,
+Marlborough, Westland, Canterbury, Otago, Southland). An old property-registration division, not
+the modern 16 regional council areas, but the broadest polygon layer confirmed available via this
+repo's existing LDS key - and, unlike a suburb/locality, these tile the *entire* country with no
+gaps (confirmed directly: a point in the middle of Aoraki/Mount Cook National Park, nowhere near
+any settlement, still resolves to "Canterbury"). Used by `src/search/regions.ts`'s
+`findContainingRegion` to annotate a place with the region it falls within (see
+`SearchSection.tsx`/`LocationSection.tsx`) - deliberately *not* wired into `src/search/places.ts`'s
+`getPlaces()`/`closestPlace` at all, since a whole land district is far too coarse a shape to be a
+search result, a long-press match, or a selected-shape outline in its own right. Only 12 features,
+so simplification matters less than a dataset like the suburb/locality one above, but each is a
+whole land district's worth of coastline - simplified at a coarser ~200m tolerance.
+
 ## Excluded gazetteer types
 
 The NZGB Gazetteer (`places.json`) has ~100 distinct place `type`s in total. Beyond what's listed
-above, deliberately not covered: administrative places (`locality`, `suburb`, `town`, `city`,
-`village`, `local authority`) and `trig station` are already shown by the LINZ vector base map
-itself; infrastructure (`railway station`, `railway line`, `road`, `bridge`, `building`) is
+above, deliberately not covered: administrative places (`suburb`, `town`, `city`, `village`,
+`local authority`) and `trig station` are already shown by the LINZ vector base map itself
+(`locality` is the one exception - see `localities.json` above); infrastructure (`railway station`,
+`railway line`, `road`, `bridge`, `building`) is
 likewise already on the base map; offshore bathymetric features (`seamount`, `guyot`, `trough`,
 `bank`, `shoal`, `fracture zone`, `sea valley`) have no real relevance to a land-based hiking map
 and barely any OSM coverage to query for; and generic/junk types (`site`, `place`, `area`,
@@ -139,11 +171,12 @@ overlay.
 ## Shared code
 
 `update_ridges.py`, `update_glaciers.py`, `update_valleys.py`, `update_waterways.py`,
-`update_landforms.py`, `update_water_features.py`, `update_geological_features.py`, and
-`update_protected_areas.py` all pull their Overpass fetching, RDP line simplification, and
-gazetteer-fallback logic from `scripts/osm_features.py`.
+`update_landforms.py`, `update_water_features.py`, `update_geological_features.py`,
+`update_protected_areas.py`, and `update_localities.py` all pull their Overpass fetching, RDP line
+simplification, and gazetteer-fallback logic from `scripts/osm_features.py`.
 
 `update_places.py`, `update_landforms.py` and `update_geological_features.py` pull authoritative
 LINZ Data Service layers via `scripts/linz_features.py`'s `fetch_wfs`, and use
 `osm_features.remove_covered` to drop an OSM feature whenever a same-named LINZ feature already
-covers it.
+covers it. `update_regions.py` also uses `fetch_wfs` (no OSM/gazetteer fallback needed - LDS is the
+only source for it), and its own RDP simplification reuses `osm_features.simplify` directly.

@@ -3,6 +3,7 @@ import { useRouteUpdater } from "../routing/router";
 import { useMap } from "../map/Map";
 import { getElevation } from "../layers/contours";
 import { closestPlace, findPlace } from "../search/nearest";
+import { findContainingRegion } from "../search/regions";
 import { getPlaces, findPlaceByExactName, hasRealShape } from "../search/places";
 import db from "../caches/indexeddb";
 import { Point } from "../tracks/point";
@@ -53,6 +54,7 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
   const [huntingBlock, setHuntingBlock] = useState<HuntingBlock | null>(null);
   const [huntingHuts, setHuntingHuts] = useState<Hut[] | undefined>(undefined);
   const { result: mountains = {} } = usePromise(getMountains, []);
+  const { result: region } = usePromise(() => findContainingRegion(lat, lng), [lat, lng]);
 
   // Fetch location info
   useEffect(() => {
@@ -204,6 +206,9 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
             {round(lat, 6)}, {round(lng, 6)}
             {elevation !== null && <span> • {round(elevation, 0)}m</span>}
           </div>
+          {region && region.name !== place?.name && (
+            <div className="text-xs text-gray-500">{region.name}</div>
+          )}
         </div>
         <div className="flex gap-2">
           {existingPoint && (

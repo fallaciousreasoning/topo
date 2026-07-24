@@ -3,12 +3,28 @@ import Section from './Section';
 import geocode from '../search/geocode';
 import { usePromise } from '../hooks/usePromise';
 import { useRouteUpdater } from '../routing/router';
-import { Place } from '../search/places';
+import { Place, hasRealShape } from '../search/places';
+import { findContainingRegion } from '../search/regions';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import Input from '../components/Input';
 import { getElevation } from '../layers/contours';
 import round from '../utils/round';
 import { useMap } from '../map/Map';
+
+// Only literal point results (a hut, a peak, a saved point, ...) get a
+// "within <region>" annotation - a lake or park's own containing region is a
+// much less obviously useful thing to show next to it.
+function ResultRegion({ place }: { place: Place }) {
+    const { result: region } = usePromise(
+        () => hasRealShape(place)
+            ? Promise.resolve(undefined)
+            : findContainingRegion(parseFloat(place.lat), parseFloat(place.lon)),
+        [place],
+    )
+
+    if (!region || region.name === place.name) return null
+    return <span className="text-gray-500"> · {region.name}</span>
+}
 
 export default function SearchSection() {
     const updateRoute = useRouteUpdater()
@@ -34,8 +50,8 @@ export default function SearchSection() {
         // or "Lake Taupō" shows the whole thing, not just its centre point at
         // whatever zoom the map already happened to be at.
         const [west, south, east, north] = r.bbox ?? [lon, lat, lon, lat]
-        const hasRealShape = west !== east || south !== north
-        if (hasRealShape) {
+        const isRealShape = west !== east || south !== north
+        if (isRealShape) {
             map.fitBounds([west, south, east, north], {
                 animate: true,
                 padding: 60,
@@ -72,7 +88,7 @@ export default function SearchSection() {
             }
         }} onChange={e => setQuery(e.target.value)} />
         {result.map((r, i) => <div key={i} className={`w-full px-2 text-md py-0.5 hover:bg-gray-300 cursor-pointer ${i === selectedIndex && 'bg-gray-200'}`} onClick={() => selectResult(r)}>
-            {r.name} ({r.type})
+            {r.name} ({r.type})<ResultRegion place={r} />
         </div>)}
     </Section>
 }
