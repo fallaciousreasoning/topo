@@ -1,27 +1,19 @@
 import { BaseLayerDefinition, OverlayDefinition } from "./config";
 import contours from "./contours";
-import geologicalFeatures from "./geologicalFeatures";
-import glaciers from "./glaciers";
 import hillshade from "./hillshade";
 import hunting from "./hunting";
 import huts from "./huts";
-import landforms from "./landforms";
 import linzAerial from "./linzAerial";
 import linzVector from "./linzVector";
-import localities from "./localities";
 import mountains from "./mountains";
 import openTopo from "./openTopo";
 import osm from "./osm";
+import placeNames from "./placeNames";
 import points from "./points";
-import protectedAreas from "./protectedAreas";
-import ridges from "./ridges";
 import slopeAngle from "./slopeAngle";
 import topoRaster from "./topoRaster";
 import utmGrid from "./utmGrid";
 import tracksLayer from "./TracksLayer";
-import valleys from "./valleys";
-import waterFeatures from "./waterFeatures";
-import waterways from "./waterways";
 
 export const extraData = {
     version: 8,
@@ -45,15 +37,21 @@ export const overlays: OverlayDefinition[] = [
     huts,
     mountains,
     points,
-    ridges,
-    glaciers,
-    valleys,
-    waterways,
-    landforms,
-    waterFeatures,
-    geologicalFeatures,
-    localities,
-    protectedAreas,
+    placeNames,
     tracksLayer,
     hunting,
 ]
+
+/**
+ * The overlays a base layer starts with the first time it's switched to -
+ * used by LayersControl.tsx's basemap switcher when there's no remembered
+ * set yet (see settings.ts's getRememberedOverlays/rememberOverlaysForBasemap).
+ * The LINZ vector basemap is detailed enough to carry every overlay except
+ * hunting (a niche, visually heavy one - see hunting.tsx); every other,
+ * plainer basemap just gets the two most broadly useful overlays instead of
+ * being overwhelmed by all of them at once.
+ */
+export const defaultOverlaysForBasemap = (basemapId: string): string[] =>
+    basemapId === linzVector.id
+        ? overlays.filter(o => o.id !== hunting.id).map(o => o.id)
+        : [huts.id, mountains.id]

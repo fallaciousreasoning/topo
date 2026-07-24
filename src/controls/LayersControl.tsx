@@ -1,8 +1,9 @@
 import * as React from 'react'
 import Control from './Control'
-import { baseLayers, overlays } from '../layers/layerDefinition'
+import { baseLayers, overlays, defaultOverlaysForBasemap } from '../layers/layerDefinition'
 import { useParams, useRouteUpdater } from '../routing/router'
 import { useMap } from '../map/Map'
+import { getRememberedOverlays, rememberOverlaysForBasemap } from '../utils/settings'
 import OpacityDialog, { getOpacity } from './OpacityDialog'
 
 export default function LayersControl() {
@@ -23,6 +24,20 @@ export default function LayersControl() {
                 overlays: routeParams.overlays.filter(r => r !== overlayId)
             })
         }
+    }
+
+    // Switching base layer remembers what was showing on the one we're
+    // leaving (so coming back to it later restores it), and either restores
+    // or picks a sensible default set of overlays for the one we're
+    // switching to (see defaultOverlaysForBasemap) - so overlays are
+    // remembered per base layer instead of just carrying over unchanged.
+    const selectBasemap = (basemapId: string) => {
+        if (basemapId === routeParams.basemap) return
+
+        rememberOverlaysForBasemap(routeParams.basemap, routeParams.overlays)
+        const nextOverlays = getRememberedOverlays(basemapId) ?? defaultOverlaysForBasemap(basemapId)
+
+        updateParams({ basemap: basemapId, overlays: nextOverlays })
     }
 
     const handleOpacityChange = (layerId: string, opacity: number) => {
@@ -99,7 +114,7 @@ export default function LayersControl() {
                     <ul>
                         {baseLayers.map(m => <li key={m.id}>
                             <label className='flex items-center gap-1'>
-                                <input type="radio" value={m.id} checked={routeParams.basemap === m.id} onChange={e => updateParams({ basemap: m.id })} />
+                                <input type="radio" value={m.id} checked={routeParams.basemap === m.id} onChange={() => selectBasemap(m.id)} />
                                 {m.name}
                             </label>
                         </li>)}

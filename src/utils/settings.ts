@@ -16,6 +16,12 @@ interface Settings {
     cursorMode: CursorMode
     statusBarMode: StatusBarMode
     layerSettings: Record<string, Record<string, number>>
+    /** Which overlays were showing the last time each base layer was active
+     * (keyed by base layer id) - see LayersControl.tsx's basemap switcher,
+     * which saves the outgoing base layer's current overlays here and
+     * restores the incoming one's, so switching base layers back and forth
+     * doesn't lose what you had showing on each. */
+    overlaysByBasemap: Record<string, string[]>
 }
 
 const defaultSettings: Settings = {
@@ -23,6 +29,7 @@ const defaultSettings: Settings = {
     cursorMode: 'automatic',
     statusBarMode: 'always',
     layerSettings: {},
+    overlaysByBasemap: {},
 }
 
 let cachedValue: Settings | undefined
@@ -101,4 +108,16 @@ export const updateLayerSetting = (layerId: string, key: string, value: number) 
 export const useLayerSetting = (layerId: string, key: string, defaultValue: number): number => {
     const layerSettings = useSetting('layerSettings')
     return layerSettings[layerId]?.[key] ?? defaultValue
+}
+
+/** The overlays remembered for this base layer, or undefined if it's never been switched to before. */
+export const getRememberedOverlays = (basemapId: string): string[] | undefined => {
+    return getSetting('overlaysByBasemap')[basemapId]
+}
+
+export const rememberOverlaysForBasemap = (basemapId: string, overlayIds: string[]) => {
+    const current = getSetting('overlaysByBasemap')
+    updateSettings({
+        overlaysByBasemap: { ...current, [basemapId]: overlayIds },
+    })
 }
