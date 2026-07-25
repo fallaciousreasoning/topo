@@ -1,7 +1,13 @@
-import { GeolocateControl, Map, NavigationControl, ScaleControl } from "maplibre-gl";
+import { GeolocateControl, Map, NavigationControl, ScaleControl, setWorkerUrl } from "maplibre-gl";
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import React, { useContext, useEffect } from "react";
 import Terrain from "../layers/terrain";
 import { useParams } from "../routing/router";
+
+// maplibre-gl resolves its worker script relative to import.meta.url, which breaks once
+// the library is bundled (Vite's dep pre-bundling in dev, Rollup's static analysis in
+// prod both fail to carry the separate worker file along). Pin it explicitly instead.
+setWorkerUrl(maplibreWorkerUrl);
 
 const style = {
   width: '100vw',
@@ -62,7 +68,8 @@ export default function MapContext(props: React.PropsWithChildren) {
         }
       }))
       .addControl(new NavigationControl({
-        showCompass: true
+        showCompass: true,
+        visualizePitch: true
       }))
 
     const onStyleLoad = () => setStyleLoaded(true);

@@ -31,7 +31,7 @@ export default function LayersControl() {
         // Update different layer types based on the layer ID
         if (layerId === 'hillshade') {
             if (map.getLayer('hillshade')) {
-                map.setPaintProperty('hillshade', 'hillshade-opacity', opacity)
+                map.setPaintProperty('hillshade', 'hillshade-opacity' as any, opacity)
             }
         } else if (layerId === 'contour-source') {
             if (map.getLayer('contour-lines')) {

@@ -76,13 +76,7 @@ export default function StatusBar() {
                 })
             }
 
-            const handleMouseLeave = () => {
-                setPosition(null)
-                setElevation(null)
-                setSlopeAngle(null)
-            }
-
-            // Also listen to the map container events
+            // Listen to the map container events (map-level 'mouseleave' requires a layer filter, so use the DOM event instead)
             const container = map.getContainer()
             const handleContainerMouseLeave = () => {
                 setPosition(null)
@@ -91,12 +85,10 @@ export default function StatusBar() {
             }
 
             map.on('mousemove', handleMouseMove)
-            map.on('mouseleave', handleMouseLeave)
             container.addEventListener('mouseleave', handleContainerMouseLeave)
 
             return () => {
                 map.off('mousemove', handleMouseMove)
-                map.off('mouseleave', handleMouseLeave)
                 container.removeEventListener('mouseleave', handleContainerMouseLeave)
             }
         }

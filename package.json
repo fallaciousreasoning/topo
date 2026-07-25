@@ -35,7 +35,7 @@
     "dexie-react-hooks": "^1.1.7",
     "isomorphic-fetch": "3.0.0",
     "maplibre-contour": "github:fallaciousreasoning/maplibre-contour",
-    "maplibre-gl": "^5.24.0",
+    "maplibre-gl": "^6.0.0",
     "ol": "9.1.0",
     "pbf": "^4.0.1",
     "proj4": "2.9.2",

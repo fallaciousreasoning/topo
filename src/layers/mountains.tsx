@@ -129,7 +129,7 @@ export default {
             }
 
             updateCluster()
-            const events = ['zoom']
+            const events = ['zoom'] as const
             for (const e of events) map.on(e, updateCluster)
 
             return () => {
