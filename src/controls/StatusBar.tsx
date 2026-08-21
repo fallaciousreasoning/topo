@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useMap } from '../map/Map'
 import { getElevation } from '../layers/contours'
 import { findPlace } from '../search/nearest'
+import { hasRealShape } from '../search/places'
 import { slopeAngleSource } from '../layers/slopeAngle'
 import round from '../utils/round'
 import { useParams } from '../routing/router'
@@ -123,13 +124,17 @@ export default function StatusBar() {
             const abortController = new AbortController()
             const zoom = map.getZoom()
 
-            // First find the place, then use its coordinates for elevation/slope
+            // First find the place, then use its coordinates for elevation/slope -
+            // but only when it's a real point (a peak, a hut, ...). A place with
+            // real line/polygon geometry (a lake, a track, ...) has a bbox-centre
+            // lat/lon that can be well away from the actual cursor position, so
+            // fall back to the cursor's own coordinates for those.
             findPlace(position.lat, position.lng)
                 .catch(() => null)
                 .then((placeData) => {
-                    // Use place coordinates if found, otherwise use position
-                    const lat = placeData ? parseFloat(placeData.lat) : position.lat
-                    const lng = placeData ? parseFloat(placeData.lon) : position.lng
+                    const useCursorPosition = !placeData || hasRealShape(placeData)
+                    const lat = useCursorPosition ? position.lat : parseFloat(placeData.lat)
+                    const lng = useCursorPosition ? position.lng : parseFloat(placeData.lon)
 
                     // Fetch elevation and slope angle at the place's location
                     return Promise.all([

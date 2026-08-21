@@ -84,8 +84,13 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
           (underlyingPlace.name === name || name.startsWith(underlyingPlace.name));
         const resolvedPlace = !name || isSamePlace ? underlyingPlace : undefined;
 
-        const placeLat = resolvedPlace ? parseFloat(resolvedPlace.lat) : lat;
-        const placeLng = resolvedPlace ? parseFloat(resolvedPlace.lon) : lng;
+        // Only trust the resolved place's own lat/lon for elevation/slope when
+        // it's a real point (a peak, a hut, ...) - a place with real
+        // line/polygon geometry (a lake, a track, ...) has a bbox-centre
+        // lat/lon that can be well away from the actual clicked position.
+        const useResolvedPlace = resolvedPlace && !hasRealShape(resolvedPlace);
+        const placeLat = useResolvedPlace ? parseFloat(resolvedPlace.lat) : lat;
+        const placeLng = useResolvedPlace ? parseFloat(resolvedPlace.lon) : lng;
 
         return Promise.all([
           getElevation([placeLat, placeLng], zoom).catch(() => null),
