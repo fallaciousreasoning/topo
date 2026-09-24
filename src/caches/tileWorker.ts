@@ -124,7 +124,7 @@ async function saveTile(layer: string, path: string, data: Uint8Array): Promise<
 const CHECKPOINT_TILE_INTERVAL = 100
 
 /** How many writes to have in flight at once, so disk I/O doesn't stall the network read. */
-const WRITE_CONCURRENCY = 8
+const WRITE_CONCURRENCY = 512
 
 /** How often to post a progress update back to the main thread, regardless of tile count. */
 const PROGRESS_INTERVAL_MS = 200
@@ -181,7 +181,19 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
         if (!reader) throw new Error('Response body is not readable')
 
         let tilesWritten = 0
-        const inFlight = new Set<Promise<void>>()
+        // Backpressure on in-flight writes. Deliberately a counter plus a single waiter rather than
+        // `Promise.race` over a Set of pending writes: a race attaches a fresh reaction to every
+        // pending promise on each call, which at high concurrency means O(WRITE_CONCURRENCY) work
+        // (and accumulating reactions) per tile.
+        let inFlight = 0
+        let wakeWaiter: (() => void) | null = null
+        const waitForInFlightBelow = async (limit: number) => {
+            while (inFlight >= limit) {
+                const { promise, resolve } = Promise.withResolvers<void>()
+                wakeWaiter = resolve
+                await promise
+            }
+        }
         let confirmedBytes = bytesReceived
         let confirmedSinceCheckpoint = 0
         let lastProgressTime = 0
@@ -204,9 +216,9 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
             const entry = { recordBytes, done: false }
             writeQueue.push(entry)
 
-            let tracked: Promise<void>
-            tracked = saveTile(layerId, `/${z}/${x}/${y}.${tileExt}`, data).then(() => {
-                inFlight.delete(tracked)
+            inFlight++
+            saveTile(layerId, `/${z}/${x}/${y}.${tileExt}`, data).then(() => {
+                inFlight--
                 entry.done = true
                 while (writeQueue.length > 0 && writeQueue[0].done) {
                     confirmedBytes += writeQueue.shift()!.recordBytes
@@ -216,8 +228,10 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
                         self.postMessage(checkpoint)
                     }
                 }
+                const wake = wakeWaiter
+                wakeWaiter = null
+                wake?.()
             })
-            inFlight.add(tracked)
 
             tilesWritten++
             bytesReceived += recordBytes
@@ -228,12 +242,10 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
                 postProgress(totalBytes > 0 ? Math.min(1, bytesReceived / totalBytes) : 0, bytesReceived)
             }
 
-            if (inFlight.size >= WRITE_CONCURRENCY) {
-                await Promise.race(inFlight)
-            }
+            await waitForInFlightBelow(WRITE_CONCURRENCY)
         }
 
-        await Promise.all(inFlight)
+        await waitForInFlightBelow(1)
         postProgress(1, bytesReceived)
 
         const done: DownloadDoneResponse = { type: 'DOWNLOAD_DONE', id, tilesWritten }

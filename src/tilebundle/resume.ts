@@ -9,6 +9,43 @@ const PROGRESS_WRITE_INTERVAL_MS = 200
 
 const activeDownloads = new Map<number, AbortController>()
 
+// Hold a screen wake lock while any download is running, so the screen sleeping (and the browser
+// then throttling or suspending the page) doesn't stall a multi-gigabyte download. Best-effort:
+// unsupported browsers, or a request the browser refuses (e.g. battery saver), just go without.
+// The browser drops the lock whenever the page is hidden, so it's re-requested on becoming visible.
+let wakeLock: WakeLockSentinel | null = null
+
+// Updates are chained so two overlapping calls (e.g. two downloads starting together) can't both
+// see no lock, both request one, and leak the first.
+let wakeLockUpdate = Promise.resolve()
+function updateWakeLock(): void {
+    wakeLockUpdate = wakeLockUpdate.then(syncWakeLock)
+}
+
+async function syncWakeLock(): Promise<void> {
+    if (!('wakeLock' in navigator)) return
+    const wanted = activeDownloads.size > 0 && document.visibilityState === 'visible'
+    if (wanted && (!wakeLock || wakeLock.released)) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen')
+        } catch {
+            wakeLock = null
+        }
+    } else if (!wanted) {
+        await releaseWakeLock()
+    }
+}
+
+async function releaseWakeLock(): Promise<void> {
+    const lock = wakeLock
+    wakeLock = null
+    await lock?.release().catch(() => {})
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => { updateWakeLock() })
+}
+
 /**
  * Cancel a download, however it's currently running. If a runner is actively fetching it, this
  * aborts it — `runDownload`'s catch block then removes the record and any tiles it wrote. If the
@@ -76,6 +113,7 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
 
     const controller = new AbortController()
     activeDownloads.set(download.id, controller)
+    updateWakeLock()
 
     console.log('[runDownload] starting:', {
         id: download.id, layerId: download.layerId, regionId: download.regionId,
@@ -156,5 +194,6 @@ export async function runDownload(download: Download, onProgress?: (progress: nu
         }
     } finally {
         activeDownloads.delete(download.id)
+        updateWakeLock()
     }
 }

@@ -66,12 +66,9 @@ function RegionRow({ region, layerId, record, offerQuality }: RegionRowProps) {
         ? (record.maxZoom <= SD_MAX_ZOOM ? bundleSize.sd : bundleSize.hd)
         : undefined
 
-    const { result: sizeBytes } = usePromise(async () => {
-        if (!isComplete) return undefined
-        const [west, south, east, north] = polygonBbox(region.polygon)
-        const cacher = await cacherPromise.then(r => r.default)
-        return cacher.getSizeInBbox(layerId, west, south, east, north)
-    }, [isComplete, layerId, region.polygon])
+    // A completed bundle download's bytesDownloaded is the whole bundle's size, so just show that
+    // rather than walking every tile file in OPFS (slow for hundreds of thousands of tiles).
+    const sizeBytes = isComplete ? record?.bytesDownloaded || undefined : undefined
 
     return (
         <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
@@ -172,10 +169,12 @@ function CustomAreaRow({ download }: { download: Download }) {
 
     const { result: sizeBytes } = usePromise(async () => {
         if (!isComplete) return undefined
+        // Bundle downloads: bytesDownloaded is the whole bundle's size (see RegionRow).
+        if (download.regionId !== null) return download.bytesDownloaded || undefined
         const [west, south, east, north] = polygonBbox(download.polygon)
         const cacher = await cacherPromise.then(r => r.default)
         return cacher.getSizeInBbox(download.layerId, west, south, east, north)
-    }, [isComplete, download.layerId, download.polygon])
+    }, [isComplete, download.layerId, download.polygon, download.regionId, download.bytesDownloaded])
 
     return (
         <div className="flex items-center gap-2 py-1.5 border-b last:border-0">
