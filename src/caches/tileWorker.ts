@@ -129,6 +129,25 @@ const WRITE_CONCURRENCY = 512
 /** How often to post a progress update back to the main thread, regardless of tile count. */
 const PROGRESS_INTERVAL_MS = 200
 
+/**
+ * How long a single tile write can take before it's given up on. An OPFS call that never settles
+ * would otherwise wedge the whole download: the checkpoint can't advance past a write that never
+ * finishes (so a reload resumes from wherever that tile was, possibly near the start), and the
+ * final drain waits on it forever (so the download sits at 100% and never completes). A timed-out
+ * write is treated like any other failed write - the tile just isn't cached.
+ */
+const WRITE_TIMEOUT_MS = 30_000
+
+function saveTileWithTimeout(layer: string, path: string, data: Uint8Array): Promise<boolean> {
+    const { promise, resolve } = Promise.withResolvers<boolean>()
+    const timer = setTimeout(() => {
+        console.warn('[tileWorker] tile write timed out:', { layer, path })
+        resolve(false)
+    }, WRITE_TIMEOUT_MS)
+    saveTile(layer, path, data).then(resolve, () => resolve(false)).finally(() => clearTimeout(timer))
+    return promise
+}
+
 const activeControllers = new Map<string, AbortController>()
 
 async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
@@ -217,7 +236,7 @@ async function runBundleDownload(req: DownloadBundleRequest): Promise<void> {
             writeQueue.push(entry)
 
             inFlight++
-            saveTile(layerId, `/${z}/${x}/${y}.${tileExt}`, data).then(() => {
+            saveTileWithTimeout(layerId, `/${z}/${x}/${y}.${tileExt}`, data).then(() => {
                 inFlight--
                 entry.done = true
                 while (writeQueue.length > 0 && writeQueue[0].done) {
