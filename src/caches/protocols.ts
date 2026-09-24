@@ -1,4 +1,8 @@
-import { AddProtocolAction, addProtocol as addProtocolInternal, removeProtocol as removeProtocolInternal, RequestParameters } from "maplibre-gl"
+import { addProtocol as addProtocolInternal, removeProtocol as removeProtocolInternal, GetResourceResponse, RequestParameters } from "maplibre-gl"
+
+// MapLibre's AddProtocolAction allows any response data (images, strings, JSON), but all of our
+// protocols serve raw ArrayBuffers, and callers (and maplibre-contour) rely on that.
+export type AddProtocolAction = (requestParameters: RequestParameters, abortController: AbortController) => Promise<GetResourceResponse<ArrayBuffer>>
 
 const protocols: {
     [scheme: string]: AddProtocolAction
