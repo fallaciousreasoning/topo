@@ -3,13 +3,27 @@ import { useParams, useRouteUpdater } from "../routing/router";
 
 const COLLAPSED_HEIGHT_VH = 20;
 
+interface SheetState {
+  isExpanded: boolean;
+  toggleExpanded: () => void;
+}
+
+// Only provided when sections are shown as a bottom sheet (small screens)
+const SheetContext = React.createContext<SheetState | null>(null);
+
+export function useSheet() {
+  return React.useContext(SheetContext);
+}
+
 export default function SectionContainer({ children }: { children: React.ReactNode }) {
   const [isSmallScreen, setIsSmallScreen] = React.useState(false);
   const [enablePointerEvents, setEnablePointerEvents] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const params = useParams();
   const updateRoute = useRouteUpdater();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const offScreenSpacerRef = React.useRef<HTMLDivElement>(null);
   const scrollPositionsRef = React.useRef<{ [page: string]: number }>({});
 
   // Detect small screen (mobile)
@@ -79,16 +93,34 @@ export default function SectionContainer({ children }: { children: React.ReactNo
     }
   }, [params.editingFeature, isSheet]);
 
+  // Scroll offsets for the collapsed and expanded positions, measured from the layout
+  const getSnapPositions = () => {
+    const collapsed = offScreenSpacerRef.current?.offsetHeight ?? window.innerHeight;
+    const expanded = (contentRef.current?.offsetTop ?? 0) - 48;
+    return { collapsed, expanded };
+  };
+
+  // iOS can't drag the sheet up (the container is pointer-events: none), so offer a button
+  const toggleExpanded = () => {
+    if (!containerRef.current) return;
+    const { collapsed, expanded } = getSnapPositions();
+    containerRef.current.scrollTo({ top: isExpanded ? collapsed : expanded, behavior: 'smooth' });
+  };
+
   // Save scroll position when scrolling
   React.useEffect(() => {
     if (!isSheet || !containerRef.current || !params.page) return;
 
     const handleScroll = () => {
       if (!containerRef.current || !params.page) return;
-      scrollPositionsRef.current[params.page] = containerRef.current.scrollTop;
+      const scrollTop = containerRef.current.scrollTop;
+      scrollPositionsRef.current[params.page] = scrollTop;
+      const { collapsed, expanded } = getSnapPositions();
+      setIsExpanded(scrollTop > (collapsed + expanded) / 2);
     };
 
     const container = containerRef.current;
+    handleScroll();
     container.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
@@ -201,7 +233,7 @@ export default function SectionContainer({ children }: { children: React.ReactNo
         pointerEvents: enablePointerEvents ? 'auto' : undefined,
       }}
     >
-      <div style={spacerOffScreenStyle} />
+      <div ref={offScreenSpacerRef} style={spacerOffScreenStyle} />
       <div style={spacerCollapsedStyle} />
       <div style={spacerFixedStyle} />
       <div
@@ -213,7 +245,9 @@ export default function SectionContainer({ children }: { children: React.ReactNo
           scrollSnapStop: 'normal',
         }}
       >
-        {children}
+        <SheetContext.Provider value={{ isExpanded, toggleExpanded }}>
+          {children}
+        </SheetContext.Provider>
       </div>
     </div>
   );
