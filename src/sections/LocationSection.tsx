@@ -81,9 +81,11 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
         // own gazetteer entry. Only trust it when we don't already have a name
         // from the click itself, or when it's clearly the same feature
         // (exact match, or a prefix match to allow for mountains.tsx appending
-        // "(1234m)" to the name).
+        // "(1234m)" to the name). The prefix match is only for peaks - a pin
+        // named "Lake X (700m)" inside Lake X keeps its own name.
         const isSamePlace = !!underlyingPlace && !!name &&
-          (underlyingPlace.name === name || name.startsWith(underlyingPlace.name));
+          (underlyingPlace.name === name ||
+            (!hasRealShape(underlyingPlace) && name.startsWith(underlyingPlace.name)));
         const resolvedPlace = !name || isSamePlace ? underlyingPlace : undefined;
 
         // Only trust the resolved place's own lat/lon for elevation/slope when
@@ -114,9 +116,16 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
         // on a fresh page load/refresh too, since this effect re-resolves
         // the place from scratch on mount regardless of how the location
         // page was reached.
-        if (placeData && hasRealShape(placeData)) {
+        //
+        // Only when the link actually names that shape, though - a pin that
+        // merely falls inside a polygon (a saved point, an unnamed link, a
+        // saved point named "Lake X (700m)" that prefix-matches "Lake X", ...)
+        // should stay a pin rather than being swapped for the polygon.
+        if (point || !name) {
+          setSelectedShape(lat, lng, null);
+        } else if (placeData && hasRealShape(placeData) && placeData.name === name) {
           setSelectedShape(lat, lng, placeData.geometry);
-        } else if (name) {
+        } else {
           // closestPlace's proximity threshold can miss a large, irregular
           // polygon entirely (see findPlaceByExactName) even though we
           // already have an exact name for it - fall back to a name-only
@@ -124,8 +133,6 @@ function LocationInfo({ lat, lng, name }: { lat: number; lng: number; name?: str
           findPlaceByExactName(name).then(exact => {
             setSelectedShape(lat, lng, exact && hasRealShape(exact) ? exact.geometry! : null);
           });
-        } else {
-          setSelectedShape(lat, lng, null);
         }
 
         // Fetch full hut details if this is a hut
