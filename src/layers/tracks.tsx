@@ -5,7 +5,7 @@ import Layer from "../map/Layer";
 import Source from "../map/Source";
 
 const fetchData = async () => {
-    const url = "https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.json"
+    const url = "https://data.topos.nz/tracks.json"
     const response = await fetch(url, {
         cache: 'force-cache'
     });

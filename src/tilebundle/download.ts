@@ -1,4 +1,4 @@
-const BUNDLE_BASE_URL = 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev'
+const BUNDLE_BASE_URL = 'https://data.topos.nz'
 
 /**
  * `maxZoom` selects the bundle variant: 16 (or unspecified) gets the full-detail HD bundle,

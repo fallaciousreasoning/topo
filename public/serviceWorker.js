@@ -118,7 +118,7 @@ const rules = {
   'https://search.topos.nz/data/min_excluded_places.json': cacheThenNetwork,
 
   // Cache the routing graph on first load (not eagerly prefetched).
-  'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.tg': cacheThenNetwork,
+  'https://data.topos.nz/tracks.tg': cacheThenNetwork,
 }
 
 // Stashes files POSTed via the OS share sheet into Cache Storage, keyed under

@@ -1,6 +1,6 @@
 import { loadCompactBuffer, CompactGraph } from './compactGraph';
 
-const GRAPH_URL = 'https://pub-36de1a8a322545b9bd6ef274d5f46c7c.r2.dev/tracks.tg';
+const GRAPH_URL = 'https://data.topos.nz/tracks.tg';
 
 // NZTM2000 parameters (GRS80, CM=173°E, FE=1600000, FN=10000000, k0=0.9996)
 const TM_A = 6378137.0;
