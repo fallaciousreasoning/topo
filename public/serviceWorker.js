@@ -79,10 +79,37 @@ const cache = async (request, response) => {
   return response;
 }
 
+// How long networkThenCache waits on the network before falling back to a cached copy. On a weak
+// connection a request often doesn't fail, it just crawls, so without this the cache is never used.
+const NETWORK_TIMEOUT_MS = 5000;
+
 const networkThenCache = async e => {
-  return fetch(e.request)
-    .then(r => cache(e.request, r))
-    .catch(() => caches.match(e.request));
+  const fetchPromise = fetch(e.request).then(r => cache(e.request, r));
+  // Keep the worker alive until the fetch settles, so a slow response still updates the cache
+  // even when the cached copy was served instead.
+  e.waitUntil(fetchPromise.catch(() => {}));
+
+  const timedOut = Symbol('timedOut');
+  const timeout = new Promise(resolve => setTimeout(resolve, NETWORK_TIMEOUT_MS, timedOut));
+  try {
+    const result = await Promise.race([fetchPromise, timeout]);
+    if (result !== timedOut) return result;
+  } catch {
+    return caches.match(e.request);
+  }
+
+  // The network is slow: race it against the cache, responding with whichever produces a
+  // response first. A cache miss doesn't win the race, nor does a network failure.
+  const cachePromise = caches.match(e.request);
+  return new Promise(resolve => {
+    let remaining = 2;
+    const settle = response => {
+      if (response) resolve(response);
+      else if (--remaining === 0) resolve(undefined);
+    };
+    cachePromise.then(settle, () => settle(undefined));
+    fetchPromise.then(settle, () => settle(undefined));
+  });
 }
 
 const cacheThenNetwork = async e => {
