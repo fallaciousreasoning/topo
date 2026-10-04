@@ -17,22 +17,40 @@ const shouldConserveData = () => {
   return connection.type === "cellular";
 };
 
-// Download assets necessary to work offline.
+// Download assets necessary to work offline. Includes everything place lookups (getPlaces,
+// tapping a peak for route info, ...) need, so they work offline without having happened to be
+// fetched online first.
+const FIRST_RUN_ASSETS = [
+  '/index.html',
+  '/favicon.png',
+  '/favicon.svg',
+  '/global.css',
+  '/build/tailwind.css',
+  '/icons/marker.svg',
+  '/icons/location-indicator.svg',
+  '/data/huts.json',
+  '/data/peaks.json',
+  '/data/regions.json',
+  '/data/protectedAreas.json',
+  '/data/waterFeatures.json',
+  '/data/landforms.json',
+  '/data/geologicalFeatures.json',
+  '/data/glaciers.json',
+  '/data/ridges.json',
+  '/data/localities.json',
+  'https://search.topos.nz/data/min_excluded_places.json',
+  'https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json',
+];
+
 const downloadFirstRunAssets = async () => {
   const cache = await caches.open(CACHE_NAME);
-  cache.addAll([
-    '/index.html',
-    '/favicon.png',
-    '/favicon.svg',
-    '/global.css',
-    '/build/extra.css',
-    '/build/tailwind.css',
-    '/build/main.js',
-    '/data/huts.json',
-    '/icons/marker.svg',
-    '/icons/location-indicator.svg',
-    'https://search.topos.nz/data/min_excluded_places.json'
-  ]);
+  // Added individually rather than via cache.addAll, which is all-or-nothing: a single missing
+  // entry (e.g. '/build/main.js', which no longer exists since the move to Vite's hashed
+  // assets) silently meant nothing at all got precached.
+  const results = await Promise.allSettled(FIRST_RUN_ASSETS.map(url => cache.add(url)));
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') console.warn('[ServiceWorker] Failed to precache', FIRST_RUN_ASSETS[i], r.reason);
+  });
 };
 
 self.addEventListener('install', function (e) {
@@ -108,11 +126,17 @@ const maybeConserve = (normal, conservative) => {
 
 // Map regexes to a strategy.
 const rules = {
-  // First party scripts should be fetched from the network, if possible. 
+  // Lookup data (huts, peaks, places...) is served from cache straight away and refreshed in the
+  // background. Network-first meant every location lookup waited on the network, which on a weak
+  // connection (as opposed to none) just stalls rather than failing over to the cache. Must come
+  // before the scope rule below, since rules are matched in order.
+  [`${self.registration.scope}data/`]: raceNetworkAndCache,
+
+  // First party scripts should be fetched from the network, if possible.
   [self.registration.scope]: networkThenCache,
 
-  // Fetch latest mountain data, if we have a network connection.
-  "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json": networkThenCache,
+  // Mountain/route data: 5MB+, so same reasoning as the lookup data above.
+  "https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json": raceNetworkAndCache,
 
   // Use search data from cache.
   'https://search.topos.nz/data/min_excluded_places.json': cacheThenNetwork,

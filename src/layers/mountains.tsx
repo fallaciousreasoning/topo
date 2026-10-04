@@ -57,11 +57,16 @@ const fetchMountains = (): Promise<{ [id: string]: Mountain }> => {
     return fetch('https://raw.githubusercontent.com/fallaciousreasoning/nz-mountains/main/mountains.json').then(r => r.json())
 }
 
-let mountainsPromise: Promise<{ [id: string]: Mountain }>
+let mountainsPromise: Promise<{ [id: string]: Mountain }> | undefined
 export const getMountains = () => {
     if (!mountainsPromise) {
         mountainsPromise = fetchMountains()
-            .catch(() => ({}))
+            .catch(() => {
+                // Don't memoize the failure, or route info stays missing for the whole session
+                // even once the data becomes available (e.g. back online).
+                mountainsPromise = undefined
+                return {}
+            })
     }
     return mountainsPromise
 }

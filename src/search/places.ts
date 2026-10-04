@@ -131,10 +131,22 @@ const placesFromGeoJson = (url: string, filter: (f: GeoJSON.Feature) => boolean 
         })
 }
 
-let placesPromise: Promise<Place[]>;
+let placesPromise: Promise<Place[]> | undefined;
 
+// Each source fails independently - offline, any one dataset missing from the service worker's
+// cache used to reject the whole Promise.all, so every place lookup (e.g. tapping a peak for its
+// route info) silently came back empty, even though the rest of the data was available.
 const makePlacesPromise = async (sources: (() => Promise<Place[]>)[]) => {
-    return Promise.all(sources.map(s => s())).then(r => dedupeByShape(r.flat()))
+    let anyFailed = false
+    const results = await Promise.all(sources.map(s => s().catch(err => {
+        console.warn('[getPlaces] source failed to load:', err)
+        anyFailed = true
+        return [] as Place[]
+    })))
+    // Don't memoize a partial result - retry the missing sources on the next lookup (e.g. once
+    // back online) instead of being stuck without them for the rest of the session.
+    if (anyFailed) placesPromise = undefined
+    return dedupeByShape(results.flat())
 }
 
 export const getPlaces = () => {
