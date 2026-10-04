@@ -12,9 +12,15 @@ export function getBundleUrl(layerId: string, regionCode: string, maxZoom?: numb
     return `${BUNDLE_BASE_URL}/${prefix}-${regionCode.toLowerCase()}${suffix}.tilebundle`
 }
 
-/** File extension tiles are stored under in a given layer's bundle (and thus in the OPFS cache). */
+/**
+ * File extension tiles are stored under in a given layer's bundle (and thus in the OPFS cache).
+ * Must match the extension in the layer's live tile URL, since `maybe-cache` looks tiles up by
+ * the URL's `/z/x/y.ext` - a mismatch means bundle tiles are written but never found offline.
+ */
 export function getBundleTileExt(layerId: string): string {
-    return layerId === 'topoVector' ? 'pbf' : 'png'
+    if (layerId === 'topoVector') return 'pbf'
+    if (layerId === 'topo-raster') return 'webp'
+    return 'png'
 }
 
 /** Actual file sizes (bytes) of the topo-raster island bundles, for showing accurate download estimates. */

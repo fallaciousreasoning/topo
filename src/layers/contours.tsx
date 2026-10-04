@@ -32,7 +32,7 @@ export const contourTiles = demSource.contourProtocolUrl({
         20: close,
     },
     // used to color contour lines differently where they cross a glacier
-    glacierUrlPattern: `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}`,
+    glacierUrlPattern: `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}#topoVector`,
     glacierMaxzoom: 12,
 })
 
