@@ -11,6 +11,11 @@ import { useTrackStats } from '../draw/trackStatsSignal'
 import { friendlyDistance } from '../utils/friendlyUnits'
 import LocationStats from '../components/LocationStats'
 
+// Keeps the bar clear of the home indicator/rounded corners (index.html sets viewport-fit=cover,
+// so the page draws edge-to-edge). 0 on devices/browsers without safe-area insets.
+const SAFE_BOTTOM = 'env(safe-area-inset-bottom, 0px)'
+const SAFE_RIGHT = 'env(safe-area-inset-right, 0px)'
+
 export default function StatusBar() {
     const { map } = useMap()
     const params = useParams()
@@ -195,7 +200,7 @@ export default function StatusBar() {
     return (
       <>
         {trackStats && (
-            <div className="fixed bottom-8 right-2 pointer-events-none z-10 flex gap-1">
+            <div className="fixed pointer-events-none z-10 flex gap-1" style={{ bottom: `calc(2rem + ${SAFE_BOTTOM})`, right: `calc(0.5rem + ${SAFE_RIGHT})` }}>
                 <span className="px-2 py-1 text-xs font-bold text-white bg-blue-500 rounded">
                     {friendlyDistance(trackStats.distanceM)}
                 </span>
@@ -207,7 +212,7 @@ export default function StatusBar() {
             </div>
         )}
         {shouldShow && (
-        <div className="fixed bottom-0 right-0 pointer-events-none z-10">
+        <div className="fixed pointer-events-none z-10" style={{ bottom: SAFE_BOTTOM, right: SAFE_RIGHT }}>
             <div className="bg-white bg-opacity-90 text-black px-2 py-1 rounded-tl" style={{ fontSize: '10px' }}>
                 <div className="flex items-center space-x-2 min-w-0">
                     {place?.name && (
