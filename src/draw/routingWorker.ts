@@ -1,6 +1,7 @@
 import { loadCompactBuffer, CompactGraph } from './compactGraph';
 
-const GRAPH_URL = 'https://data.topos.nz/tracks.tg';
+// Local build from ~/dev/track-graph (LINZ + OSM tracks), symlinked into public/
+const GRAPH_URL = '/tracks_osm.tg';
 
 // NZTM2000 parameters (GRS80, CM=173°E, FE=1600000, FN=10000000, k0=0.9996)
 const TM_A = 6378137.0;

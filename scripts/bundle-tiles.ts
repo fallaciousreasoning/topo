@@ -3,9 +3,11 @@
  * Bundle a tile pyramid directory into a single .tilebundle file.
  *
  * Usage:
- *   tsx scripts/bundle-tiles.ts <tileDir> <outputFile> [--max-zoom <z>] [--min-zoom <z>] [--region <id>]
+ *   tsx scripts/bundle-tiles.ts <tileDir|tiles.mbtiles> <outputFile> [--max-zoom <z>] [--min-zoom <z>] [--region <id>]
  *
- * Tile directory must follow the standard z/x/y.<ext> layout.
+ * Input is either a tile directory in the standard z/x/y.<ext> layout, or an
+ * .mbtiles file (read directly, TMS rows flipped to XYZ, gzipped tiles
+ * decompressed to match what a directory export holds).
  * Tiles are written lowest-zoom-first, so a client streaming the bundle can
  * extract usable (if coarse) tiles well before the whole file has downloaded,
  * and an interrupted download leaves a usable map rather than scattered
@@ -18,11 +20,13 @@
 import { createWriteStream, WriteStream } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { gunzipSync } from 'node:zlib';
 import { encodeTile } from '../src/tilebundle/index';
 import { NZ_REGIONS } from '../src/tilebundle/regions';
 
 function usage(): never {
-    console.error('Usage: bundle-tiles <tileDir> <outputFile> [--max-zoom <z>] [--min-zoom <z>] [--region <id>]');
+    console.error('Usage: bundle-tiles <tileDir|tiles.mbtiles> <outputFile> [--max-zoom <z>] [--min-zoom <z>] [--region <id>]');
     process.exit(1);
 }
 
@@ -76,6 +80,63 @@ function write(stream: WriteStream, data: Uint8Array): Promise<void> {
     });
 }
 
+interface TileSource {
+    zoomLevels(): Promise<number[]>;
+    /** Tiles at zoom z within bounds, in x then y order. */
+    tiles(z: number, bounds?: TileBounds): AsyncIterable<{ x: number; y: number; data: Uint8Array }>;
+}
+
+function inBounds(x: number, y: number, bounds?: TileBounds): boolean {
+    return !bounds || (x >= bounds.xMin && x <= bounds.xMax && y >= bounds.yMin && y <= bounds.yMax);
+}
+
+function directorySource(tileDir: string): TileSource {
+    return {
+        zoomLevels: async () => (await readdir(tileDir)).map(d => parseInt(d, 10)).filter(z => !isNaN(z)),
+        async *tiles(z, bounds) {
+            const zDir = join(tileDir, String(z));
+            const xs = (await readdir(zDir))
+                .map(d => parseInt(d, 10))
+                .filter(x => !isNaN(x))
+                .filter(x => !bounds || (x >= bounds.xMin && x <= bounds.xMax))
+                .sort((a, b) => a - b);
+
+            for (const x of xs) {
+                const xDir = join(zDir, String(x));
+                const yFiles = (await readdir(xDir))
+                    .filter(f => /^\d+\.\w+$/.test(f))
+                    .filter(f => inBounds(x, parseInt(f, 10), bounds))
+                    .sort((a, b) => parseInt(a) - parseInt(b));
+
+                for (const yFile of yFiles) {
+                    const data = await readFile(join(xDir, yFile));
+                    yield { x, y: parseInt(yFile), data: new Uint8Array(data) };
+                }
+            }
+        },
+    };
+}
+
+function mbtilesSource(path: string): TileSource {
+    const db = new DatabaseSync(path, { readOnly: true });
+    return {
+        zoomLevels: async () => (db.prepare('SELECT DISTINCT zoom_level AS z FROM tiles').all() as { z: number }[]).map(r => r.z),
+        async *tiles(z, bounds) {
+            const max = (1 << z) - 1;
+            // XYZ y ascending == TMS row descending
+            const rows = db.prepare(
+                'SELECT tile_column AS x, tile_row AS row, tile_data AS data FROM tiles WHERE zoom_level = ? ORDER BY tile_column, tile_row DESC',
+            ).iterate(z) as Iterable<{ x: number; row: number; data: Uint8Array }>;
+            for (const { x, row, data } of rows) {
+                const y = max - row;
+                if (!inBounds(x, y, bounds)) continue;
+                const isGzipped = data[0] === 0x1f && data[1] === 0x8b;
+                yield { x, y, data: isGzipped ? new Uint8Array(gunzipSync(data)) : data };
+            }
+        },
+    };
+}
+
 async function main() {
     const args = process.argv.slice(2);
     let tileDir: string | undefined;
@@ -102,10 +163,11 @@ async function main() {
 
     if (!tileDir || !outputFile) usage();
 
-    // Discover zoom levels present in the directory, lowest first (see format note above).
-    const zoomLevels = (await readdir(tileDir))
-        .map(d => parseInt(d, 10))
-        .filter(z => !isNaN(z) && z >= minZoom && z <= maxZoom)
+    const source = tileDir.endsWith('.mbtiles') ? mbtilesSource(tileDir) : directorySource(tileDir);
+
+    // Lowest zoom first (see format note above).
+    const zoomLevels = (await source.zoomLevels())
+        .filter(z => z >= minZoom && z <= maxZoom)
         .sort((a, b) => a - b);
 
     if (zoomLevels.length === 0) {
@@ -122,35 +184,14 @@ async function main() {
 
     for (const z of zoomLevels) {
         const bounds = region ? regionTileBounds(region, z) : undefined;
-
-        const zDir = join(tileDir, String(z));
-        const xs = (await readdir(zDir))
-            .map(d => parseInt(d, 10))
-            .filter(x => !isNaN(x))
-            .filter(x => !bounds || (x >= bounds.xMin && x <= bounds.xMax))
-            .sort((a, b) => a - b);
-
         let zTiles = 0;
 
-        for (const x of xs) {
-            const xDir = join(zDir, String(x));
-            const yFiles = (await readdir(xDir))
-                .filter(f => /^\d+\.\w+$/.test(f))
-                .filter(f => !bounds || (() => {
-                    const y = parseInt(f, 10);
-                    return y >= bounds.yMin && y <= bounds.yMax;
-                })())
-                .sort((a, b) => parseInt(a) - parseInt(b));
-
-            for (const yFile of yFiles) {
-                const y = parseInt(yFile);
-                const data = await readFile(join(xDir, yFile));
-                const record = encodeTile(new Uint8Array(data), z, x, y);
-                await write(out, record);
-                tileCount++;
-                zTiles++;
-                byteCount += record.length;
-            }
+        for await (const { x, y, data } of source.tiles(z, bounds)) {
+            const record = encodeTile(data, z, x, y);
+            await write(out, record);
+            tileCount++;
+            zTiles++;
+            byteCount += record.length;
         }
 
         console.log(`  z${z}: ${zTiles} tiles`);
