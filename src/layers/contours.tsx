@@ -3,7 +3,6 @@ import type { OverlayDefinition } from "./config";
 import Layer from '../map/Layer'
 import Source from '../map/Source'
 import { demSource, elevationScheme, maxContourZoom } from "./demSource";
-import { LINZ_BASEMAPS_KEY } from "./config";
 import { OVERLAY_FLOOR_ID } from "../map/overlayFloor";
 
 
@@ -32,7 +31,7 @@ export const contourTiles = demSource.contourProtocolUrl({
         20: close,
     },
     // used to color contour lines differently where they cross a glacier
-    glacierUrlPattern: `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}#topoVector`,
+    glacierUrlPattern: 'maybe-cache://data.topos.nz/linz-vector/{z}/{x}/{y}.pbf#topoVector',
     glacierMaxzoom: 12,
 })
 

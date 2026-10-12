@@ -7,5 +7,3 @@
 __pycache__
 dist/
 .cache/
-# Local routing graph build (symlink to ~/dev/track-graph/tracks_osm.tg, ~100MB)
-/public/tracks_osm.tg

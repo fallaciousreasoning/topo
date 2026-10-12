@@ -1,4 +1,3 @@
-import { LINZ_BASEMAPS_KEY } from "./config";
 import { BaseLayerDefinition } from "./config";
 
 export default {
@@ -9,10 +8,10 @@ export default {
     description: 'NZ Topo50 Maps',
     sources: {
         "topoVector": {
-            "attribution": "© 2022 Toitū Te Whenua - CC BY 4.0",
+            "attribution": "© 2022 Toitū Te Whenua - CC BY 4.0, tracks © OpenStreetMap contributors",
             "type": "vector",
             "tiles": [
-                `maybe-cache://basemaps.linz.govt.nz/v1/tiles/topographic-v2/WebMercatorQuad/{z}/{x}/{y}.pbf?api=${LINZ_BASEMAPS_KEY}#topoVector`
+                'maybe-cache://data.topos.nz/linz-vector/{z}/{x}/{y}.pbf#topoVector'
             ],
             "minzoom": 0,
             "maxzoom": 15
